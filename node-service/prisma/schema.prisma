@@ -1,0 +1,655 @@
+// prisma/schema.prisma
+
+// ====================== 1. GENERATOR & DATASOURCE ======================
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ====================== 2. ENUMS ======================
+enum GenderEnum {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum UserRole {
+  LEARNER
+  INSTRUCTOR
+  REVIEWER
+  ADMIN
+}
+
+enum AuthProviderEnum {
+  LOCAL
+  GOOGLE
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCE
+  ALL_LEVELS
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  IN_REVIEW
+  CHANGES_REQUESTED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum MediaTypeEnum {
+  VIDEO
+  DOCUMENT
+  IMAGE
+  AUDIO
+  OTHER
+}
+
+// ====================== MODELS ======================
+// ====================== 3. AUTH MODELS ======================
+
+model User {
+  id            String      @id @default(uuid())
+  fullName      String
+  email         String      @unique
+  passwordHash  String?
+  phoneNumber   String?
+  dateOfBirth   DateTime?   @db.Date
+  gender        GenderEnum?
+  avatarUrl     String?
+  role          UserRole    @default(LEARNER)
+  isActive      Boolean     @default(true)
+  emailVerified Boolean     @default(false)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  lastLoginAt   DateTime?
+
+  // Relations
+  identities    UserIdentity[]
+  refreshTokens RefreshToken[]
+  enrollments   Enrollment[]
+
+  payments          Payment[]
+  courseInstructors CourseInstructor[] // as instructor
+
+  assignedReviewCategories CourseReviewerCategory[] @relation("ReviewerCategories")
+  courseReviews            CourseReview[]           @relation("CourseReviewReviewer")
+  claimedReviewCourses     Course[]                 @relation("CourseReviewClaimedBy")
+  passwordResetTokens      PasswordResetToken[]
+  assessmentAttempts       AssessmentAttempt[]
+
+  @@map("users")
+}
+
+model UserIdentity {
+  id           String           @id @default(uuid())
+  userId       String
+  provider     AuthProviderEnum
+  providerId   String
+  accessToken  String?          @db.LongText //GGtoken is too long
+  refreshToken String?          @db.LongText
+  createdAt    DateTime         @default(now())
+  lastUsedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([userId, provider, providerId])
+  @@map("user_identities")
+}
+
+model RefreshToken {
+  id         String   @id @default(uuid())
+  userId     String
+  tokenHash  String   @unique @db.VarChar(64) // explicit length for SHA-256
+  expiresAt  DateTime
+  deviceInfo String?
+  ipAddress  String?
+  isRevoked  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  // Production indexes
+  @@index([userId, isRevoked, expiresAt]) // modify it for revokeAll + find
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+// ====================== 4. COURSE MODELS ======================
+//======================4.1 REVIEWER =====================
+enum CourseReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+model CourseReview {
+  id String @id @default(uuid())
+
+  status      CourseReviewStatus @default(PENDING)
+  reviewNote  String?            @db.LongText
+  submittedAt DateTime           @default(now())
+  reviewedAt  DateTime?
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  reviewer   User   @relation("CourseReviewReviewer", fields: [reviewerId], references: [id], onDelete: Restrict)
+  reviewerId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([courseId])
+  @@index([reviewerId])
+  @@index([status])
+  @@map("course_reviews")
+}
+
+model CourseReviewerCategory {
+  isActive Boolean @default(true)
+
+  reviewer   User   @relation("ReviewerCategories", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewerId String
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([reviewerId, categoryId])
+  @@index([reviewerId])
+  @@index([categoryId])
+  @@map("course_reviewer_categories")
+}
+
+//========================================================
+model CourseInstructor {
+  id           String    @id @default(uuid())
+  courseId     String
+  instructorId String
+  isPrimary    Boolean   @default(true)
+  order        Int       @default(0)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  course     Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  instructor User   @relation(fields: [instructorId], references: [id], onDelete: Restrict)
+
+  gradedProjectSubmissions ProjectSubmission[] @relation("ProjectSubmissionGrader")
+
+  @@unique([courseId, instructorId])
+  @@map("course_instructors")
+}
+
+model Course {
+  id                 String       @id @default(uuid())
+  title              String
+  slug               String       @unique
+  shortDescription   String
+  description        String?      @db.LongText
+  whatYouWillLearn   Json? // string[]
+  requirements       Json? // string[]
+  thumbnailUrl       String?
+  cloudinaryPublicId String?      @unique
+  level              CourseLevel
+  status             CourseStatus @default(DRAFT)
+  price              Decimal?     @db.Decimal(10, 2)
+  language           String?
+  durationInMinutes  Int? // Total duration
+  isActive           Boolean      @default(true)
+  certificateEnabled Boolean      @default(false)
+  publishedAt        DateTime? // When it was published
+  reviewClaimedById  String?
+  reviewClaimedAt    DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  deletedAt          DateTime?
+
+  // Relations
+  sections         CourseSection[]
+  enrollments      Enrollment[]
+  payments         Payment[]
+  instructors      CourseInstructor[]
+  courseCategories CourseCategory[]
+
+  // Reviewer
+  reviews         CourseReview[]
+  reviewClaimedBy User?          @relation("CourseReviewClaimedBy", fields: [reviewClaimedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  // Assessment
+  assessments Assessment[]
+
+  @@index([slug])
+  @@index([status])
+  @@index([status, reviewClaimedById])
+  @@index([reviewClaimedById])
+  @@index([isActive])
+  @@map("courses")
+}
+
+model Category {
+  id          String  @id @default(uuid())
+  name        String
+  slug        String  @unique
+  description String?
+
+  parent   Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+  parentId String?
+  children Category[] @relation("CategoryToParent")
+
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  courseCategories   CourseCategory[]
+  //reviewer
+  reviewerCategories CourseReviewerCategory[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+model CourseCategory {
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([courseId, categoryId])
+  @@map("course_categories")
+}
+
+model CourseSection {
+  id           String    @id @default(uuid())
+  courseId     String
+  title        String
+  description  String?
+  sectionIndex Int
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([courseId, sectionIndex])
+  @@map("course_sections")
+}
+
+model Lesson {
+  id          String    @id @default(uuid())
+  sectionId   String
+  title       String
+  description String?
+  lessonIndex Int
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  section CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  files   FileMedia[]
+
+  @@unique([sectionId, lessonIndex])
+  @@map("lessons")
+}
+
+model FileMedia {
+  id                 String        @id @default(uuid())
+  lessonId           String
+  cloudinaryPublicId String?       @unique
+  url                String
+  type               MediaTypeEnum
+  filename           String?
+  mimeType           String?
+  sizeInBytes        Int?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@index([type])
+  @@index([deletedAt])
+  @@map("file_media")
+}
+
+// ====================== 5. BILLING MODELS ======================
+model Enrollment {
+  id                 String           @id @default(uuid())
+  userId             String
+  courseId           String
+  paymentId          String?          @unique
+  status             EnrollmentStatus @default(ACTIVE)
+  progressPercentage Float            @default(0)
+  enrolledAt         DateTime?
+  completedAt        DateTime?
+  isActive           Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  user    User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@map("enrollments")
+}
+
+enum PaymentMethod {
+  VNPAY
+  SIMULATION
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  userId            String
+  courseId          String
+  amount            Int
+  currency          String        @default("VND")
+  paymentMethod     PaymentMethod @default(VNPAY)
+  status            PaymentStatus @default(PENDING)
+  provider          String        @default("VNPAY")
+  txnRef            String?       @unique
+  providerPaymentId String?
+  providerMetadata  Json?
+  paidAt            DateTime?
+  isActive          Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  deletedAt         DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  enrollment Enrollment?
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([userId, courseId])
+  @@index([status])
+  @@map("payments")
+}
+
+//========================ASSESSMENTS======================
+
+enum AssessmentType {
+  QUIZ
+  PROJECT
+}
+
+enum AssessmentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssessmentAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  GRADED
+  PASSED
+  FAILED
+}
+
+enum AssessmentReviewTiming {
+  NEVER
+  AFTER_SUBMIT
+  AFTER_GRADED
+  AFTER_ASSESSMENT_CLOSED
+  MANUAL
+}
+
+enum AssessmentReviewContent {
+  SCORE_ONLY
+  SCORE_AND_ANSWERS
+  FULL_REVIEW
+}
+
+model Assessment {
+  id       String @id @default(uuid())
+  courseId String
+
+  title       String
+  description String?          @db.LongText
+  type        AssessmentType
+  status      AssessmentStatus @default(DRAFT)
+
+  // Display order inside lesson/section/course
+  order Int @default(0)
+
+  // Scoring
+  totalPoints  Int  @default(0)
+  passingScore Int? // Example: 70
+
+  // Attempt rules
+  maxAttempts      Int? // null = unlimited
+  timeLimitMinutes Int? // for quiz/final test
+
+  // Availability
+  availableFrom  DateTime?
+  availableUntil DateTime?
+
+  //Review
+  reviewTiming  AssessmentReviewTiming  @default(AFTER_GRADED)
+  reviewContent AssessmentReviewContent @default(SCORE_ONLY)
+
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  questions AssessmentQuestion[]
+  attempts  AssessmentAttempt[]
+
+  @@index([courseId])
+  @@index([type])
+  @@index([status])
+  @@map("assessments")
+}
+
+enum AssessmentQuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  FILL_IN_THE_BLANK
+  PROJECT
+}
+
+model AssessmentQuestion {
+  id           String @id @default(uuid())
+  assessmentId String
+
+  questionText String                 @db.LongText
+  type         AssessmentQuestionType
+
+  explanation String? @db.LongText
+
+  points Int @default(1)
+  order  Int @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  assessment     Assessment                @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  answers        AssessmentAnswer[]
+  attemptAnswers AssessmentAttemptAnswer[]
+
+  @@index([assessmentId])
+  @@index([type])
+  @@map("assessment_questions")
+}
+
+model AssessmentAnswer {
+  id                  String  @id @default(uuid())
+  correctOptionAnswer String? @db.Text
+  correctTextAnswer   String? @db.Text
+
+  wrongAnswers Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  question   AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  @@unique([questionId])
+  @@index([questionId])
+  @@map("assessment_answers")
+}
+
+model AssessmentAttempt {
+  id String @id @default(uuid())
+
+  attemptNumber Int                     @default(1)
+  status        AssessmentAttemptStatus @default(IN_PROGRESS)
+
+  score    Float? // Final score
+  maxScore Float? // Total possible score
+  passed   Boolean @default(false)
+
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  assessmentId String
+
+  learner           User                      @relation(fields: [learnerId], references: [id], onDelete: Cascade)
+  learnerId         String
+  answers           AssessmentAttemptAnswer[]
+  projectSubmission ProjectSubmission?
+
+  @@unique([assessmentId, learnerId, attemptNumber])
+  @@index([assessmentId])
+  @@index([learnerId])
+  @@index([status])
+  @@map("assessment_attempts")
+}
+
+model AssessmentAttemptAnswer {
+  id String @id @default(uuid())
+
+  textAnswer     String? @db.Text
+  answerSnapshot String? @db.Text
+
+  isCorrect    Boolean?
+  pointsEarned Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempt   AssessmentAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptId String
+
+  question   AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId String
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
+  @@index([questionId])
+  @@map("assessment_attempt_answers")
+}
+
+enum ProjectSubmissionStatus {
+  SUBMITTED
+  REVIEWED
+  NEEDS_CHANGES
+  ACCEPTED
+  REJECTED
+}
+
+model ProjectSubmission {
+  id        String @id @default(uuid())
+  attemptId String @unique
+
+  githubUrl   String?
+  deployUrl   String?
+  documentUrl String? // DOCX/PDF uploaded file URL
+  note        String? @db.LongText
+
+  status ProjectSubmissionStatus @default(SUBMITTED)
+
+  score    Float?
+  feedback String? @db.LongText
+
+  gradedAt DateTime?
+
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attempt AssessmentAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  grader   CourseInstructor? @relation("ProjectSubmissionGrader", fields: [graderId], references: [id], onDelete: SetNull)
+  graderId String?
+
+  @@index([status])
+  @@map("project_submissions")
+}

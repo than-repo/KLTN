@@ -1,0 +1,49 @@
+
+  johndoe@example.com
+  John@12345
+
+
+  ykw91875@laoia.com
+  TestPw@123
+
+//=============================================Admin
+{
+  "fullName": "Admin 1",
+  "email": "Admin1@example.com",
+  "password": "Admin1@12345",
+    "gender": "MALE"
+}
+//@123abcABC
+
+//=========================================instructor
+{
+  "fullName": "INSTRUCTOR_1",
+  "email": "INSTRUCTOR_1@example.com",
+  "password": "123@ABCabc",
+  "role": "INSTRUCTOR"
+}
+//common pw TestPw@123
+
+INSTRUCTOR_A@example.com
+123@ABCabc
+
+//=============================reviewer
+{
+  "fullName": "REVIEWER_ALL",
+  "email": "REVIEWER_ALL@example.com",
+  "password": "123@ABCabc",
+  "role": "REVIEWER"
+}
+
+Reviewer BackendA
+reviewerbackenda@gmail.com
+123@ABCabc
+
+Reviewer FrontEndA
+reviewerfrontenda@gmail.com
+123@ABCabc
+
+
+
+VNPAY
+@Vnpay2026

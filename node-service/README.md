@@ -1,0 +1,303 @@
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
+
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
+
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+
+## Description
+
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+## Project setup
+
+```bash
+$ npm install
+```
+
+## Compile and run the project
+
+```bash
+# development
+$ npm run start
+
+# watch mode
+$ npm run start:dev
+
+# production mode
+$ npm run start:prod
+```
+
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
+## Deployment
+
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
+
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+
+## Resources
+
+Check out a few resources that may come in handy when working with NestJS:
+
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+```
+elearning-system
+├─ .prettierrc
+├─ common
+├─ docker-compose.yml
+├─ eslint.config.mjs
+├─ generated
+│  └─ prisma
+│     ├─ browser.ts
+│     ├─ client.ts
+│     ├─ commonInputTypes.ts
+│     ├─ enums.ts
+│     ├─ internal
+│     │  ├─ class.ts
+│     │  ├─ prismaNamespace.ts
+│     │  └─ prismaNamespaceBrowser.ts
+│     ├─ models
+│     │  ├─ Category.ts
+│     │  ├─ Course.ts
+│     │  ├─ CourseCategory.ts
+│     │  ├─ CourseInstructor.ts
+│     │  ├─ CourseReview.ts
+│     │  ├─ CourseReviewerCategory.ts
+│     │  ├─ CourseSection.ts
+│     │  ├─ Enrollment.ts
+│     │  ├─ FileMedia.ts
+│     │  ├─ Lesson.ts
+│     │  ├─ Payment.ts
+│     │  ├─ RefreshToken.ts
+│     │  ├─ User.ts
+│     │  └─ UserIdentity.ts
+│     └─ models.ts
+├─ nest-cli.json
+├─ package-lock.json
+├─ package.json
+├─ prisma
+│  ├─ schema.prisma
+│  └─ test.prisma
+├─ prisma.config.ts
+├─ README.md
+├─ sample-data.txt
+├─ src
+│  ├─ app.module.ts
+│  ├─ common
+│  │  ├─ cloudinary
+│  │  │  ├─ cloudinary.module.ts
+│  │  │  └─ cloudinary.service.ts
+│  │  ├─ decorators
+│  │  │  └─ current-user.decorator.ts
+│  │  ├─ filters
+│  │  │  ├─ prisma-client-exception.filter.spec.ts
+│  │  │  └─ prisma-client-exception.filter.ts
+│  │  ├─ interceptors
+│  │  │  └─ response-formatting.interceptor.ts
+│  │  ├─ interfaces
+│  │  │  ├─ api-response.interfaces.ts
+│  │  │  └─ request-with-user.ts
+│  │  ├─ pipes
+│  │  └─ utils
+│  │     ├─ clean-data-util.spec.ts
+│  │     ├─ clean-data-util.ts
+│  │     ├─ prisma-error.util.spec.ts
+│  │     ├─ prisma-error.util.ts
+│  │     └─ slugify.util.ts
+│  ├─ config
+│  ├─ core
+│  │  ├─ database
+│  │  │  ├─ prisma.module.ts
+│  │  │  └─ prisma.service.ts
+│  │  ├─ mailer
+│  │  └─ storage
+│  ├─ features
+│  │  ├─ auth
+│  │  │  ├─ auth.controller.ts
+│  │  │  ├─ auth.module.ts
+│  │  │  ├─ decorators
+│  │  │  │  ├─ public.decorator.ts
+│  │  │  │  └─ roles.decorator.ts
+│  │  │  ├─ dtos
+│  │  │  │  ├─ login-response.dto.ts
+│  │  │  │  ├─ login.dto.ts
+│  │  │  │  ├─ refresh-token.dto.ts
+│  │  │  │  └─ register.dto.ts
+│  │  │  ├─ guards
+│  │  │  │  ├─ google-auth.guard.ts
+│  │  │  │  ├─ jwt-auth.guard.ts
+│  │  │  │  └─ roles.guard.ts
+│  │  │  ├─ interfaces
+│  │  │  │  ├─ create-google-user.interface.ts
+│  │  │  │  ├─ create-local-user.interface.ts
+│  │  │  │  ├─ create-refresh-token.interface.ts
+│  │  │  │  ├─ jwt-payload.interface.ts
+│  │  │  │  └─ request-with-cookies.ts
+│  │  │  ├─ repositories
+│  │  │  │  └─ auth.repository.ts
+│  │  │  ├─ services
+│  │  │  │  ├─ auth.service.ts
+│  │  │  │  └─ token-cleanup.service.ts
+│  │  │  └─ strategies
+│  │  │     ├─ google.strategy.ts
+│  │  │     └─ jwt.strategy.ts
+│  │  ├─ courses
+│  │  │  ├─ controllers
+│  │  │  │  ├─ admin-courses.controller.ts
+│  │  │  │  ├─ courses.controller.ts
+│  │  │  │  ├─ instructor-course.controller.ts
+│  │  │  │  ├─ public-courses.controller.ts
+│  │  │  │  └─ reviewer-courses.controller.ts
+│  │  │  ├─ courses.module.ts
+│  │  │  ├─ dtos
+│  │  │  │  ├─ category
+│  │  │  │  │  ├─ category-query.dto.ts
+│  │  │  │  │  ├─ category-response.dto.ts
+│  │  │  │  │  ├─ create-category.dto.ts
+│  │  │  │  │  ├─ set-category-active-status.dto.ts
+│  │  │  │  │  └─ update-category.dto.ts
+│  │  │  │  ├─ course
+│  │  │  │  │  ├─ course-response.dto.ts
+│  │  │  │  │  ├─ create-course.dto.ts
+│  │  │  │  │  ├─ paginated-course.dto.ts
+│  │  │  │  │  ├─ param-course.dto.ts
+│  │  │  │  │  ├─ query-course.dto.ts
+│  │  │  │  │  ├─ reviewer-course-query.dto.ts
+│  │  │  │  │  └─ update-course.dto.ts
+│  │  │  │  ├─ lesson
+│  │  │  │  │  ├─ create-lesson.dto.ts
+│  │  │  │  │  ├─ lesson-response.dto.ts
+│  │  │  │  │  ├─ query-lessons.dto.ts
+│  │  │  │  │  ├─ reorder-lesson.dto.ts
+│  │  │  │  │  └─ update-lesson.dto.ts
+│  │  │  │  ├─ paginated-response.dto.ts
+│  │  │  │  └─ section-lesson
+│  │  │  │     ├─ create-section.dti.ts
+│  │  │  │     ├─ query-section.dto.ts
+│  │  │  │     ├─ reorder-sections.dto.ts
+│  │  │  │     ├─ section-response.dto.ts
+│  │  │  │     └─ update-section.dto.ts
+│  │  │  ├─ interfaces
+│  │  │  │  ├─ category.repository.interface.ts
+│  │  │  │  ├─ course-review.repository.interface.ts
+│  │  │  │  ├─ course-section.repository.interface.ts
+│  │  │  │  ├─ course.repository.interface.ts
+│  │  │  │  ├─ file-media.repository.interface.ts
+│  │  │  │  └─ lesson.repository.interface.ts
+│  │  │  ├─ repositories
+│  │  │  │  ├─ category-repository.token.ts
+│  │  │  │  ├─ category.repository.ts
+│  │  │  │  ├─ course-repository.token.ts
+│  │  │  │  ├─ course-review-repository.token.ts
+│  │  │  │  ├─ course-section-repository.token.ts
+│  │  │  │  ├─ course-section-repository.ts
+│  │  │  │  ├─ course.repository.ts
+│  │  │  │  ├─ file-media.repository.token.ts
+│  │  │  │  ├─ file-media.repository.ts
+│  │  │  │  ├─ lesson-repository.token.ts
+│  │  │  │  ├─ lesson.repository.ts
+│  │  │  │  └─ prisma-course-review.repository.ts
+│  │  │  └─ services
+│  │  │     ├─ categories.service.ts
+│  │  │     ├─ course-access.service.ts
+│  │  │     ├─ course-sections.service.ts
+│  │  │     ├─ courses.service.ts
+│  │  │     ├─ file-media.service.ts
+│  │  │     ├─ lessons.service.ts
+│  │  │     └─ reviewer-courses.service.ts
+│  │  ├─ upload
+│  │  │  ├─ dtos
+│  │  │  │  └─ get-upload-signature.dto.ts
+│  │  │  ├─ interfaces
+│  │  │  ├─ upload.controller.ts
+│  │  │  ├─ upload.module.ts
+│  │  │  └─ upload.service.ts
+│  │  └─ users
+│  │     ├─ controllers
+│  │     │  ├─ admin-users.controller.ts
+│  │     │  └─ users.controller.ts
+│  │     ├─ dtos
+│  │     │  ├─ create-user.dto.ts
+│  │     │  ├─ find-all-users-query.dto.ts
+│  │     │  ├─ paginated-users-response.dto.ts
+│  │     │  ├─ public-user-response.dto.ts
+│  │     │  ├─ update-user.dto.ts
+│  │     │  └─ user-response.dto.ts
+│  │     ├─ interfaces
+│  │     │  ├─ create-user-payload.interface.ts
+│  │     │  ├─ get-users-payload.interface.ts
+│  │     │  ├─ update-user-payload.interface.ts
+│  │     │  └─ user-select-result.interface.ts
+│  │     ├─ repositories
+│  │     │  └─ users.repository.ts
+│  │     ├─ services
+│  │     │  ├─ admin-user.service.ts
+│  │     │  └─ users.service.ts
+│  │     └─ users.module.ts
+│  └─ main.ts
+├─ structure.txt
+├─ test
+│  ├─ app.e2e-spec.ts
+│  └─ jest-e2e.json
+├─ test.ts
+├─ tsconfig.build.json
+└─ tsconfig.json
+
+```
