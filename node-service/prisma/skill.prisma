@@ -18,10 +18,23 @@ model Skill {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
-  parent   Skill?  @relation("SkillHierarchy", fields: [parentId], references: [id])
-  children Skill[] @relation("SkillHierarchy")
+  parent   Skill?        @relation("SkillHierarchy", fields: [parentId], references: [id])
+  children Skill[]       @relation("SkillHierarchy")
+  lessons  LessonSkill[]
 
   @@index([parentId])
   @@index([status])
   @@map("skills")
+}
+
+model LessonSkill {
+  lessonId String
+  skillId  String
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  skill  Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([lessonId, skillId])
+  @@index([skillId])
+  @@map("lesson_skills")
 }

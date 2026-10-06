@@ -13,7 +13,7 @@ datasource db {
 
 // ====================== 2. ENUMS ======================
 enum GenderEnum {
-    MALE
+  MALE
   FEMALE
   OTHER
   PREFER_NOT_TO_SAY
@@ -340,6 +340,7 @@ model Lesson {
 
   section CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   files   FileMedia[]
+  skills  LessonSkill[]
 
   @@unique([sectionId, lessonIndex])
   @@map("lessons")
