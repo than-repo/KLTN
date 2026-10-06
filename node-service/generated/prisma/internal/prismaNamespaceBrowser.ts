@@ -71,7 +71,8 @@ export const ModelName = {
   AssessmentAnswer: 'AssessmentAnswer',
   AssessmentAttempt: 'AssessmentAttempt',
   AssessmentAttemptAnswer: 'AssessmentAttemptAnswer',
-  ProjectSubmission: 'ProjectSubmission'
+  ProjectSubmission: 'ProjectSubmission',
+  Skill: 'Skill'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -436,6 +437,22 @@ export const ProjectSubmissionScalarFieldEnum = {
 export type ProjectSubmissionScalarFieldEnum = (typeof ProjectSubmissionScalarFieldEnum)[keyof typeof ProjectSubmissionScalarFieldEnum]
 
 
+export const SkillScalarFieldEnum = {
+  id: 'id',
+  canonicalName: 'canonicalName',
+  description: 'description',
+  aliases: 'aliases',
+  embedding: 'embedding',
+  parentId: 'parentId',
+  level: 'level',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SkillScalarFieldEnum = (typeof SkillScalarFieldEnum)[keyof typeof SkillScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -698,4 +715,15 @@ export const ProjectSubmissionOrderByRelevanceFieldEnum = {
 } as const
 
 export type ProjectSubmissionOrderByRelevanceFieldEnum = (typeof ProjectSubmissionOrderByRelevanceFieldEnum)[keyof typeof ProjectSubmissionOrderByRelevanceFieldEnum]
+
+
+export const SkillOrderByRelevanceFieldEnum = {
+  id: 'id',
+  canonicalName: 'canonicalName',
+  description: 'description',
+  parentId: 'parentId',
+  status: 'status'
+} as const
+
+export type SkillOrderByRelevanceFieldEnum = (typeof SkillOrderByRelevanceFieldEnum)[keyof typeof SkillOrderByRelevanceFieldEnum]
 

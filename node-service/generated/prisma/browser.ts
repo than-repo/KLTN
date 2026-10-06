@@ -122,3 +122,8 @@ export type AssessmentAttemptAnswer = Prisma.AssessmentAttemptAnswerModel
  * 
  */
 export type ProjectSubmission = Prisma.ProjectSubmissionModel
+/**
+ * Model Skill
+ * 
+ */
+export type Skill = Prisma.SkillModel

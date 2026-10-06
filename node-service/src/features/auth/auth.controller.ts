@@ -11,7 +11,11 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type {
+  Request as ExpressRequest,
+  Response,
+  CookieOptions,
+} from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { UnauthorizedException } from '@nestjs/common';
 
@@ -39,6 +43,7 @@ import { ForgotPasswordDto } from './dtos/forgot-password.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { AccountRecoveryService } from './services/account-recovery.service';
 import { ChangePasswordDto } from './dtos/change-password.dto';
+import { MessageResponseDto } from './dtos/message-response.dto';
 
 @ApiTags('Auth')
 @Controller({ path: 'auth', version: '1' })
@@ -55,12 +60,22 @@ export class AuthController {
     );
 
     res.cookie('refreshToken', refreshToken, {
+      maxAge,
+      ...this.getRefreshTokenCookieOptions(),
+    });
+  }
+  private clearRefreshTokenCookie(res: Response): void {
+    res.clearCookie('refreshToken', {
+      ...this.getRefreshTokenCookieOptions(),
+    });
+  }
+  private getRefreshTokenCookieOptions(): CookieOptions {
+    return {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge,
       path: '/',
-    });
+    };
   }
 
   @Post('register')
@@ -118,16 +133,12 @@ export class AuthController {
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
+    const result = await this.authService.refreshToken(
+      req.cookies?.refreshToken,
+    );
 
-    if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token is missing from cookies');
-    }
-
-    const result = await this.authService.refreshToken(refreshToken);
-
-    const { refreshToken: _, ...response } = result;
-    this.setRefreshTokenCookie(res, _);
+    const { refreshToken: newRefreshToken, ...response } = result;
+    this.setRefreshTokenCookie(res, newRefreshToken);
     return response;
   }
 
@@ -159,25 +170,17 @@ export class AuthController {
   @ApiOperation({
     summary: 'Logout user - revokes refresh token and clears httpOnly cookie',
   })
-  @ApiOkResponse({ description: 'User logged out successfully' })
+  @ApiOkResponse({ type: MessageResponseDto })
   async logout(
     @Req() req: RequestWithCookies,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
-
     // Revoke token if it exists
-    if (refreshToken) {
-      await this.authService.logout(refreshToken);
-    }
+
+    await this.authService.logout(req.cookies?.refreshToken);
 
     // Clear the httpOnly cookie securely
-    res.clearCookie('refreshToken', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/',
-    });
+    this.clearRefreshTokenCookie(res);
 
     return { message: 'Logged out successfully' };
   }
@@ -188,11 +191,21 @@ export class AuthController {
   @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout from all devices' })
-  async logoutAll(@CurrentUser('sub') userId: string) {
+  @ApiOkResponse({ type: MessageResponseDto })
+  async logoutAll(
+    @CurrentUser('sub') userId: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.authService.logoutAll(userId);
+    // Clear the httpOnly cookie securely
+    this.clearRefreshTokenCookie(res);
+
     return { message: 'Logged out from all devices successfully' };
   }
 
+  @ApiOperation({ summary: 'Forgot password' })
+  @ApiOkResponse({ type: MessageResponseDto })
+  @ApiBadRequestResponse()
   @Post('forgot-password')
   @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(HttpStatus.OK)
@@ -204,6 +217,9 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({ summary: 'Reset password' })
+  @ApiBadRequestResponse()
+  @ApiOkResponse({ type: MessageResponseDto })
   @Post('reset-password')
   @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(HttpStatus.OK)
@@ -215,13 +231,27 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({ summary: 'Change password' })
+  @ApiOkResponse({
+    description: 'New access token after password change',
+    schema: {
+      type: 'object',
+      properties: {
+        accessToken: { type: 'string' },
+      },
+      required: ['accessToken'],
+    },
+  })
+  @ApiBadRequestResponse()
   @Patch('change-password')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
+  @ApiBearerAuth()
   async changePassword(
     @CurrentUser('sub') userId: string,
     @Body() dto: ChangePasswordDto,
-    @Req() req: Request,
+    @Req() req: ExpressRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const tokens = await this.accountRecoveryService.changePassword(

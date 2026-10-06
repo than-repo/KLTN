@@ -404,7 +404,8 @@ export const ModelName = {
   AssessmentAnswer: 'AssessmentAnswer',
   AssessmentAttempt: 'AssessmentAttempt',
   AssessmentAttemptAnswer: 'AssessmentAttemptAnswer',
-  ProjectSubmission: 'ProjectSubmission'
+  ProjectSubmission: 'ProjectSubmission',
+  Skill: 'Skill'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userIdentity" | "refreshToken" | "passwordResetToken" | "courseReview" | "courseReviewerCategory" | "courseInstructor" | "course" | "category" | "courseCategory" | "courseSection" | "lesson" | "fileMedia" | "enrollment" | "payment" | "assessment" | "assessmentQuestion" | "assessmentAnswer" | "assessmentAttempt" | "assessmentAttemptAnswer" | "projectSubmission"
+    modelProps: "user" | "userIdentity" | "refreshToken" | "passwordResetToken" | "courseReview" | "courseReviewerCategory" | "courseInstructor" | "course" | "category" | "courseCategory" | "courseSection" | "lesson" | "fileMedia" | "enrollment" | "payment" | "assessment" | "assessmentQuestion" | "assessmentAnswer" | "assessmentAttempt" | "assessmentAttemptAnswer" | "projectSubmission" | "skill"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1810,6 +1811,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Skill: {
+      payload: Prisma.$SkillPayload<ExtArgs>
+      fields: Prisma.SkillFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SkillFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SkillFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>
+        }
+        findFirst: {
+          args: Prisma.SkillFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SkillFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>
+        }
+        findMany: {
+          args: Prisma.SkillFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>[]
+        }
+        create: {
+          args: Prisma.SkillCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>
+        }
+        createMany: {
+          args: Prisma.SkillCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.SkillDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>
+        }
+        update: {
+          args: Prisma.SkillUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>
+        }
+        deleteMany: {
+          args: Prisma.SkillDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SkillUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.SkillUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SkillPayload>
+        }
+        aggregate: {
+          args: Prisma.SkillAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSkill>
+        }
+        groupBy: {
+          args: Prisma.SkillGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SkillGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SkillCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SkillCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2195,6 +2262,22 @@ export const ProjectSubmissionScalarFieldEnum = {
 export type ProjectSubmissionScalarFieldEnum = (typeof ProjectSubmissionScalarFieldEnum)[keyof typeof ProjectSubmissionScalarFieldEnum]
 
 
+export const SkillScalarFieldEnum = {
+  id: 'id',
+  canonicalName: 'canonicalName',
+  description: 'description',
+  aliases: 'aliases',
+  embedding: 'embedding',
+  parentId: 'parentId',
+  level: 'level',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SkillScalarFieldEnum = (typeof SkillScalarFieldEnum)[keyof typeof SkillScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2457,6 +2540,17 @@ export const ProjectSubmissionOrderByRelevanceFieldEnum = {
 } as const
 
 export type ProjectSubmissionOrderByRelevanceFieldEnum = (typeof ProjectSubmissionOrderByRelevanceFieldEnum)[keyof typeof ProjectSubmissionOrderByRelevanceFieldEnum]
+
+
+export const SkillOrderByRelevanceFieldEnum = {
+  id: 'id',
+  canonicalName: 'canonicalName',
+  description: 'description',
+  parentId: 'parentId',
+  status: 'status'
+} as const
+
+export type SkillOrderByRelevanceFieldEnum = (typeof SkillOrderByRelevanceFieldEnum)[keyof typeof SkillOrderByRelevanceFieldEnum]
 
 
 
@@ -2770,6 +2864,7 @@ export type GlobalOmitConfig = {
   assessmentAttempt?: Prisma.AssessmentAttemptOmit
   assessmentAttemptAnswer?: Prisma.AssessmentAttemptAnswerOmit
   projectSubmission?: Prisma.ProjectSubmissionOmit
+  skill?: Prisma.SkillOmit
 }
 
 /* Types for Logging */

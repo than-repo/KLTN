@@ -1,11 +1,5 @@
-import { UserModel } from './../../../../generated/prisma/models/User';
-import { RefreshToken } from './../../../../generated/prisma/browser';
 //src\features\auth\repositories\auth.repository.ts
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/core/database/prisma.service';
 import { AuthProviderEnum, UserRole } from 'generated/prisma/enums';
 
@@ -17,9 +11,18 @@ import { CreateGoogleUserData } from '../interfaces/create-google-user.interface
 import {
   CreatePasswordResetTokenInput,
   ResetPasswordInput,
-  UpdatePasswordAndResetTokenInput,
 } from '../interfaces/user.repository.interface';
 import { Prisma } from 'generated/prisma/client';
+
+export interface RefreshTokenResponse {
+  user: {
+    id: string;
+    fullName: string;
+    email: string;
+    role: UserRole;
+  };
+  refreshToken: string;
+}
 
 @Injectable()
 export class AuthRepository {
@@ -74,7 +77,10 @@ export class AuthRepository {
    * Create a new refresh token (secure random + hashed)
    */
 
-  async createRefreshToken(data: CreateRefreshToken) {
+  async createRefreshToken(
+    data: CreateRefreshToken,
+    db: Pick<Prisma.TransactionClient, 'refreshToken'> = this.prisma,
+  ) {
     const refreshToken = crypto.randomBytes(64).toString('hex'); // plain token sent to client
     const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
 
@@ -394,6 +400,36 @@ export class AuthRepository {
       });
 
       return refreshToken;
+    });
+  }
+
+  async rotateRefreshToken(
+    oldTokenId: string,
+    data: CreateRefreshToken,
+  ): Promise<{
+    refreshToken: string;
+    refreshTokenId: string;
+  } | null> {
+    return this.prisma.$transaction(async (tx) => {
+      const consumed = await tx.refreshToken.updateMany({
+        where: {
+          id: oldTokenId,
+          userId: data.userId,
+          isRevoked: false,
+          expiresAt: {
+            gt: new Date(),
+          },
+        },
+        data: {
+          isRevoked: true,
+        },
+      });
+
+      if (consumed.count !== 1) {
+        return null;
+      }
+
+      return this.createRefreshToken(data, tx);
     });
   }
 }

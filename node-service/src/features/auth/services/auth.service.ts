@@ -1,6 +1,7 @@
 //src\features\auth\auth.service.ts
 
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -14,10 +15,15 @@ import { AuthRepository } from '../repositories/auth.repository';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import { AuthResponseDto } from '../dtos/login-response.dto';
-import { CreateRefreshToken } from '../interfaces/create-refresh-token.interface';
+import { UserRole } from 'generated/prisma/enums';
+import { Profile } from 'passport-google-oauth20';
 
-import { createHash } from 'node:crypto';
-import * as crypto from 'node:crypto';
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  role: UserRole;
+}
 
 @Injectable()
 export class AuthService {
@@ -70,7 +76,7 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('Account has been deactivated');
+      throw new UnauthorizedException('Invalid email or password');
     }
     // if (!user.emailVerified) {
     //   throw new UnauthorizedException(
@@ -92,7 +98,7 @@ export class AuthService {
   /**
    * Private helper - removes duplication between register n login
    */
-  private async generateAuthResponse(user: any): Promise<AuthResponseDto> {
+  private async generateAuthResponse(user: User): Promise<AuthResponseDto> {
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -124,8 +130,20 @@ export class AuthService {
   }
 
   private calculateExpiry(expiresIn: string): Date {
-    const ms = this.parseMs(expiresIn);
-    return new Date(Date.now() + ms);
+    const durationMs = this.parseMs(expiresIn);
+    const expiresAt = new Date(Date.now() + durationMs);
+
+    if (
+      !Number.isSafeInteger(durationMs) ||
+      durationMs <= 0 ||
+      Number.isNaN(expiresAt.getTime())
+    ) {
+      throw new Error(
+        'REFRESH_TOKEN_EXPIRES_IN must produce a positive, valid duration',
+      );
+    }
+
+    return expiresAt;
   }
 
   private parseMs(value: string): number {
@@ -152,24 +170,65 @@ export class AuthService {
   }
 
   //REFRESH TOKEN METHOD
-  async refreshToken(refreshToken: string): Promise<AuthResponseDto> {
-    if (!refreshToken || typeof refreshToken !== 'string') {
+  async refreshToken(
+    refreshToken: string | undefined,
+  ): Promise<AuthResponseDto> {
+    if (typeof refreshToken !== 'string' || !refreshToken) {
       throw new UnauthorizedException('Invalid refresh token format');
     }
-    const refreshTokenRecord =
+
+    const current =
       await this.authRepository.findRefreshTokenByToken(refreshToken);
 
-    if (!refreshTokenRecord?.user) {
+    if (!current?.user || !current.user.isActive) {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    await this.authRepository.revokeToken(refreshTokenRecord.id);
+    const user = current.user;
 
-    return this.generateAuthResponse(refreshTokenRecord.user);
+    const refreshExpiresIn = this.configService.getOrThrow<string>(
+      'REFRESH_TOKEN_EXPIRES_IN',
+    );
+    const expiresAt = this.calculateExpiry(refreshExpiresIn);
+
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    // Sign before rotating so a signing failure doesn't consume the old token.
+    // The access token is returned only if rotation succeeds.
+    const accessToken = this.jwtService.sign(payload);
+
+    const replacement = await this.authRepository.rotateRefreshToken(
+      current.id,
+      {
+        userId: user.id,
+        expiresAt,
+        deviceInfo: current.deviceInfo ?? undefined,
+        ipAddress: current.ipAddress ?? undefined,
+      },
+    );
+
+    if (!replacement) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    return {
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+      refreshToken: replacement.refreshToken,
+    };
   }
 
   async validateGoogleUser(
-    profile: any,
+    profile: Profile,
     accessToken: string,
     refreshToken: string,
   ) {
@@ -192,22 +251,26 @@ export class AuthService {
       avatarUrl: profile.photos?.[0]?.value,
     });
   }
-
   /**
    * Optional helper - can be used later for Google login controller
    */
   async googleLogin(payload: JwtPayload): Promise<AuthResponseDto> {
-    // reuse the same flow as local login (token generation + cookie)
     const user = await this.authRepository.findUserById(payload.sub);
+
+    if (!user || !user.isActive) {
+      throw new UnauthorizedException('Unable to authenticate');
+    }
+
     return this.generateAuthResponse(user);
   }
+  async logout(refreshToken: string | undefined): Promise<{ message: string }> {
+    if (refreshToken) {
+      const record =
+        await this.authRepository.findRefreshTokenByToken(refreshToken);
 
-  async logout(refreshToken: string): Promise<{ message: string }> {
-    // Try to revoke the token (it may already be expired/revoked — don't throw)
-    const record =
-      await this.authRepository.findRefreshTokenByToken(refreshToken);
-    if (record) {
-      await this.authRepository.revokeToken(record.id);
+      if (record) {
+        await this.authRepository.revokeToken(record.id);
+      }
     }
 
     return { message: 'Logged out successfully' };
