@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { MediaTypeEnum } from 'generated/prisma/enums';
+import { Difficulty, MediaTypeEnum } from 'generated/prisma/enums';
 
 export class LearningPaginationMetaDto {
   @ApiProperty()
@@ -172,4 +172,32 @@ export class LearningLessonDetailResponseDto {
   @Expose()
   @Type(() => LearningFileV2Dto)
   files!: LearningFileV2Dto[];
+
+  //apply skills
+  @ApiProperty({ type: () => [LearningSkillDto] })
+  @Expose()
+  @Type(() => LearningSkillDto)
+  skills!: LearningSkillDto[];
+}
+
+export class LearningSkillDto {
+  @ApiProperty()
+  @Expose()
+  id!: string;
+
+  @ApiProperty()
+  @Expose()
+  canonicalName!: string;
+
+  @ApiProperty({ nullable: true })
+  @Expose()
+  description!: string | null;
+
+  @ApiProperty({ type: [String], nullable: true })
+  @Expose()
+  aliases!: string[] | null;
+
+  @ApiProperty({ enum: Difficulty })
+  @Expose()
+  difficulty!: Difficulty;
 }

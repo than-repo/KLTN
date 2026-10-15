@@ -2270,9 +2270,11 @@ export const SkillScalarFieldEnum = {
   embedding: 'embedding',
   parentId: 'parentId',
   level: 'level',
-  status: 'status',
+  difficulty: 'difficulty',
+  isActive: 'isActive',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type SkillScalarFieldEnum = (typeof SkillScalarFieldEnum)[keyof typeof SkillScalarFieldEnum]
@@ -2546,8 +2548,7 @@ export const SkillOrderByRelevanceFieldEnum = {
   id: 'id',
   canonicalName: 'canonicalName',
   description: 'description',
-  parentId: 'parentId',
-  status: 'status'
+  parentId: 'parentId'
 } as const
 
 export type SkillOrderByRelevanceFieldEnum = (typeof SkillOrderByRelevanceFieldEnum)[keyof typeof SkillOrderByRelevanceFieldEnum]
@@ -2731,6 +2732,13 @@ export type EnumAssessmentAttemptStatusFieldRefInput<$PrismaModel> = FieldRefInp
  * Reference to a field of type 'ProjectSubmissionStatus'
  */
 export type EnumProjectSubmissionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProjectSubmissionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'Difficulty'
+ */
+export type EnumDifficultyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Difficulty'>
     
 
 /**

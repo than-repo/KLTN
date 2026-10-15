@@ -3,11 +3,14 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  ArrayUnique,
+  IsArray,
   IsBoolean,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class UpdateLessonDto {
@@ -54,4 +57,13 @@ export class UpdateLessonDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  //apply skills
+
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  skillIds?: string[];
 }

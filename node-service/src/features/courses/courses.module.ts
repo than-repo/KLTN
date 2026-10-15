@@ -29,6 +29,7 @@ import { AdminCoursesController } from './controllers/admin-courses.controller';
 import { CourseReviewAuthorizationService } from './services/course-review-authorization.service';
 import { REVIEWER_CATEGORY_AUTHORIZATION_REPOSITORY } from './repositories/reviewer-category-authorization-repository.token';
 import { ReviewerCategoryAuthorizationRepository } from './repositories/reviewer-category-authorization.repository';
+import { SkillModule } from '../skill/skill.module';
 
 @Module({
   providers: [
@@ -83,7 +84,7 @@ import { ReviewerCategoryAuthorizationRepository } from './repositories/reviewer
     },
   ],
   exports: [],
-  imports: [PrismaModule],
+  imports: [PrismaModule, SkillModule],
   controllers: [
     PublicCoursesController,
     InstructorCoursesController,

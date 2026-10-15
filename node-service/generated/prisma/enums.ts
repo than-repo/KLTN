@@ -190,10 +190,10 @@ export const ProjectSubmissionStatus = {
 export type ProjectSubmissionStatus = (typeof ProjectSubmissionStatus)[keyof typeof ProjectSubmissionStatus]
 
 
-export const SkillLevel = {
-  BEGINNER: 'BEGINNER',
-  INTERMEDIATE: 'INTERMEDIATE',
-  ADVANCED: 'ADVANCED'
+export const Difficulty = {
+  EASY: 'EASY',
+  MEDIUM: 'MEDIUM',
+  HARD: 'HARD'
 } as const
 
-export type SkillLevel = (typeof SkillLevel)[keyof typeof SkillLevel]
+export type Difficulty = (typeof Difficulty)[keyof typeof Difficulty]

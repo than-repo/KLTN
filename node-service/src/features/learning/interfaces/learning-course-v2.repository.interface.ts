@@ -1,3 +1,4 @@
+import { Difficulty } from 'generated/prisma/enums';
 import type { MediaTypeModel } from './learning-course.repository.interface';
 
 export interface LearningPaginationParams {
@@ -44,12 +45,23 @@ export interface LearningLessonDetailModel {
   description: string | null;
   lessonIndex: number;
   files: LearningFileV2Model[];
+  //skills
+  skills: LearningSkillModel[];
 }
 
 export interface LearningFileV2Model {
   id: string;
   url: string;
   type: MediaTypeModel;
+}
+
+//apply skills
+export interface LearningSkillModel {
+  id: string;
+  canonicalName: string;
+  description: string | null;
+  aliases: string[] | null;
+  difficulty: Difficulty;
 }
 
 export interface ILearningCourseV2Repository {

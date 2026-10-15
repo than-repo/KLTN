@@ -62,6 +62,22 @@ const learningLessonDetailInclude = {
       createdAt: 'asc',
     },
   },
+  skills: {
+    where: {
+      isActive: true,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      canonicalName: true,
+      description: true,
+      aliases: true,
+      difficulty: true,
+    },
+    orderBy: {
+      canonicalName: 'asc',
+    },
+  },
 } satisfies Prisma.LessonInclude;
 
 type PrismaLearningCourseOverview = Prisma.CourseGetPayload<{
@@ -283,6 +299,28 @@ export class LearningCourseV2Repository implements ILearningCourseV2Repository {
         url: file.url,
         type: file.type,
       })),
+      skills: lesson.skills.map((skill) => ({
+        id: skill.id,
+        canonicalName: skill.canonicalName,
+        description: skill.description,
+        aliases: this.readSkillAliases(skill.aliases),
+        difficulty: skill.difficulty,
+      })),
     };
+  }
+
+  private readSkillAliases(value: Prisma.JsonValue): string[] | null {
+    if (value === null) {
+      return null;
+    }
+
+    if (
+      !Array.isArray(value) ||
+      !value.every((item) => typeof item === 'string')
+    ) {
+      throw new Error('Stored skill aliases are invalid');
+    }
+
+    return value as string[];
   }
 }

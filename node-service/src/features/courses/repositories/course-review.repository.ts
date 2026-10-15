@@ -30,6 +30,7 @@ import {
   SortDirection,
 } from '../dtos/course/reviewer-course-query.dto';
 import { InstructorCourseLatestReviewResponseDto } from '../dtos/course/instructor-course-review.dto';
+import { lessonSkillsInclude } from './lesson.repository';
 
 const availableReviewCourseInclude = {
   courseCategories: {
@@ -138,6 +139,7 @@ const courseReviewWorkspaceInclude = {
               isActive: true,
             },
             include: {
+              ...lessonSkillsInclude,
               files: {
                 where: {
                   deletedAt: null,
@@ -862,12 +864,30 @@ export class CourseReviewRepository implements ICourseReviewRepository {
               updatedAt: file.updatedAt,
               deletedAt: file.deletedAt,
             })),
+            skills: lesson.skills.map((skill) => ({
+              ...skill,
+              aliases: this.readSkillAliases(skill.aliases),
+            })),
           })),
         })),
       },
     };
   }
 
+  private readSkillAliases(value: Prisma.JsonValue): string[] | null {
+    if (value === null) {
+      return null;
+    }
+
+    if (
+      !Array.isArray(value) ||
+      !value.every((item) => typeof item === 'string')
+    ) {
+      throw new Error('Stored skill aliases are invalid');
+    }
+
+    return value as string[];
+  }
   private parseStringArrayJson(
     value: Prisma.JsonValue | null,
   ): string[] | null {

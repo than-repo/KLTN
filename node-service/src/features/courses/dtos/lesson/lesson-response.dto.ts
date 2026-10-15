@@ -1,7 +1,8 @@
 // src/features/courses/dtos/lesson-response.dto.ts
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { SkillResponseDto } from 'src/features/skill/dtos/skill-response.dto';
 
 export const LESSON_VIEW_GROUPS = {
   LEARNER: 'lesson:learner',
@@ -65,6 +66,15 @@ export class LessonResponseDto {
   })
   @Expose({ groups: MANAGEMENT_LESSON_GROUPS })
   isActive!: boolean;
+
+  //apply skills
+  @ApiProperty({
+    description: 'Skills associated with this lesson.',
+    type: () => [SkillResponseDto],
+  })
+  @Expose({ groups: ALL_LESSON_GROUPS })
+  @Type(() => SkillResponseDto)
+  skills!: SkillResponseDto[];
 
   /**
    * Owner-only sensitive/internal fields

@@ -97,14 +97,51 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 
+
+
 ```
-elearning-system
+node-service
 ├─ .prettierrc
+├─ AGENTS.md
 ├─ common
 ├─ docker-compose.yml
 ├─ eslint.config.mjs
 ├─ generated
-│  └─ prisma
+│  ├─ prisma
+│  │  ├─ browser.ts
+│  │  ├─ client.ts
+│  │  ├─ commonInputTypes.ts
+│  │  ├─ enums.ts
+│  │  ├─ internal
+│  │  │  ├─ class.ts
+│  │  │  ├─ prismaNamespace.ts
+│  │  │  └─ prismaNamespaceBrowser.ts
+│  │  ├─ models
+│  │  │  ├─ Assessment.ts
+│  │  │  ├─ AssessmentAnswer.ts
+│  │  │  ├─ AssessmentAttempt.ts
+│  │  │  ├─ AssessmentAttemptAnswer.ts
+│  │  │  ├─ AssessmentQuestion.ts
+│  │  │  ├─ Category.ts
+│  │  │  ├─ Course.ts
+│  │  │  ├─ CourseCategory.ts
+│  │  │  ├─ CourseInstructor.ts
+│  │  │  ├─ CourseReview.ts
+│  │  │  ├─ CourseReviewerCategory.ts
+│  │  │  ├─ CourseSection.ts
+│  │  │  ├─ Enrollment.ts
+│  │  │  ├─ FileMedia.ts
+│  │  │  ├─ Lesson.ts
+│  │  │  ├─ LessonSkill.ts
+│  │  │  ├─ PasswordResetToken.ts
+│  │  │  ├─ Payment.ts
+│  │  │  ├─ ProjectSubmission.ts
+│  │  │  ├─ RefreshToken.ts
+│  │  │  ├─ Skill.ts
+│  │  │  ├─ User.ts
+│  │  │  └─ UserIdentity.ts
+│  │  └─ models.ts
+│  └─ prisma-test
 │     ├─ browser.ts
 │     ├─ client.ts
 │     ├─ commonInputTypes.ts
@@ -114,44 +151,45 @@ elearning-system
 │     │  ├─ prismaNamespace.ts
 │     │  └─ prismaNamespaceBrowser.ts
 │     ├─ models
-│     │  ├─ Category.ts
-│     │  ├─ Course.ts
-│     │  ├─ CourseCategory.ts
-│     │  ├─ CourseInstructor.ts
-│     │  ├─ CourseReview.ts
-│     │  ├─ CourseReviewerCategory.ts
-│     │  ├─ CourseSection.ts
-│     │  ├─ Enrollment.ts
-│     │  ├─ FileMedia.ts
-│     │  ├─ Lesson.ts
-│     │  ├─ Payment.ts
-│     │  ├─ RefreshToken.ts
-│     │  ├─ User.ts
-│     │  └─ UserIdentity.ts
+│     │  └─ TestSkill.ts
 │     └─ models.ts
 ├─ nest-cli.json
 ├─ package-lock.json
 ├─ package.json
 ├─ prisma
+│  ├─ migrations
+│  │  ├─ 20260610000000_add_file_media_audit_fields
+│  │  │  └─ migration.sql
+│  │  ├─ 20260610000100_add_course_review_claim_fields
+│  │  │  └─ migration.sql
+│  │  ├─ 20260611000000_add_password_reset_tokens
+│  │  │  └─ migration.sql
+│  │  ├─ 20260612000000_add_payments_and_enrollments
+│  │  │  └─ migration.sql
+│  │  ├─ 20260616000000_allow_payment_retries
+│  │  │  └─ migration.sql
+│  │  └─ 20260617000000_add_simulation_payment_method
+│  │     └─ migration.sql
 │  ├─ schema.prisma
-│  └─ test.prisma
+│  ├─ seed.ts
+│  └─ skill.prisma
 ├─ prisma.config.ts
 ├─ README.md
 ├─ sample-data.txt
 ├─ src
 │  ├─ app.module.ts
 │  ├─ common
-│  │  ├─ cloudinary
-│  │  │  ├─ cloudinary.module.ts
-│  │  │  └─ cloudinary.service.ts
 │  │  ├─ decorators
-│  │  │  └─ current-user.decorator.ts
+│  │  │  ├─ current-user.decorator.ts
+│  │  │  └─ skip-response-formatting.decorator.ts
 │  │  ├─ filters
+│  │  │  ├─ http-exception.filter.ts
 │  │  │  ├─ prisma-client-exception.filter.spec.ts
 │  │  │  └─ prisma-client-exception.filter.ts
 │  │  ├─ interceptors
 │  │  │  └─ response-formatting.interceptor.ts
 │  │  ├─ interfaces
+│  │  │  ├─ api-error-response.interface.ts
 │  │  │  ├─ api-response.interfaces.ts
 │  │  │  └─ request-with-user.ts
 │  │  ├─ pipes
@@ -162,13 +200,81 @@ elearning-system
 │  │     ├─ prisma-error.util.ts
 │  │     └─ slugify.util.ts
 │  ├─ config
+│  │  ├─ vnpay.config.spec.ts
+│  │  └─ vnpay.config.ts
 │  ├─ core
 │  │  ├─ database
 │  │  │  ├─ prisma.module.ts
 │  │  │  └─ prisma.service.ts
 │  │  ├─ mailer
+│  │  │  ├─ mailer.module.ts
+│  │  │  └─ mailer.service.ts
 │  │  └─ storage
+│  │     └─ cloudinary
+│  │        ├─ cloudinary.module.ts
+│  │        └─ cloudinary.service.ts
 │  ├─ features
+│  │  ├─ assessments
+│  │  │  ├─ assessments.module.ts
+│  │  │  ├─ controllers
+│  │  │  │  ├─ instructor-assessments.controller.ts
+│  │  │  │  └─ learner-assessments.controller.ts
+│  │  │  ├─ dtos
+│  │  │  │  ├─ answers
+│  │  │  │  │  ├─ assessment-answer-response.dto.ts
+│  │  │  │  │  └─ assessment-answer.dto.ts
+│  │  │  │  ├─ assessment
+│  │  │  │  │  ├─ assessment-response.ts
+│  │  │  │  │  ├─ create-assessment.dto.ts
+│  │  │  │  │  ├─ detailed-assessment.dto.ts
+│  │  │  │  │  ├─ paginated-assessment-response.dto.ts
+│  │  │  │  │  ├─ query-assessment.dto.ts
+│  │  │  │  │  ├─ update-assessment.dto.ts
+│  │  │  │  │  ├─ update-published-assessment.dto.ts
+│  │  │  │  │  └─ updated-published-assessment-response.dto.ts
+│  │  │  │  ├─ attempts
+│  │  │  │  │  ├─ active-attempt.dto.ts
+│  │  │  │  │  ├─ attempt-history.dto.ts
+│  │  │  │  │  ├─ attempt-result.dto.ts
+│  │  │  │  │  ├─ create-attempt.dto.ts
+│  │  │  │  │  ├─ learner-assessment.dto.ts
+│  │  │  │  │  ├─ learner-course-assessments.dto.ts
+│  │  │  │  │  ├─ save-attempt-answer.dto.ts
+│  │  │  │  │  └─ submit-project.dto.ts
+│  │  │  │  └─ questions
+│  │  │  │     ├─ assessment-question-response.dto.ts
+│  │  │  │     └─ assessment-question.dto.ts
+│  │  │  ├─ interfaces
+│  │  │  │  ├─ assessment-access.repository.interface.ts
+│  │  │  │  ├─ assessment-answers.repository.interface.ts
+│  │  │  │  ├─ assessment-questions.repository.interface.ts
+│  │  │  │  ├─ assessment.repository.interface.ts
+│  │  │  │  ├─ attempt.repository.interface.ts
+│  │  │  │  ├─ detailed-assessment.interface.ts
+│  │  │  │  └─ learner-assessment-service-input.interface.ts
+│  │  │  ├─ mappers
+│  │  │  │  ├─ assessment-answers.mapper.ts
+│  │  │  │  ├─ assessment-questions.mapper.ts
+│  │  │  │  └─ assessment.mapper.ts
+│  │  │  ├─ repositories
+│  │  │  │  ├─ assessment-access.repository.token.ts
+│  │  │  │  ├─ assessment-access.repository.ts
+│  │  │  │  ├─ assessment-answers.repository.token.ts
+│  │  │  │  ├─ assessment-answers.repository.ts
+│  │  │  │  ├─ assessment-questions.interface.token.ts
+│  │  │  │  ├─ assessment-questions.repository.ts
+│  │  │  │  ├─ assessment.repository.token.ts
+│  │  │  │  ├─ assessment.repository.ts
+│  │  │  │  ├─ attempt.repository.token.ts
+│  │  │  │  ├─ attempt.repository.ts
+│  │  │  │  ├─ detailed-assessment.repository.token.ts
+│  │  │  │  └─ detailed-assessment.repository.ts
+│  │  │  └─ services
+│  │  │     ├─ assessment-access.service.ts
+│  │  │     ├─ assessment-answers.service.ts
+│  │  │     ├─ assessment-questions.service.ts
+│  │  │     ├─ assessments.service.ts
+│  │  │     └─ learner-assessments.service.ts
 │  │  ├─ auth
 │  │  │  ├─ auth.controller.ts
 │  │  │  ├─ auth.module.ts
@@ -176,10 +282,15 @@ elearning-system
 │  │  │  │  ├─ public.decorator.ts
 │  │  │  │  └─ roles.decorator.ts
 │  │  │  ├─ dtos
+│  │  │  │  ├─ change-password.dto.ts
+│  │  │  │  ├─ forgot-password.dto.ts
 │  │  │  │  ├─ login-response.dto.ts
 │  │  │  │  ├─ login.dto.ts
+│  │  │  │  ├─ message-response.dto.ts
 │  │  │  │  ├─ refresh-token.dto.ts
-│  │  │  │  └─ register.dto.ts
+│  │  │  │  ├─ register.dto.ts
+│  │  │  │  └─ reset-password.dto.ts
+│  │  │  ├─ google-oauth.controller.ts
 │  │  │  ├─ guards
 │  │  │  │  ├─ google-auth.guard.ts
 │  │  │  │  ├─ jwt-auth.guard.ts
@@ -189,10 +300,14 @@ elearning-system
 │  │  │  │  ├─ create-local-user.interface.ts
 │  │  │  │  ├─ create-refresh-token.interface.ts
 │  │  │  │  ├─ jwt-payload.interface.ts
-│  │  │  │  └─ request-with-cookies.ts
+│  │  │  │  ├─ request-with-cookies.ts
+│  │  │  │  └─ user.repository.interface.ts
 │  │  │  ├─ repositories
+│  │  │  │  ├─ auth.repository.spec.ts
 │  │  │  │  └─ auth.repository.ts
 │  │  │  ├─ services
+│  │  │  │  ├─ account-recovery.service.spec.ts
+│  │  │  │  ├─ account-recovery.service.ts
 │  │  │  │  ├─ auth.service.ts
 │  │  │  │  └─ token-cleanup.service.ts
 │  │  │  └─ strategies
@@ -201,7 +316,6 @@ elearning-system
 │  │  ├─ courses
 │  │  │  ├─ controllers
 │  │  │  │  ├─ admin-courses.controller.ts
-│  │  │  │  ├─ courses.controller.ts
 │  │  │  │  ├─ instructor-course.controller.ts
 │  │  │  │  ├─ public-courses.controller.ts
 │  │  │  │  └─ reviewer-courses.controller.ts
@@ -216,11 +330,19 @@ elearning-system
 │  │  │  │  ├─ course
 │  │  │  │  │  ├─ course-response.dto.ts
 │  │  │  │  │  ├─ create-course.dto.ts
+│  │  │  │  │  ├─ instructor-course-review.dto.ts
 │  │  │  │  │  ├─ paginated-course.dto.ts
 │  │  │  │  │  ├─ param-course.dto.ts
 │  │  │  │  │  ├─ query-course.dto.ts
 │  │  │  │  │  ├─ reviewer-course-query.dto.ts
+│  │  │  │  │  ├─ reviewer-course-response.dto.ts
+│  │  │  │  │  ├─ reviewer-course-review.dto.ts
 │  │  │  │  │  └─ update-course.dto.ts
+│  │  │  │  ├─ file-media
+│  │  │  │  │  ├─ create-file-media.dto.ts
+│  │  │  │  │  ├─ file-media-response.dto.ts
+│  │  │  │  │  ├─ query-file-media.dto.ts
+│  │  │  │  │  └─ update-file-media.dto.ts
 │  │  │  │  ├─ lesson
 │  │  │  │  │  ├─ create-lesson.dto.ts
 │  │  │  │  │  ├─ lesson-response.dto.ts
@@ -228,7 +350,10 @@ elearning-system
 │  │  │  │  │  ├─ reorder-lesson.dto.ts
 │  │  │  │  │  └─ update-lesson.dto.ts
 │  │  │  │  ├─ paginated-response.dto.ts
+│  │  │  │  ├─ review-authorization
+│  │  │  │  │  └─ reviewer-category-authorization.dto.ts
 │  │  │  │  └─ section-lesson
+│  │  │  │     ├─ change-section-status.dto.ts
 │  │  │  │     ├─ create-section.dti.ts
 │  │  │  │     ├─ query-section.dto.ts
 │  │  │  │     ├─ reorder-sections.dto.ts
@@ -240,28 +365,128 @@ elearning-system
 │  │  │  │  ├─ course-section.repository.interface.ts
 │  │  │  │  ├─ course.repository.interface.ts
 │  │  │  │  ├─ file-media.repository.interface.ts
-│  │  │  │  └─ lesson.repository.interface.ts
+│  │  │  │  ├─ lesson.repository.interface.ts
+│  │  │  │  └─ reviewer-category-authorization.repository.interface.ts
 │  │  │  ├─ repositories
 │  │  │  │  ├─ category-repository.token.ts
 │  │  │  │  ├─ category.repository.ts
 │  │  │  │  ├─ course-repository.token.ts
 │  │  │  │  ├─ course-review-repository.token.ts
+│  │  │  │  ├─ course-review.repository.spec.ts
+│  │  │  │  ├─ course-review.repository.ts
 │  │  │  │  ├─ course-section-repository.token.ts
 │  │  │  │  ├─ course-section-repository.ts
+│  │  │  │  ├─ course.repository.create.spec.ts
+│  │  │  │  ├─ course.repository.read.spec.ts
+│  │  │  │  ├─ course.repository.state.spec.ts
 │  │  │  │  ├─ course.repository.ts
+│  │  │  │  ├─ course.repository.update.spec.ts
+│  │  │  │  ├─ file-media.repository.spec.ts
 │  │  │  │  ├─ file-media.repository.token.ts
 │  │  │  │  ├─ file-media.repository.ts
 │  │  │  │  ├─ lesson-repository.token.ts
 │  │  │  │  ├─ lesson.repository.ts
-│  │  │  │  └─ prisma-course-review.repository.ts
+│  │  │  │  ├─ reviewer-category-authorization-repository.token.ts
+│  │  │  │  ├─ reviewer-category-authorization.repository.spec.ts
+│  │  │  │  └─ reviewer-category-authorization.repository.ts
 │  │  │  └─ services
 │  │  │     ├─ categories.service.ts
 │  │  │     ├─ course-access.service.ts
+│  │  │     ├─ course-review-authorization.service.spec.ts
+│  │  │     ├─ course-review-authorization.service.ts
 │  │  │     ├─ course-sections.service.ts
+│  │  │     ├─ courses.service.spec.ts
 │  │  │     ├─ courses.service.ts
+│  │  │     ├─ file-media.service.spec.ts
 │  │  │     ├─ file-media.service.ts
 │  │  │     ├─ lessons.service.ts
+│  │  │     ├─ reviewer-courses.service.spec.ts
 │  │  │     └─ reviewer-courses.service.ts
+│  │  ├─ enrollments
+│  │  │  ├─ controllers
+│  │  │  │  └─ learner-enrollments.controller.ts
+│  │  │  ├─ dtos
+│  │  │  │  ├─ enrollment-param.dto.ts
+│  │  │  │  ├─ enrollment-query.dto.ts
+│  │  │  │  └─ enrollment-response.dto.ts
+│  │  │  ├─ enrollments.module.ts
+│  │  │  ├─ interfaces
+│  │  │  │  └─ enrollment.repository.interface.ts
+│  │  │  ├─ repositories
+│  │  │  │  ├─ enrollment-repository.token.ts
+│  │  │  │  ├─ enrollment.repository.spec.ts
+│  │  │  │  └─ enrollment.repository.ts
+│  │  │  └─ services
+│  │  │     ├─ enrollment-access.service.ts
+│  │  │     ├─ enrollments.service.spec.ts
+│  │  │     └─ enrollments.service.ts
+│  │  ├─ learning
+│  │  │  ├─ controllers
+│  │  │  │  ├─ learning-courses-v2.controller.spec.ts
+│  │  │  │  ├─ learning-courses-v2.controller.ts
+│  │  │  │  ├─ learning-courses.controller.spec.ts
+│  │  │  │  └─ learning-courses.controller.ts
+│  │  │  ├─ dtos
+│  │  │  │  ├─ course-learner-response.dto.ts
+│  │  │  │  └─ v2
+│  │  │  │     ├─ learning-course-v2-response.dto.ts
+│  │  │  │     └─ learning-pagination-query.dto.ts
+│  │  │  ├─ interfaces
+│  │  │  │  ├─ learning-course-v2.repository.interface.ts
+│  │  │  │  └─ learning-course.repository.interface.ts
+│  │  │  ├─ learning.module.ts
+│  │  │  ├─ repositories
+│  │  │  │  ├─ learning-course-v2.repository.spec.ts
+│  │  │  │  ├─ learning-course-v2.repository.token.ts
+│  │  │  │  ├─ learning-course-v2.repository.ts
+│  │  │  │  ├─ learning-course.repository.spec.ts
+│  │  │  │  ├─ learning-course.repository.token.ts
+│  │  │  │  └─ learning-course.repository.ts
+│  │  │  └─ services
+│  │  │     ├─ learning-courses-v2.service.spec.ts
+│  │  │     ├─ learning-courses-v2.service.ts
+│  │  │     ├─ learning-courses.service.spec.ts
+│  │  │     └─ learning-courses.service.ts
+│  │  ├─ payment
+│  │  │  ├─ dtos
+│  │  │  │  ├─ create-simulation-payment.dto.ts
+│  │  │  │  ├─ create-vnpay-payment.dto.ts
+│  │  │  │  ├─ get-payments-response.dto.ts
+│  │  │  │  ├─ simulation-payment-response.dto.ts
+│  │  │  │  ├─ vnpay-inp-response.dto.ts
+│  │  │  │  ├─ vnpay-refund-request.dto.ts
+│  │  │  │  └─ vnpay-return-response.dto.ts
+│  │  │  ├─ interfaces
+│  │  │  │  ├─ payment.repository.interface.ts
+│  │  │  │  └─ vnpayreturnquery.interface.ts
+│  │  │  ├─ payments.controller.ts
+│  │  │  ├─ payments.module.ts
+│  │  │  ├─ repositories
+│  │  │  │  ├─ payment.repository.spec.ts
+│  │  │  │  ├─ payment.repository.token.ts
+│  │  │  │  └─ payment.repository.ts
+│  │  │  └─ services
+│  │  │     ├─ payments.service.spec.ts
+│  │  │     ├─ payments.service.ts
+│  │  │     ├─ vnpay.service.spec.ts
+│  │  │     └─ vnpay.service.ts
+│  │  ├─ skill
+│  │  │  ├─ dtos
+│  │  │  ├─ interfaces
+│  │  │  │  └─ skill.interfaces.ts
+│  │  │  ├─ services
+│  │  │  │  └─ skill.service.ts
+│  │  │  ├─ skill.controller.ts
+│  │  │  ├─ skill.module.ts
+│  │  │  └─ skill.repository.ts
+│  │  ├─ skill-suggestion
+│  │  │  ├─ repositories
+│  │  │  ├─ services
+│  │  │  │  ├─ embedding.service.ts
+│  │  │  │  └─ skill-suggestion.service.ts
+│  │  │  ├─ skill-suggestion.controller.ts
+│  │  │  ├─ skill-suggestion.interfaces.ts
+│  │  │  └─ skill-suggestion.module.ts
 │  │  ├─ upload
 │  │  │  ├─ dtos
 │  │  │  │  └─ get-upload-signature.dto.ts
@@ -292,11 +517,9 @@ elearning-system
 │  │     │  └─ users.service.ts
 │  │     └─ users.module.ts
 │  └─ main.ts
-├─ structure.txt
 ├─ test
 │  ├─ app.e2e-spec.ts
 │  └─ jest-e2e.json
-├─ test.ts
 ├─ tsconfig.build.json
 └─ tsconfig.json
 

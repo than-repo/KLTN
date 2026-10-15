@@ -1,3 +1,5 @@
+import { Difficulty } from 'generated/prisma/enums';
+
 //src\features\courses\interfaces\lesson.repository.interface.ts
 export class InvalidLessonOrderError extends Error {
   constructor() {
@@ -12,7 +14,21 @@ export interface Lesson {
   description?: string | null;
   lessonIndex: number;
   isActive: boolean;
+  skills: LessonSkillSummary[];
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
+}
 
+export interface LessonSkillSummary {
+  id: string;
+  canonicalName: string;
+  description: string | null;
+  aliases: string[] | null;
+  parentId: string | null;
+  level: number;
+  difficulty: Difficulty;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
@@ -23,6 +39,7 @@ export interface CreateLessonInput {
   title: string;
   description?: string | null;
   lessonIndex: number;
+  skillIds?: string[];
 }
 export type CreateLessonAtEndInput = Omit<CreateLessonInput, 'lessonIndex'>;
 
@@ -30,6 +47,7 @@ export interface UpdateLessonInput {
   title?: string;
   description?: string | null;
   lessonIndex?: number;
+  skillIds?: string[];
   isActive?: boolean;
   deletedAt?: Date | null;
 }
@@ -44,10 +62,7 @@ export interface LessonWhereInput {
 
 /** Ordering options */
 export type LessonSortField =
-  | 'title'
-  | 'lessonIndex'
-  | 'createdAt'
-  | 'updatedAt';
+  'title' | 'lessonIndex' | 'createdAt' | 'updatedAt';
 
 export type SortDirection = 'asc' | 'desc';
 

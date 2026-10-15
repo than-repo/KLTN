@@ -3,11 +3,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
+  ArrayUnique,
+  IsArray,
   IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateLessonDto {
@@ -41,4 +44,17 @@ export class CreateLessonDto {
   @IsString()
   @MaxLength(2000)
   description?: string | null;
+
+  //apply skills
+  @ApiPropertyOptional({
+    description: 'Existing skill IDs to attach to this lesson.',
+    type: [String],
+    example: ['cmv6st8y0000fk4voncpprhsd'],
+  })
+  @ValidateIf((_object, value) => value !== undefined)
+  @IsArray()
+  @ArrayUnique()
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  skillIds?: string[];
 }

@@ -89,7 +89,7 @@ export class InstructorCoursesController {
     );
   }
 
-  //======================== Course
+  //======================== Course=========================================
   @Get()
   @ApiOperation({ summary: 'Get my courses - Instructor' })
   @ApiOkResponse({ type: PaginatedCourseResponseDto })

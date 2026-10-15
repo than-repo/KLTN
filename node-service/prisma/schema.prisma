@@ -340,7 +340,8 @@ model Lesson {
 
   section CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   files   FileMedia[]
-  skills  LessonSkill[]
+  skills  Skill[]       @relation("LessonSkills")
+  
 
   @@unique([sectionId, lessonIndex])
   @@map("lessons")

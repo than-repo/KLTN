@@ -1,18 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { Expose } from 'class-transformer';
-import {
-  IsIn,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import {
   CourseLevel,
   CourseReviewStatus,
   CourseStatus,
   MediaTypeEnum,
 } from 'generated/prisma/enums';
+import { SkillResponseDto } from 'src/features/skill/dtos/skill-response.dto';
 
 const REVIEW_DECISION_STATUSES = [
   CourseReviewStatus.APPROVED,
@@ -108,6 +104,12 @@ export class ReviewerCourseReviewLessonDto {
   @ApiProperty()
   @Expose()
   lessonIndex!: number;
+
+  //apply Skills
+  @ApiProperty({ type: () => [SkillResponseDto] })
+  @Expose()
+  @Type(() => SkillResponseDto)
+  skills!: SkillResponseDto[];
 
   @ApiProperty()
   @Expose()

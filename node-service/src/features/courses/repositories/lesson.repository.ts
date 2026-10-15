@@ -12,10 +12,37 @@ import {
   UpdateLessonInput,
 } from '../interfaces/lesson.repository.interface';
 import { Injectable } from '@nestjs/common';
+
+export const lessonSkillsInclude = {
+  skills: {
+    where: {
+      isActive: true,
+      deletedAt: null,
+    },
+    select: {
+      id: true,
+      canonicalName: true,
+      description: true,
+      aliases: true,
+      parentId: true,
+      level: true,
+      difficulty: true,
+      isActive: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+    },
+  },
+} satisfies Prisma.LessonInclude;
+
+type LessonWithSkills = Prisma.LessonGetPayload<{
+  include: typeof lessonSkillsInclude;
+}>;
+
 @Injectable()
 export class LessonRepository implements ILessonRepository {
   constructor(private readonly prisma: PrismaService) {}
-  private toDomain(lesson: PrismaLesson): Lesson {
+  private toDomain(lesson: LessonWithSkills): Lesson {
     return {
       id: lesson.id,
       sectionId: lesson.sectionId,
@@ -26,7 +53,26 @@ export class LessonRepository implements ILessonRepository {
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
       deletedAt: lesson.deletedAt,
+      skills: lesson.skills.map((skill) => ({
+        ...skill,
+        aliases: this.readAliases(skill.aliases),
+      })),
     };
+  }
+
+  private readAliases(value: Prisma.JsonValue): string[] | null {
+    if (value === null) {
+      return null;
+    }
+
+    if (
+      !Array.isArray(value) ||
+      !value.every((item) => typeof item === 'string')
+    ) {
+      throw new Error('Stored skill aliases are invalid');
+    }
+
+    return value as string[];
   }
   private readonly DEFAULT_LIMIT = 10;
   private readonly MAX_LIMIT = 100;
@@ -87,17 +133,34 @@ export class LessonRepository implements ILessonRepository {
   }
   //Basic CRUD
   async create(input: CreateLessonInput): Promise<Lesson> {
+    const { skillIds, ...fields } = input;
+
     const lesson = await this.prisma.lesson.create({
       data: {
-        ...input,
+        ...fields,
+        ...(skillIds?.length
+          ? {
+              skills: {
+                connect: skillIds.map((id) => ({
+                  id,
+                  isActive: true,
+                  deletedAt: null,
+                })),
+              },
+            }
+          : {}),
       },
+      include: lessonSkillsInclude,
     });
+
     return this.toDomain(lesson);
   }
 
+  //handle 2 request create a lesson with x order concurrently
   async createAtEnd(input: CreateLessonAtEndInput): Promise<Lesson | null> {
     const maxAttempts = 3;
-    for (let i = 0; i < maxAttempts; i++) {
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
         const lessonIndex = await this.getNextLessonIndex(input.sectionId);
 
@@ -105,41 +168,65 @@ export class LessonRepository implements ILessonRepository {
           ...input,
           lessonIndex,
         });
-      } catch (error) {
-        if (!this.isUniqueConstraintError(error) || i === maxAttempts - 1) {
+      } catch (error: unknown) {
+        if (!this.isUniqueConstraintError(error)) {
           throw error;
+        }
+
+        if (attempt === maxAttempts - 1) {
+          return null;
         }
       }
     }
+
     return null;
   }
   async findById(id: string): Promise<Lesson | null> {
     const lesson = await this.prisma.lesson.findFirst({
       where: { id, deletedAt: null },
+      include: lessonSkillsInclude,
     });
     return lesson ? this.toDomain(lesson) : null;
   }
   async findByIdIncludingDeleted(id: string): Promise<Lesson | null> {
     const lesson = await this.prisma.lesson.findFirst({
       where: { id },
+      include: lessonSkillsInclude,
     });
     return lesson ? this.toDomain(lesson) : null;
   }
   async update(id: string, input: UpdateLessonInput): Promise<Lesson> {
+    const { skillIds, ...fields } = input;
+
     const lesson = await this.prisma.lesson.update({
       where: { id },
       data: {
-        ...input,
+        ...fields,
+        ...(skillIds !== undefined
+          ? {
+              skills: {
+                set: skillIds.map((skillId) => ({
+                  id: skillId,
+                  isActive: true,
+                  deletedAt: null,
+                })),
+              },
+            }
+          : {}),
       },
+      include: lessonSkillsInclude,
     });
     return this.toDomain(lesson);
   }
 
+  //Update only if that section is not deleted
   async updateInSection(
     lessonId: string,
     sectionId: string,
     input: UpdateLessonInput,
   ): Promise<Lesson | null> {
+    const { skillIds, ...fields } = input;
+
     const lesson = await this.prisma.$transaction(async (tx) => {
       const result = await tx.lesson.updateMany({
         where: {
@@ -148,7 +235,8 @@ export class LessonRepository implements ILessonRepository {
           deletedAt: null,
         },
         data: {
-          ...input,
+          ...fields,
+          updatedAt: new Date(),
         },
       });
 
@@ -156,12 +244,22 @@ export class LessonRepository implements ILessonRepository {
         return null;
       }
 
-      return tx.lesson.findFirst({
-        where: {
-          id: lessonId,
-          sectionId,
-          deletedAt: null,
+      return tx.lesson.update({
+        where: { id: lessonId },
+        data: {
+          ...(skillIds !== undefined
+            ? {
+                skills: {
+                  set: skillIds.map((skillId) => ({
+                    id: skillId,
+                    isActive: true,
+                    deletedAt: null,
+                  })),
+                },
+              }
+            : {}),
         },
+        include: lessonSkillsInclude,
       });
     });
 
@@ -178,6 +276,7 @@ export class LessonRepository implements ILessonRepository {
         isActive: true,
         lessonIndex,
       },
+      include: lessonSkillsInclude,
     });
 
     return this.toDomain(lesson);
@@ -191,6 +290,7 @@ export class LessonRepository implements ILessonRepository {
       data: {
         isActive,
       },
+      include: lessonSkillsInclude,
     });
 
     return this.toDomain(lesson);
@@ -203,6 +303,7 @@ export class LessonRepository implements ILessonRepository {
       orderBy: this.buildOrderBy(params?.orderBy),
       skip: params?.offset,
       take: this.normalizeLimit(params?.limit),
+      include: lessonSkillsInclude,
     });
 
     return lessons.map((lesson) => this.toDomain(lesson));
@@ -222,6 +323,7 @@ export class LessonRepository implements ILessonRepository {
       orderBy: {
         lessonIndex: 'asc',
       },
+      include: lessonSkillsInclude,
     });
 
     return lessons.map((lesson) => this.toDomain(lesson));
@@ -352,6 +454,7 @@ export class LessonRepository implements ILessonRepository {
         orderBy: {
           lessonIndex: 'asc',
         },
+        include: lessonSkillsInclude,
       });
     });
 
@@ -417,4 +520,6 @@ export class LessonRepository implements ILessonRepository {
       }
     });
   }
+
+  //apply skills
 }

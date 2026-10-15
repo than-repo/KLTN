@@ -30,6 +30,7 @@ import { UpdateLessonDto } from '../dtos/lesson/update-lesson.dto';
 import { QueryLessonsDto } from '../dtos/lesson/query-lessons.dto';
 import { PaginatedResponse } from '../dtos/paginated-response.dto';
 import { ReorderLessonsDto } from '../dtos/lesson/reorder-lesson.dto';
+import { SkillService } from 'src/features/skill/services/skill.service';
 
 @Injectable()
 export class LessonsService {
@@ -38,6 +39,7 @@ export class LessonsService {
     private readonly lessonRepository: ILessonRepository,
 
     private readonly courseAccessService: CourseAccessService,
+    private readonly skillService: SkillService,
   ) {}
 
   private toOwnerLessonResponse(lesson: Lesson): LessonResponseDto {
@@ -59,17 +61,25 @@ export class LessonsService {
       sectionId,
     );
 
-    const lesson = await this.lessonRepository.createAtEnd({
+    if (dto.skillIds !== undefined) {
+      await this.skillService.validateSkillIds(dto.skillIds);
+    }
+
+    const input: CreateLessonAtEndInput = {
       sectionId,
       title: dto.title,
       description: dto.description ?? null,
-    } satisfies CreateLessonAtEndInput);
+      skillIds: dto.skillIds ?? [],
+    };
+
+    const lesson = await this.lessonRepository.createAtEnd(input);
 
     if (!lesson) {
       throw new ConflictException(
         'Could not create lesson order. Please try again.',
       );
     }
+
     return this.toOwnerLessonResponse(lesson);
   }
 
@@ -87,41 +97,49 @@ export class LessonsService {
       lessonId,
     );
 
-    const updateData = this.buildUpdateLessonInput(dto);
+    if (dto.skillIds !== undefined) {
+      await this.skillService.validateSkillIds(dto.skillIds);
+    }
 
-    if (Object.keys(updateData).length === 0) {
+    const input = this.buildUpdateLessonInput(dto);
+
+    if (Object.keys(input).length === 0) {
       throw new BadRequestException('No valid lesson fields provided.');
     }
 
-    const updatedLesson = await this.lessonRepository.updateInSection(
+    const lesson = await this.lessonRepository.updateInSection(
       lessonId,
       sectionId,
-      updateData,
+      input,
     );
 
-    if (!updatedLesson) {
+    if (!lesson) {
       throw new NotFoundException('Lesson not found in this section.');
     }
 
-    return this.toOwnerLessonResponse(updatedLesson);
+    return this.toOwnerLessonResponse(lesson);
   }
 
   private buildUpdateLessonInput(dto: UpdateLessonDto): UpdateLessonInput {
-    const updateData: UpdateLessonInput = {};
+    const input: UpdateLessonInput = {};
 
     if (dto.title !== undefined) {
-      updateData.title = dto.title;
+      input.title = dto.title;
     }
 
     if (dto.description !== undefined) {
-      updateData.description = dto.description;
+      input.description = dto.description;
     }
 
     if (dto.isActive !== undefined) {
-      updateData.isActive = dto.isActive;
+      input.isActive = dto.isActive;
     }
 
-    return updateData;
+    if (dto.skillIds !== undefined) {
+      input.skillIds = dto.skillIds;
+    }
+
+    return input;
   }
 
   async getLessons(

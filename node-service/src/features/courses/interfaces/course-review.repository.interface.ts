@@ -12,6 +12,7 @@ import {
   ReviewerCourseSortField,
   SortDirection,
 } from '../dtos/course/reviewer-course-query.dto';
+import { LessonSkillSummary } from './lesson.repository.interface';
 
 export type DecidedCourseReviewStatus =
   | (typeof CourseReviewStatus)['APPROVED']
@@ -148,6 +149,8 @@ export interface CourseReviewWorkspaceModel extends CourseReviewCourseModel {
         title: string;
         description?: string | null;
         lessonIndex: number;
+        //apply skills
+        skills: LessonSkillSummary[];
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
