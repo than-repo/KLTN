@@ -1,0 +1,9 @@
+
+venv\Scripts\activate
+python -m app.face.face_monitor
+python -m app.face.verifier
+python -m app.dev.embedding
+python app/dev/embedding.py
+
+
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
