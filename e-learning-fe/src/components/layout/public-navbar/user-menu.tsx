@@ -81,37 +81,51 @@ export function UserMenu({ onLogout, user }: UserMenuProps) {
               onClick={() => setIsOpen(false)}
               role="menuitem"
             >
-              My courses
+              My Courses
             </Link>
           ) : null}
-
-          {user.role === "LEARNER" ? (
+          {user.role === "INSTRUCTOR" ? (
             <Link
-              href="/my-payments"
+              href="/instructor"
               className="mt-2 block rounded-md px-3 py-2 text-sm font-normal hover:bg-muted"
               onClick={() => setIsOpen(false)}
               role="menuitem"
             >
-              My payments
+              Instructor Dashboard
             </Link>
           ) : null}
-
+          {user.role === "ADMIN" ? (
+            <Link
+              href="/admin"
+              className="mt-2 block rounded-md px-3 py-2 text-sm font-normal hover:bg-muted"
+              onClick={() => setIsOpen(false)}
+              role="menuitem"
+            >
+              Admin Dashboard
+            </Link>
+          ) : null}
           <Link
-            href="/settings"
-            className="mt-2 block rounded-md px-3 py-2 text-sm font-normal hover:bg-muted"
+            href="/profile"
+            className="block rounded-md px-3 py-2 text-sm font-normal hover:bg-muted"
             onClick={() => setIsOpen(false)}
             role="menuitem"
           >
-            Settings
+            Edit profile
           </Link>
-
+          <button
+            type="button"
+            className="block w-full rounded-md px-3 py-2 text-left text-sm font-normal hover:bg-muted"
+            role="menuitem"
+          >
+            Change dark mode
+          </button>
           <button
             onClick={() => {
               setIsOpen(false);
               void onLogout?.();
             }}
             type="button"
-            className="mt-2 block w-full rounded-md px-3 py-2 text-left text-sm font-normal text-danger hover:bg-muted"
+            className="block w-full rounded-md px-3 py-2 text-left text-sm font-normal text-danger hover:bg-muted"
             role="menuitem"
           >
             Logout
