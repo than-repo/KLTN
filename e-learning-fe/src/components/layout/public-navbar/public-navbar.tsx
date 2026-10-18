@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import type { UserRole } from "@/features/auth/types/auth";
 
 import { AuthActions } from "./auth-actions";
 import { BrandLink } from "./brand-link";
@@ -26,9 +27,7 @@ export function PublicNavbar({
   const router = useRouter();
   const { logout, status, user } = useAuth();
   const resolvedLinks =
-    status === "authenticated" && user?.role === "LEARNER"
-      ? addLearnerLinks(links)
-      : links;
+    status === "authenticated" && user ? addRoleLinks(links, user.role) : links;
   const sessionUser =
     status === "authenticated" && user
       ? { email: user.email, name: user.fullName, role: user.role }
@@ -55,10 +54,7 @@ export function PublicNavbar({
           />
 
           <div className="ml-auto flex shrink-0">
-            <AuthActions
-              currentUser={resolvedUser}
-              onLogout={handleLogout}
-            />
+            <AuthActions currentUser={resolvedUser} onLogout={handleLogout} />
           </div>
         </div>
 
@@ -84,10 +80,29 @@ export function PublicNavbar({
   );
 }
 
-function addLearnerLinks(links: PublicNavLink[]) {
-  if (links.some((link) => link.href === "/my-courses")) {
+function addRoleLinks(links: PublicNavLink[], role: UserRole) {
+  if (role === "LEARNER") {
+    return addLinkIfMissing(links, {
+      href: "/my-courses",
+      label: "My Courses",
+    });
+  }
+
+  if (role === "INSTRUCTOR") {
+    return addLinkIfMissing(links, { href: "/instructor", label: "Dashboard" });
+  }
+
+  if (role === "ADMIN") {
+    return addLinkIfMissing(links, { href: "/admin", label: "Dashboard" });
+  }
+
+  return links;
+}
+
+function addLinkIfMissing(links: PublicNavLink[], nextLink: PublicNavLink) {
+  if (links.some((link) => link.href === nextLink.href)) {
     return links;
   }
 
-  return [...links, { href: "/my-courses", label: "My Courses" }];
+  return [...links, nextLink];
 }
