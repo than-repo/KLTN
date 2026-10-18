@@ -83,7 +83,7 @@ import { SkillModule } from '../skill/skill.module';
       useClass: ReviewerCategoryAuthorizationRepository,
     },
   ],
-  exports: [],
+  exports: [CourseAccessService],
   imports: [PrismaModule, SkillModule],
   controllers: [
     PublicCoursesController,

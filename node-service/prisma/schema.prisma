@@ -264,6 +264,9 @@ model Course {
   // Assessment
   assessments Assessment[]
 
+  //Skills
+  skills Skill[]
+
   @@index([slug])
   @@index([status])
   @@index([status, reviewClaimedById])
@@ -341,7 +344,6 @@ model Lesson {
   section CourseSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   files   FileMedia[]
   skills  Skill[]       @relation("LessonSkills")
-  
 
   @@unique([sectionId, lessonIndex])
   @@map("lessons")

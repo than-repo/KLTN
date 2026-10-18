@@ -8,6 +8,9 @@ export interface CreateSkillInput {
   parentId?: string | null;
   level: number;
   difficulty: Difficulty;
+
+  //apply course
+  courseId: string;
 }
 
 export interface UpdateSkillInput {

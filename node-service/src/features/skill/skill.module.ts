@@ -4,6 +4,7 @@ import { SkillService } from './services/skill.service';
 import { EmbeddingService } from './services/embedding.service';
 import { SkillRepository } from './repositories/skill.repository';
 import { SkillSuggestionService } from './services/skill-suggestion.service';
+import { CoursesModule } from '../courses/courses.module';
 
 @Module({
   controllers: [SkillController],
@@ -14,7 +15,7 @@ import { SkillSuggestionService } from './services/skill-suggestion.service';
     SkillSuggestionService,
   ],
 
-  imports: [],
+  imports: [CoursesModule],
   exports: [],
 })
 export class SkillModule {}

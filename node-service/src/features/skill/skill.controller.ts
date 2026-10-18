@@ -17,8 +17,10 @@ import { SkillResponseDto } from './dtos/skill-response.dto';
 import { UpdateSkillDto } from './dtos/update-skill.dto';
 import { SuggestSkillDto } from './dtos/suggest-skill.dto';
 import { SkillSuggestionService } from './services/skill-suggestion.service';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { SuggestSkillResultDto } from './dtos/suggest-skill-response.dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from 'generated/prisma/enums';
 
 @Controller({
   path: 'skill',
@@ -34,14 +36,18 @@ export class SkillController {
 
   @Post()
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
+  @Roles(UserRole.INSTRUCTOR)
   @ApiOperation({
     summary: 'Create a skill - Instructors',
   })
-  async createSkill(@Body() dto: CreateSkillDto): Promise<SkillResponseDto> {
-    return this.skillService.createSkill(dto);
+  async createSkill(
+    @Body() dto: CreateSkillDto,
+    @CurrentUser('sub') instructorId: string,
+  ): Promise<SkillResponseDto> {
+    return this.skillService.createSkill(dto, instructorId);
   }
 
-  @Patch(':skillId')
+  @Patch('course/:courseId/skill/:skillId')
   @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @ApiOperation({
     summary: 'Update a skill - Instructors',
@@ -49,18 +55,24 @@ export class SkillController {
   async updateSkill(
     @Body() dto: UpdateSkillDto,
     @Param('skillId') skillId: string,
+    @CurrentUser('sub') instructorId: string,
+    @Param('courseId') courseId: string,
   ): Promise<SkillResponseDto> {
-    return this.skillService.updateSkill(dto, skillId);
+    return this.skillService.updateSkill(dto, skillId, courseId, instructorId);
   }
 
-  @Delete(':skillId')
+  @Delete('course/:courseId/skill/:skillId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @ApiOperation({
     summary: 'Soft-delete a skill - Instructors',
   })
-  async deleteSkill(@Param('skillId') skillId: string): Promise<void> {
-    await this.skillService.softDeleteSkill(skillId);
+  async deleteSkill(
+    @Param('skillId') skillId: string,
+    @CurrentUser('sub') instructorId: string,
+    @Param('courseId') courseId: string,
+  ): Promise<void> {
+    await this.skillService.softDeleteSkill(skillId, courseId, instructorId);
   }
 
   // ==================Suggestion Skill========================

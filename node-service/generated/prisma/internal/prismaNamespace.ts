@@ -2264,6 +2264,7 @@ export type ProjectSubmissionScalarFieldEnum = (typeof ProjectSubmissionScalarFi
 
 export const SkillScalarFieldEnum = {
   id: 'id',
+  courseId: 'courseId',
   canonicalName: 'canonicalName',
   description: 'description',
   aliases: 'aliases',
@@ -2546,6 +2547,7 @@ export type ProjectSubmissionOrderByRelevanceFieldEnum = (typeof ProjectSubmissi
 
 export const SkillOrderByRelevanceFieldEnum = {
   id: 'id',
+  courseId: 'courseId',
   canonicalName: 'canonicalName',
   description: 'description',
   parentId: 'parentId'

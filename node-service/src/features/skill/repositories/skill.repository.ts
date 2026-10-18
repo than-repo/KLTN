@@ -42,17 +42,21 @@ export class SkillRepository {
     return this.prisma.skill.create({ data });
   }
 
-  async getSkillById(id: string): Promise<Prisma.SkillModel | null> {
-    return this.prisma.skill.findUnique({
-      where: { id, isActive: true, deletedAt: null },
+  async getSkillById(
+    id: string,
+    courseId: string,
+  ): Promise<Prisma.SkillModel | null> {
+    return this.prisma.skill.findFirst({
+      where: { id, courseId, isActive: true, deletedAt: null },
     });
   }
 
   async getSkillByName(
     canonicalName: string,
+    courseId: string,
   ): Promise<Prisma.SkillModel | null> {
-    return this.prisma.skill.findUnique({
-      where: { canonicalName, isActive: true, deletedAt: null },
+    return this.prisma.skill.findFirst({
+      where: { canonicalName, courseId, isActive: true, deletedAt: null },
     });
   }
 
@@ -112,21 +116,7 @@ export class SkillRepository {
       where: {
         isActive: true,
         deletedAt: null,
-        lessons: {
-          some: {
-            isActive: true,
-            deletedAt: null,
-            section: {
-              courseId,
-              isActive: true,
-              deletedAt: null,
-              course: {
-                isActive: true,
-                deletedAt: null,
-              },
-            },
-          },
-        },
+        courseId,
       },
     });
   }
