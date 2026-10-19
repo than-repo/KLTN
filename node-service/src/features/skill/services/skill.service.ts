@@ -328,4 +328,8 @@ export class SkillService {
 
     await this.skillRepository.softDeleteSkill(skillId);
   }
+
+  async getSkillsByCourseId(courseId: string) {
+    return this.skillRepository.getSkillsByCourseId(courseId);
+  }
 }

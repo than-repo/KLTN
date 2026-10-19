@@ -62,7 +62,7 @@ export class LessonsService {
     );
 
     if (dto.skillIds !== undefined) {
-      await this.skillService.validateSkillIds(dto.skillIds);
+      await this.skillService.getSkillsByCourseId(courseId);
     }
 
     const input: CreateLessonAtEndInput = {
@@ -98,7 +98,7 @@ export class LessonsService {
     );
 
     if (dto.skillIds !== undefined) {
-      await this.skillService.validateSkillIds(dto.skillIds);
+      await this.skillService.getSkillsByCourseId(courseId);
     }
 
     const input = this.buildUpdateLessonInput(dto);
