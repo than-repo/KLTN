@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { SkillController } from './skill.controller';
 import { SkillService } from './services/skill.service';
 import { EmbeddingService } from './services/embedding.service';
@@ -15,7 +15,7 @@ import { CoursesModule } from '../courses/courses.module';
     SkillSuggestionService,
   ],
 
-  imports: [CoursesModule],
-  exports: [],
+  imports: [forwardRef(() => CoursesModule)],
+  exports: [SkillService],
 })
 export class SkillModule {}
