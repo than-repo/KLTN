@@ -474,16 +474,6 @@ export type ProjectSubmissionUncheckedUpdateManyInput = {
   graderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
-export type ProjectSubmissionListRelationFilter = {
-  every?: Prisma.ProjectSubmissionWhereInput
-  some?: Prisma.ProjectSubmissionWhereInput
-  none?: Prisma.ProjectSubmissionWhereInput
-}
-
-export type ProjectSubmissionOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type ProjectSubmissionNullableScalarRelationFilter = {
   is?: Prisma.ProjectSubmissionWhereInput | null
   isNot?: Prisma.ProjectSubmissionWhereInput | null
@@ -551,6 +541,52 @@ export type ProjectSubmissionSumOrderByAggregateInput = {
   score?: Prisma.SortOrder
 }
 
+export type ProjectSubmissionListRelationFilter = {
+  every?: Prisma.ProjectSubmissionWhereInput
+  some?: Prisma.ProjectSubmissionWhereInput
+  none?: Prisma.ProjectSubmissionWhereInput
+}
+
+export type ProjectSubmissionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type ProjectSubmissionCreateNestedOneWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
+  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
+  connect?: Prisma.ProjectSubmissionWhereUniqueInput
+}
+
+export type ProjectSubmissionUncheckedCreateNestedOneWithoutAttemptInput = {
+  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
+  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
+  connect?: Prisma.ProjectSubmissionWhereUniqueInput
+}
+
+export type ProjectSubmissionUpdateOneWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
+  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
+  upsert?: Prisma.ProjectSubmissionUpsertWithoutAttemptInput
+  disconnect?: Prisma.ProjectSubmissionWhereInput | boolean
+  delete?: Prisma.ProjectSubmissionWhereInput | boolean
+  connect?: Prisma.ProjectSubmissionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectSubmissionUpdateToOneWithWhereWithoutAttemptInput, Prisma.ProjectSubmissionUpdateWithoutAttemptInput>, Prisma.ProjectSubmissionUncheckedUpdateWithoutAttemptInput>
+}
+
+export type ProjectSubmissionUncheckedUpdateOneWithoutAttemptNestedInput = {
+  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
+  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
+  upsert?: Prisma.ProjectSubmissionUpsertWithoutAttemptInput
+  disconnect?: Prisma.ProjectSubmissionWhereInput | boolean
+  delete?: Prisma.ProjectSubmissionWhereInput | boolean
+  connect?: Prisma.ProjectSubmissionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectSubmissionUpdateToOneWithWhereWithoutAttemptInput, Prisma.ProjectSubmissionUpdateWithoutAttemptInput>, Prisma.ProjectSubmissionUncheckedUpdateWithoutAttemptInput>
+}
+
+export type EnumProjectSubmissionStatusFieldUpdateOperationsInput = {
+  set?: $Enums.ProjectSubmissionStatus
+}
+
 export type ProjectSubmissionCreateNestedManyWithoutGraderInput = {
   create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedCreateWithoutGraderInput> | Prisma.ProjectSubmissionCreateWithoutGraderInput[] | Prisma.ProjectSubmissionUncheckedCreateWithoutGraderInput[]
   connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutGraderInput | Prisma.ProjectSubmissionCreateOrConnectWithoutGraderInput[]
@@ -591,117 +627,6 @@ export type ProjectSubmissionUncheckedUpdateManyWithoutGraderNestedInput = {
   update?: Prisma.ProjectSubmissionUpdateWithWhereUniqueWithoutGraderInput | Prisma.ProjectSubmissionUpdateWithWhereUniqueWithoutGraderInput[]
   updateMany?: Prisma.ProjectSubmissionUpdateManyWithWhereWithoutGraderInput | Prisma.ProjectSubmissionUpdateManyWithWhereWithoutGraderInput[]
   deleteMany?: Prisma.ProjectSubmissionScalarWhereInput | Prisma.ProjectSubmissionScalarWhereInput[]
-}
-
-export type ProjectSubmissionCreateNestedOneWithoutAttemptInput = {
-  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
-  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
-  connect?: Prisma.ProjectSubmissionWhereUniqueInput
-}
-
-export type ProjectSubmissionUncheckedCreateNestedOneWithoutAttemptInput = {
-  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
-  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
-  connect?: Prisma.ProjectSubmissionWhereUniqueInput
-}
-
-export type ProjectSubmissionUpdateOneWithoutAttemptNestedInput = {
-  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
-  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
-  upsert?: Prisma.ProjectSubmissionUpsertWithoutAttemptInput
-  disconnect?: Prisma.ProjectSubmissionWhereInput | boolean
-  delete?: Prisma.ProjectSubmissionWhereInput | boolean
-  connect?: Prisma.ProjectSubmissionWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectSubmissionUpdateToOneWithWhereWithoutAttemptInput, Prisma.ProjectSubmissionUpdateWithoutAttemptInput>, Prisma.ProjectSubmissionUncheckedUpdateWithoutAttemptInput>
-}
-
-export type ProjectSubmissionUncheckedUpdateOneWithoutAttemptNestedInput = {
-  create?: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutAttemptInput, Prisma.ProjectSubmissionUncheckedCreateWithoutAttemptInput>
-  connectOrCreate?: Prisma.ProjectSubmissionCreateOrConnectWithoutAttemptInput
-  upsert?: Prisma.ProjectSubmissionUpsertWithoutAttemptInput
-  disconnect?: Prisma.ProjectSubmissionWhereInput | boolean
-  delete?: Prisma.ProjectSubmissionWhereInput | boolean
-  connect?: Prisma.ProjectSubmissionWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ProjectSubmissionUpdateToOneWithWhereWithoutAttemptInput, Prisma.ProjectSubmissionUpdateWithoutAttemptInput>, Prisma.ProjectSubmissionUncheckedUpdateWithoutAttemptInput>
-}
-
-export type EnumProjectSubmissionStatusFieldUpdateOperationsInput = {
-  set?: $Enums.ProjectSubmissionStatus
-}
-
-export type ProjectSubmissionCreateWithoutGraderInput = {
-  id?: string
-  githubUrl?: string | null
-  deployUrl?: string | null
-  documentUrl?: string | null
-  note?: string | null
-  status?: $Enums.ProjectSubmissionStatus
-  score?: number | null
-  feedback?: string | null
-  gradedAt?: Date | string | null
-  submittedAt?: Date | string
-  updatedAt?: Date | string
-  attempt: Prisma.AssessmentAttemptCreateNestedOneWithoutProjectSubmissionInput
-}
-
-export type ProjectSubmissionUncheckedCreateWithoutGraderInput = {
-  id?: string
-  attemptId: string
-  githubUrl?: string | null
-  deployUrl?: string | null
-  documentUrl?: string | null
-  note?: string | null
-  status?: $Enums.ProjectSubmissionStatus
-  score?: number | null
-  feedback?: string | null
-  gradedAt?: Date | string | null
-  submittedAt?: Date | string
-  updatedAt?: Date | string
-}
-
-export type ProjectSubmissionCreateOrConnectWithoutGraderInput = {
-  where: Prisma.ProjectSubmissionWhereUniqueInput
-  create: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedCreateWithoutGraderInput>
-}
-
-export type ProjectSubmissionCreateManyGraderInputEnvelope = {
-  data: Prisma.ProjectSubmissionCreateManyGraderInput | Prisma.ProjectSubmissionCreateManyGraderInput[]
-  skipDuplicates?: boolean
-}
-
-export type ProjectSubmissionUpsertWithWhereUniqueWithoutGraderInput = {
-  where: Prisma.ProjectSubmissionWhereUniqueInput
-  update: Prisma.XOR<Prisma.ProjectSubmissionUpdateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedUpdateWithoutGraderInput>
-  create: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedCreateWithoutGraderInput>
-}
-
-export type ProjectSubmissionUpdateWithWhereUniqueWithoutGraderInput = {
-  where: Prisma.ProjectSubmissionWhereUniqueInput
-  data: Prisma.XOR<Prisma.ProjectSubmissionUpdateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedUpdateWithoutGraderInput>
-}
-
-export type ProjectSubmissionUpdateManyWithWhereWithoutGraderInput = {
-  where: Prisma.ProjectSubmissionScalarWhereInput
-  data: Prisma.XOR<Prisma.ProjectSubmissionUpdateManyMutationInput, Prisma.ProjectSubmissionUncheckedUpdateManyWithoutGraderInput>
-}
-
-export type ProjectSubmissionScalarWhereInput = {
-  AND?: Prisma.ProjectSubmissionScalarWhereInput | Prisma.ProjectSubmissionScalarWhereInput[]
-  OR?: Prisma.ProjectSubmissionScalarWhereInput[]
-  NOT?: Prisma.ProjectSubmissionScalarWhereInput | Prisma.ProjectSubmissionScalarWhereInput[]
-  id?: Prisma.StringFilter<"ProjectSubmission"> | string
-  attemptId?: Prisma.StringFilter<"ProjectSubmission"> | string
-  githubUrl?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
-  deployUrl?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
-  documentUrl?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
-  note?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
-  status?: Prisma.EnumProjectSubmissionStatusFilter<"ProjectSubmission"> | $Enums.ProjectSubmissionStatus
-  score?: Prisma.FloatNullableFilter<"ProjectSubmission"> | number | null
-  feedback?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
-  gradedAt?: Prisma.DateTimeNullableFilter<"ProjectSubmission"> | Date | string | null
-  submittedAt?: Prisma.DateTimeFilter<"ProjectSubmission"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"ProjectSubmission"> | Date | string
-  graderId?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
 }
 
 export type ProjectSubmissionCreateWithoutAttemptInput = {
@@ -778,6 +703,81 @@ export type ProjectSubmissionUncheckedUpdateWithoutAttemptInput = {
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   graderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ProjectSubmissionCreateWithoutGraderInput = {
+  id?: string
+  githubUrl?: string | null
+  deployUrl?: string | null
+  documentUrl?: string | null
+  note?: string | null
+  status?: $Enums.ProjectSubmissionStatus
+  score?: number | null
+  feedback?: string | null
+  gradedAt?: Date | string | null
+  submittedAt?: Date | string
+  updatedAt?: Date | string
+  attempt: Prisma.AssessmentAttemptCreateNestedOneWithoutProjectSubmissionInput
+}
+
+export type ProjectSubmissionUncheckedCreateWithoutGraderInput = {
+  id?: string
+  attemptId: string
+  githubUrl?: string | null
+  deployUrl?: string | null
+  documentUrl?: string | null
+  note?: string | null
+  status?: $Enums.ProjectSubmissionStatus
+  score?: number | null
+  feedback?: string | null
+  gradedAt?: Date | string | null
+  submittedAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProjectSubmissionCreateOrConnectWithoutGraderInput = {
+  where: Prisma.ProjectSubmissionWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedCreateWithoutGraderInput>
+}
+
+export type ProjectSubmissionCreateManyGraderInputEnvelope = {
+  data: Prisma.ProjectSubmissionCreateManyGraderInput | Prisma.ProjectSubmissionCreateManyGraderInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProjectSubmissionUpsertWithWhereUniqueWithoutGraderInput = {
+  where: Prisma.ProjectSubmissionWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProjectSubmissionUpdateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedUpdateWithoutGraderInput>
+  create: Prisma.XOR<Prisma.ProjectSubmissionCreateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedCreateWithoutGraderInput>
+}
+
+export type ProjectSubmissionUpdateWithWhereUniqueWithoutGraderInput = {
+  where: Prisma.ProjectSubmissionWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProjectSubmissionUpdateWithoutGraderInput, Prisma.ProjectSubmissionUncheckedUpdateWithoutGraderInput>
+}
+
+export type ProjectSubmissionUpdateManyWithWhereWithoutGraderInput = {
+  where: Prisma.ProjectSubmissionScalarWhereInput
+  data: Prisma.XOR<Prisma.ProjectSubmissionUpdateManyMutationInput, Prisma.ProjectSubmissionUncheckedUpdateManyWithoutGraderInput>
+}
+
+export type ProjectSubmissionScalarWhereInput = {
+  AND?: Prisma.ProjectSubmissionScalarWhereInput | Prisma.ProjectSubmissionScalarWhereInput[]
+  OR?: Prisma.ProjectSubmissionScalarWhereInput[]
+  NOT?: Prisma.ProjectSubmissionScalarWhereInput | Prisma.ProjectSubmissionScalarWhereInput[]
+  id?: Prisma.StringFilter<"ProjectSubmission"> | string
+  attemptId?: Prisma.StringFilter<"ProjectSubmission"> | string
+  githubUrl?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
+  deployUrl?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
+  documentUrl?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
+  note?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
+  status?: Prisma.EnumProjectSubmissionStatusFilter<"ProjectSubmission"> | $Enums.ProjectSubmissionStatus
+  score?: Prisma.FloatNullableFilter<"ProjectSubmission"> | number | null
+  feedback?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
+  gradedAt?: Prisma.DateTimeNullableFilter<"ProjectSubmission"> | Date | string | null
+  submittedAt?: Prisma.DateTimeFilter<"ProjectSubmission"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"ProjectSubmission"> | Date | string
+  graderId?: Prisma.StringNullableFilter<"ProjectSubmission"> | string | null
 }
 
 export type ProjectSubmissionCreateManyGraderInput = {

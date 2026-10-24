@@ -15,6 +15,28 @@
 }
 //@123abcABC
 
+
+----Tung Than (Admin)----
+tungthan@gmail.com
+Tungthan1122@@
+----Co Phuong Sinh (Instructor)----
+cophuongsinh@gmail.com
+CPStop1thetu@@
+----Dam Thu Nhan (Instructor)-----
+damcongnuong@gmail.com
+DamTy2202@@
+----Muc Phong Dat (Learner)---
+muclangkhach@gmail.com
+DeNhatKiemtu@@1
+
+
+{
+  "fullName": "ADMIN_TEST",
+  "email": "admin_test@example.com",
+  "password": "123@ABCabc",
+  "role": "ADMIN"
+}
+
 //=========================================instructor
 {
   "fullName": "INSTRUCTOR_1",
@@ -25,6 +47,9 @@
 //common pw TestPw@123
 
 INSTRUCTOR_A@example.com
+123@ABCabc
+
+INSTRUCTOR_Test@example.com
 123@ABCabc
 
 //=============================reviewer

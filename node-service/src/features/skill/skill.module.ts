@@ -5,6 +5,7 @@ import { EmbeddingService } from './services/embedding.service';
 import { SkillRepository } from './repositories/skill.repository';
 import { SkillSuggestionService } from './services/skill-suggestion.service';
 import { CoursesModule } from '../courses/courses.module';
+import { AssessmentsModule } from '../assessments/assessments.module';
 
 @Module({
   controllers: [SkillController],
@@ -15,7 +16,7 @@ import { CoursesModule } from '../courses/courses.module';
     SkillSuggestionService,
   ],
 
-  imports: [forwardRef(() => CoursesModule)],
+  imports: [forwardRef(() => CoursesModule), AssessmentsModule],
   exports: [SkillService],
 })
 export class SkillModule {}

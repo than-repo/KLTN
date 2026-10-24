@@ -1,8 +1,8 @@
 // src/features/assessments/dtos/assessment-question-response.dto.ts
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
-import { AssessmentQuestionType } from 'generated/prisma/enums';
+import { Expose, Transform, Type } from 'class-transformer';
+import { AssessmentQuestionType, Difficulty } from 'generated/prisma/enums';
 import { ASSESSMENT_VIEW_GROUPS } from '../assessment/assessment-response';
 
 const ALL_ASSESSMENT_GROUPS = [
@@ -66,4 +66,56 @@ export class AssessmentQuestionResponseDto {
   })
   @Expose({ groups: INSTRUCTOR_ASSESSMENT_GROUPS })
   deletedAt?: Date | null;
+
+  @ApiPropertyOptional({
+    type: () => SkillDto,
+    isArray: true,
+  })
+  @Expose({ groups: INSTRUCTOR_ASSESSMENT_GROUPS })
+  @Type(() => SkillDto)
+  skills?: SkillDto[];
+}
+
+export class SkillDto {
+  @Expose()
+  id!: string;
+
+  @Expose()
+  canonicalName!: string;
+
+  @Expose()
+  description!: string | null;
+
+  @Expose()
+  aliases!: string[] | null;
+
+  @Expose()
+  parentId!: string | null;
+
+  @Expose()
+  level!: number;
+
+  @Expose()
+  difficulty!: Difficulty;
+
+  @Expose()
+  isActive!: boolean;
+
+  @Expose()
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
+  createdAt!: string;
+
+  @Expose()
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
+  updatedAt!: string;
+
+  @Expose()
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
+  deletedAt!: string | null;
 }

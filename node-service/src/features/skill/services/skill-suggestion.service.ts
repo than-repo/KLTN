@@ -5,18 +5,26 @@ import { SuggestSkillDto } from '../dtos/suggest-skill.dto';
 import { SkillEmbeddings } from '../interfaces/skill.interfaces';
 import { SkillRepository } from '../repositories/skill.repository';
 import { SuggestSkillResultDto } from '../dtos/suggest-skill-response.dto';
+import { CourseAccessService } from 'src/features/courses/services/course-access.service';
 
 @Injectable()
 export class SkillSuggestionService {
   constructor(
     private readonly embeddingService: EmbeddingService,
     private readonly skillRepository: SkillRepository,
+    private readonly courseAccessService: CourseAccessService,
   ) {}
 
   async suggest(
     dto: SuggestSkillDto,
     courseId: string,
+    instructorId: string,
   ): Promise<SuggestSkillResultDto[]> {
+    await this.courseAccessService.ensureInstructorCanManageCourse(
+      courseId,
+      instructorId,
+    );
+
     // Get keywords and description
     const { keywords, description } = dto;
     const limit = dto.limit ?? 5;

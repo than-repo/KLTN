@@ -1,3 +1,4 @@
+import { IsOptional } from 'class-validator';
 // src/features/assessments/dtos/questions/assessment-question.dto.ts
 
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
@@ -6,7 +7,6 @@ import {
   IsEnum,
   IsInt,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Max,
   MaxLength,

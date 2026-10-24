@@ -329,12 +329,10 @@ export class CoursesService {
       instructorId,
     );
 
-    if (
-      !(
-        course.status === CourseStatus.DRAFT ||
-        course.status === CourseStatus.CHANGES_REQUESTED
-      )
-    ) {
+    if (!(
+      course.status === CourseStatus.DRAFT ||
+      course.status === CourseStatus.CHANGES_REQUESTED
+    )) {
       throw new BadRequestException('ONLY_DRAFT_COURSE_CAN_BE_UPDATED');
     }
 
@@ -404,12 +402,10 @@ export class CoursesService {
       instructorId,
     );
 
-    if (
-      !(
-        course.status === CourseStatus.DRAFT ||
-        course.status === CourseStatus.CHANGES_REQUESTED
-      )
-    ) {
+    if (!(
+      course.status === CourseStatus.DRAFT ||
+      course.status === CourseStatus.CHANGES_REQUESTED
+    )) {
       throw new BadRequestException(
         'ONLY_DRAFT_OR_CHANGES_REQUESTED_COURSE_CAN_BE_SUBMITTED_FOR_REVIEW',
       );
@@ -513,5 +509,8 @@ export class CoursesService {
     return {
       message: 'DRAFT_COURSE_DELETED_SUCCESSFULLY',
     };
+  }
+  async canEditCourse(courseId: string): Promise<boolean> {
+    return this.iCourseRepository.canEdit(courseId);
   }
 }

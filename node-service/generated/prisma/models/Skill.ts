@@ -276,6 +276,7 @@ export type SkillWhereInput = {
   parent?: Prisma.XOR<Prisma.SkillNullableScalarRelationFilter, Prisma.SkillWhereInput> | null
   children?: Prisma.SkillListRelationFilter
   lessons?: Prisma.LessonListRelationFilter
+  assessmentQuestions?: Prisma.AssessmentQuestionListRelationFilter
 }
 
 export type SkillOrderByWithRelationInput = {
@@ -296,6 +297,7 @@ export type SkillOrderByWithRelationInput = {
   parent?: Prisma.SkillOrderByWithRelationInput
   children?: Prisma.SkillOrderByRelationAggregateInput
   lessons?: Prisma.LessonOrderByRelationAggregateInput
+  assessmentQuestions?: Prisma.AssessmentQuestionOrderByRelationAggregateInput
   _relevance?: Prisma.SkillOrderByRelevanceInput
 }
 
@@ -321,6 +323,7 @@ export type SkillWhereUniqueInput = Prisma.AtLeast<{
   parent?: Prisma.XOR<Prisma.SkillNullableScalarRelationFilter, Prisma.SkillWhereInput> | null
   children?: Prisma.SkillListRelationFilter
   lessons?: Prisma.LessonListRelationFilter
+  assessmentQuestions?: Prisma.AssessmentQuestionListRelationFilter
 }, "id" | "courseId_canonicalName">
 
 export type SkillOrderByWithAggregationInput = {
@@ -379,6 +382,7 @@ export type SkillCreateInput = {
   parent?: Prisma.SkillCreateNestedOneWithoutChildrenInput
   children?: Prisma.SkillCreateNestedManyWithoutParentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillUncheckedCreateInput = {
@@ -397,6 +401,7 @@ export type SkillUncheckedCreateInput = {
   deletedAt?: Date | string | null
   children?: Prisma.SkillUncheckedCreateNestedManyWithoutParentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillUpdateInput = {
@@ -415,6 +420,7 @@ export type SkillUpdateInput = {
   parent?: Prisma.SkillUpdateOneWithoutChildrenNestedInput
   children?: Prisma.SkillUpdateManyWithoutParentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateInput = {
@@ -433,6 +439,7 @@ export type SkillUncheckedUpdateInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   children?: Prisma.SkillUncheckedUpdateManyWithoutParentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillCreateManyInput = {
@@ -557,6 +564,44 @@ export type SkillMinOrderByAggregateInput = {
 
 export type SkillSumOrderByAggregateInput = {
   level?: Prisma.SortOrder
+}
+
+export type SkillCreateNestedManyWithoutAssessmentQuestionsInput = {
+  create?: Prisma.XOR<Prisma.SkillCreateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput> | Prisma.SkillCreateWithoutAssessmentQuestionsInput[] | Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput[]
+  connectOrCreate?: Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput | Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput[]
+  connect?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+}
+
+export type SkillUncheckedCreateNestedManyWithoutAssessmentQuestionsInput = {
+  create?: Prisma.XOR<Prisma.SkillCreateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput> | Prisma.SkillCreateWithoutAssessmentQuestionsInput[] | Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput[]
+  connectOrCreate?: Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput | Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput[]
+  connect?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+}
+
+export type SkillUpdateManyWithoutAssessmentQuestionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SkillCreateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput> | Prisma.SkillCreateWithoutAssessmentQuestionsInput[] | Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput[]
+  connectOrCreate?: Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput | Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput[]
+  upsert?: Prisma.SkillUpsertWithWhereUniqueWithoutAssessmentQuestionsInput | Prisma.SkillUpsertWithWhereUniqueWithoutAssessmentQuestionsInput[]
+  set?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  disconnect?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  delete?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  connect?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  update?: Prisma.SkillUpdateWithWhereUniqueWithoutAssessmentQuestionsInput | Prisma.SkillUpdateWithWhereUniqueWithoutAssessmentQuestionsInput[]
+  updateMany?: Prisma.SkillUpdateManyWithWhereWithoutAssessmentQuestionsInput | Prisma.SkillUpdateManyWithWhereWithoutAssessmentQuestionsInput[]
+  deleteMany?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
+}
+
+export type SkillUncheckedUpdateManyWithoutAssessmentQuestionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SkillCreateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput> | Prisma.SkillCreateWithoutAssessmentQuestionsInput[] | Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput[]
+  connectOrCreate?: Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput | Prisma.SkillCreateOrConnectWithoutAssessmentQuestionsInput[]
+  upsert?: Prisma.SkillUpsertWithWhereUniqueWithoutAssessmentQuestionsInput | Prisma.SkillUpsertWithWhereUniqueWithoutAssessmentQuestionsInput[]
+  set?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  disconnect?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  delete?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  connect?: Prisma.SkillWhereUniqueInput | Prisma.SkillWhereUniqueInput[]
+  update?: Prisma.SkillUpdateWithWhereUniqueWithoutAssessmentQuestionsInput | Prisma.SkillUpdateWithWhereUniqueWithoutAssessmentQuestionsInput[]
+  updateMany?: Prisma.SkillUpdateManyWithWhereWithoutAssessmentQuestionsInput | Prisma.SkillUpdateManyWithWhereWithoutAssessmentQuestionsInput[]
+  deleteMany?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
 }
 
 export type SkillCreateNestedManyWithoutCourseInput = {
@@ -701,6 +746,82 @@ export type SkillUncheckedUpdateManyWithoutParentNestedInput = {
   deleteMany?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
 }
 
+export type SkillCreateWithoutAssessmentQuestionsInput = {
+  id?: string
+  canonicalName: string
+  description?: string | null
+  aliases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  embedding?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  level?: number
+  difficulty?: $Enums.Difficulty
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  course: Prisma.CourseCreateNestedOneWithoutSkillsInput
+  parent?: Prisma.SkillCreateNestedOneWithoutChildrenInput
+  children?: Prisma.SkillCreateNestedManyWithoutParentInput
+  lessons?: Prisma.LessonCreateNestedManyWithoutSkillsInput
+}
+
+export type SkillUncheckedCreateWithoutAssessmentQuestionsInput = {
+  id?: string
+  courseId: string
+  canonicalName: string
+  description?: string | null
+  aliases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  embedding?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  parentId?: string | null
+  level?: number
+  difficulty?: $Enums.Difficulty
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  children?: Prisma.SkillUncheckedCreateNestedManyWithoutParentInput
+  lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutSkillsInput
+}
+
+export type SkillCreateOrConnectWithoutAssessmentQuestionsInput = {
+  where: Prisma.SkillWhereUniqueInput
+  create: Prisma.XOR<Prisma.SkillCreateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput>
+}
+
+export type SkillUpsertWithWhereUniqueWithoutAssessmentQuestionsInput = {
+  where: Prisma.SkillWhereUniqueInput
+  update: Prisma.XOR<Prisma.SkillUpdateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedUpdateWithoutAssessmentQuestionsInput>
+  create: Prisma.XOR<Prisma.SkillCreateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedCreateWithoutAssessmentQuestionsInput>
+}
+
+export type SkillUpdateWithWhereUniqueWithoutAssessmentQuestionsInput = {
+  where: Prisma.SkillWhereUniqueInput
+  data: Prisma.XOR<Prisma.SkillUpdateWithoutAssessmentQuestionsInput, Prisma.SkillUncheckedUpdateWithoutAssessmentQuestionsInput>
+}
+
+export type SkillUpdateManyWithWhereWithoutAssessmentQuestionsInput = {
+  where: Prisma.SkillScalarWhereInput
+  data: Prisma.XOR<Prisma.SkillUpdateManyMutationInput, Prisma.SkillUncheckedUpdateManyWithoutAssessmentQuestionsInput>
+}
+
+export type SkillScalarWhereInput = {
+  AND?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
+  OR?: Prisma.SkillScalarWhereInput[]
+  NOT?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
+  id?: Prisma.StringFilter<"Skill"> | string
+  courseId?: Prisma.StringFilter<"Skill"> | string
+  canonicalName?: Prisma.StringFilter<"Skill"> | string
+  description?: Prisma.StringNullableFilter<"Skill"> | string | null
+  aliases?: Prisma.JsonNullableFilter<"Skill">
+  embedding?: Prisma.JsonNullableFilter<"Skill">
+  parentId?: Prisma.StringNullableFilter<"Skill"> | string | null
+  level?: Prisma.IntFilter<"Skill"> | number
+  difficulty?: Prisma.EnumDifficultyFilter<"Skill"> | $Enums.Difficulty
+  isActive?: Prisma.BoolFilter<"Skill"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Skill"> | Date | string | null
+}
+
 export type SkillCreateWithoutCourseInput = {
   id?: string
   canonicalName: string
@@ -716,6 +837,7 @@ export type SkillCreateWithoutCourseInput = {
   parent?: Prisma.SkillCreateNestedOneWithoutChildrenInput
   children?: Prisma.SkillCreateNestedManyWithoutParentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillUncheckedCreateWithoutCourseInput = {
@@ -733,6 +855,7 @@ export type SkillUncheckedCreateWithoutCourseInput = {
   deletedAt?: Date | string | null
   children?: Prisma.SkillUncheckedCreateNestedManyWithoutParentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillCreateOrConnectWithoutCourseInput = {
@@ -761,25 +884,6 @@ export type SkillUpdateManyWithWhereWithoutCourseInput = {
   data: Prisma.XOR<Prisma.SkillUpdateManyMutationInput, Prisma.SkillUncheckedUpdateManyWithoutCourseInput>
 }
 
-export type SkillScalarWhereInput = {
-  AND?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
-  OR?: Prisma.SkillScalarWhereInput[]
-  NOT?: Prisma.SkillScalarWhereInput | Prisma.SkillScalarWhereInput[]
-  id?: Prisma.StringFilter<"Skill"> | string
-  courseId?: Prisma.StringFilter<"Skill"> | string
-  canonicalName?: Prisma.StringFilter<"Skill"> | string
-  description?: Prisma.StringNullableFilter<"Skill"> | string | null
-  aliases?: Prisma.JsonNullableFilter<"Skill">
-  embedding?: Prisma.JsonNullableFilter<"Skill">
-  parentId?: Prisma.StringNullableFilter<"Skill"> | string | null
-  level?: Prisma.IntFilter<"Skill"> | number
-  difficulty?: Prisma.EnumDifficultyFilter<"Skill"> | $Enums.Difficulty
-  isActive?: Prisma.BoolFilter<"Skill"> | boolean
-  createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
-  deletedAt?: Prisma.DateTimeNullableFilter<"Skill"> | Date | string | null
-}
-
 export type SkillCreateWithoutLessonsInput = {
   id?: string
   canonicalName: string
@@ -795,6 +899,7 @@ export type SkillCreateWithoutLessonsInput = {
   course: Prisma.CourseCreateNestedOneWithoutSkillsInput
   parent?: Prisma.SkillCreateNestedOneWithoutChildrenInput
   children?: Prisma.SkillCreateNestedManyWithoutParentInput
+  assessmentQuestions?: Prisma.AssessmentQuestionCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillUncheckedCreateWithoutLessonsInput = {
@@ -812,6 +917,7 @@ export type SkillUncheckedCreateWithoutLessonsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   children?: Prisma.SkillUncheckedCreateNestedManyWithoutParentInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillCreateOrConnectWithoutLessonsInput = {
@@ -850,6 +956,7 @@ export type SkillCreateWithoutChildrenInput = {
   course: Prisma.CourseCreateNestedOneWithoutSkillsInput
   parent?: Prisma.SkillCreateNestedOneWithoutChildrenInput
   lessons?: Prisma.LessonCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillUncheckedCreateWithoutChildrenInput = {
@@ -867,6 +974,7 @@ export type SkillUncheckedCreateWithoutChildrenInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillCreateOrConnectWithoutChildrenInput = {
@@ -889,6 +997,7 @@ export type SkillCreateWithoutParentInput = {
   course: Prisma.CourseCreateNestedOneWithoutSkillsInput
   children?: Prisma.SkillCreateNestedManyWithoutParentInput
   lessons?: Prisma.LessonCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillUncheckedCreateWithoutParentInput = {
@@ -906,6 +1015,7 @@ export type SkillUncheckedCreateWithoutParentInput = {
   deletedAt?: Date | string | null
   children?: Prisma.SkillUncheckedCreateNestedManyWithoutParentInput
   lessons?: Prisma.LessonUncheckedCreateNestedManyWithoutSkillsInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutSkillsInput
 }
 
 export type SkillCreateOrConnectWithoutParentInput = {
@@ -944,6 +1054,7 @@ export type SkillUpdateWithoutChildrenInput = {
   course?: Prisma.CourseUpdateOneRequiredWithoutSkillsNestedInput
   parent?: Prisma.SkillUpdateOneWithoutChildrenNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateWithoutChildrenInput = {
@@ -961,6 +1072,7 @@ export type SkillUncheckedUpdateWithoutChildrenInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUpsertWithWhereUniqueWithoutParentInput = {
@@ -977,6 +1089,58 @@ export type SkillUpdateWithWhereUniqueWithoutParentInput = {
 export type SkillUpdateManyWithWhereWithoutParentInput = {
   where: Prisma.SkillScalarWhereInput
   data: Prisma.XOR<Prisma.SkillUpdateManyMutationInput, Prisma.SkillUncheckedUpdateManyWithoutParentInput>
+}
+
+export type SkillUpdateWithoutAssessmentQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  canonicalName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  embedding?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course?: Prisma.CourseUpdateOneRequiredWithoutSkillsNestedInput
+  parent?: Prisma.SkillUpdateOneWithoutChildrenNestedInput
+  children?: Prisma.SkillUpdateManyWithoutParentNestedInput
+  lessons?: Prisma.LessonUpdateManyWithoutSkillsNestedInput
+}
+
+export type SkillUncheckedUpdateWithoutAssessmentQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  canonicalName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  embedding?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  children?: Prisma.SkillUncheckedUpdateManyWithoutParentNestedInput
+  lessons?: Prisma.LessonUncheckedUpdateManyWithoutSkillsNestedInput
+}
+
+export type SkillUncheckedUpdateManyWithoutAssessmentQuestionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  canonicalName?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliases?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  embedding?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  parentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  level?: Prisma.IntFieldUpdateOperationsInput | number
+  difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SkillCreateManyCourseInput = {
@@ -1009,6 +1173,7 @@ export type SkillUpdateWithoutCourseInput = {
   parent?: Prisma.SkillUpdateOneWithoutChildrenNestedInput
   children?: Prisma.SkillUpdateManyWithoutParentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateWithoutCourseInput = {
@@ -1026,6 +1191,7 @@ export type SkillUncheckedUpdateWithoutCourseInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   children?: Prisma.SkillUncheckedUpdateManyWithoutParentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateManyWithoutCourseInput = {
@@ -1058,6 +1224,7 @@ export type SkillUpdateWithoutLessonsInput = {
   course?: Prisma.CourseUpdateOneRequiredWithoutSkillsNestedInput
   parent?: Prisma.SkillUpdateOneWithoutChildrenNestedInput
   children?: Prisma.SkillUpdateManyWithoutParentNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateWithoutLessonsInput = {
@@ -1075,6 +1242,7 @@ export type SkillUncheckedUpdateWithoutLessonsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   children?: Prisma.SkillUncheckedUpdateManyWithoutParentNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateManyWithoutLessonsInput = {
@@ -1123,6 +1291,7 @@ export type SkillUpdateWithoutParentInput = {
   course?: Prisma.CourseUpdateOneRequiredWithoutSkillsNestedInput
   children?: Prisma.SkillUpdateManyWithoutParentNestedInput
   lessons?: Prisma.LessonUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateWithoutParentInput = {
@@ -1140,6 +1309,7 @@ export type SkillUncheckedUpdateWithoutParentInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   children?: Prisma.SkillUncheckedUpdateManyWithoutParentNestedInput
   lessons?: Prisma.LessonUncheckedUpdateManyWithoutSkillsNestedInput
+  assessmentQuestions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutSkillsNestedInput
 }
 
 export type SkillUncheckedUpdateManyWithoutParentInput = {
@@ -1165,11 +1335,13 @@ export type SkillUncheckedUpdateManyWithoutParentInput = {
 export type SkillCountOutputType = {
   children: number
   lessons: number
+  assessmentQuestions: number
 }
 
 export type SkillCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   children?: boolean | SkillCountOutputTypeCountChildrenArgs
   lessons?: boolean | SkillCountOutputTypeCountLessonsArgs
+  assessmentQuestions?: boolean | SkillCountOutputTypeCountAssessmentQuestionsArgs
 }
 
 /**
@@ -1196,6 +1368,13 @@ export type SkillCountOutputTypeCountLessonsArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.LessonWhereInput
 }
 
+/**
+ * SkillCountOutputType without action
+ */
+export type SkillCountOutputTypeCountAssessmentQuestionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssessmentQuestionWhereInput
+}
+
 
 export type SkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1215,6 +1394,7 @@ export type SkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   parent?: boolean | Prisma.Skill$parentArgs<ExtArgs>
   children?: boolean | Prisma.Skill$childrenArgs<ExtArgs>
   lessons?: boolean | Prisma.Skill$lessonsArgs<ExtArgs>
+  assessmentQuestions?: boolean | Prisma.Skill$assessmentQuestionsArgs<ExtArgs>
   _count?: boolean | Prisma.SkillCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["skill"]>
 
@@ -1242,6 +1422,7 @@ export type SkillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   parent?: boolean | Prisma.Skill$parentArgs<ExtArgs>
   children?: boolean | Prisma.Skill$childrenArgs<ExtArgs>
   lessons?: boolean | Prisma.Skill$lessonsArgs<ExtArgs>
+  assessmentQuestions?: boolean | Prisma.Skill$assessmentQuestionsArgs<ExtArgs>
   _count?: boolean | Prisma.SkillCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1252,6 +1433,7 @@ export type $SkillPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     parent: Prisma.$SkillPayload<ExtArgs> | null
     children: Prisma.$SkillPayload<ExtArgs>[]
     lessons: Prisma.$LessonPayload<ExtArgs>[]
+    assessmentQuestions: Prisma.$AssessmentQuestionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1611,6 +1793,7 @@ export interface Prisma__SkillClient<T, Null = never, ExtArgs extends runtime.Ty
   parent<T extends Prisma.Skill$parentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Skill$parentArgs<ExtArgs>>): Prisma.Prisma__SkillClient<runtime.Types.Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   children<T extends Prisma.Skill$childrenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Skill$childrenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lessons<T extends Prisma.Skill$lessonsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Skill$lessonsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  assessmentQuestions<T extends Prisma.Skill$assessmentQuestionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Skill$assessmentQuestionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2065,6 +2248,30 @@ export type Skill$lessonsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.LessonScalarFieldEnum | Prisma.LessonScalarFieldEnum[]
+}
+
+/**
+ * Skill.assessmentQuestions
+ */
+export type Skill$assessmentQuestionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AssessmentQuestion
+   */
+  select?: Prisma.AssessmentQuestionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AssessmentQuestion
+   */
+  omit?: Prisma.AssessmentQuestionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentQuestionInclude<ExtArgs> | null
+  where?: Prisma.AssessmentQuestionWhereInput
+  orderBy?: Prisma.AssessmentQuestionOrderByWithRelationInput | Prisma.AssessmentQuestionOrderByWithRelationInput[]
+  cursor?: Prisma.AssessmentQuestionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssessmentQuestionScalarFieldEnum | Prisma.AssessmentQuestionScalarFieldEnum[]
 }
 
 /**

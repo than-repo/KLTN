@@ -177,4 +177,6 @@ export interface ICourseRepository {
     instructorId: string,
   ): Promise<boolean>;
   existsBySlug(slug: string, excludeId?: string): Promise<boolean>;
+
+  canEdit(id: string): Promise<boolean>;
 }

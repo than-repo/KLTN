@@ -695,6 +695,11 @@ export type CourseUncheckedUpdateManyInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type CourseScalarRelationFilter = {
+  is?: Prisma.CourseWhereInput
+  isNot?: Prisma.CourseWhereInput
+}
+
 export type CourseListRelationFilter = {
   every?: Prisma.CourseWhereInput
   some?: Prisma.CourseWhereInput
@@ -703,11 +708,6 @@ export type CourseListRelationFilter = {
 
 export type CourseOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type CourseScalarRelationFilter = {
-  is?: Prisma.CourseWhereInput
-  isNot?: Prisma.CourseWhereInput
 }
 
 export type CourseOrderByRelevanceInput = {
@@ -797,6 +797,20 @@ export type CourseSumOrderByAggregateInput = {
   durationInMinutes?: Prisma.SortOrder
 }
 
+export type CourseCreateNestedOneWithoutAssessmentsInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutAssessmentsInput
+  connect?: Prisma.CourseWhereUniqueInput
+}
+
+export type CourseUpdateOneRequiredWithoutAssessmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
+  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutAssessmentsInput
+  upsert?: Prisma.CourseUpsertWithoutAssessmentsInput
+  connect?: Prisma.CourseWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutAssessmentsInput, Prisma.CourseUpdateWithoutAssessmentsInput>, Prisma.CourseUncheckedUpdateWithoutAssessmentsInput>
+}
+
 export type CourseCreateNestedManyWithoutReviewClaimedByInput = {
   create?: Prisma.XOR<Prisma.CourseCreateWithoutReviewClaimedByInput, Prisma.CourseUncheckedCreateWithoutReviewClaimedByInput> | Prisma.CourseCreateWithoutReviewClaimedByInput[] | Prisma.CourseUncheckedCreateWithoutReviewClaimedByInput[]
   connectOrCreate?: Prisma.CourseCreateOrConnectWithoutReviewClaimedByInput | Prisma.CourseCreateOrConnectWithoutReviewClaimedByInput[]
@@ -883,14 +897,6 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CourseCreateNestedOneWithoutCourseCategoriesInput = {
   create?: Prisma.XOR<Prisma.CourseCreateWithoutCourseCategoriesInput, Prisma.CourseUncheckedCreateWithoutCourseCategoriesInput>
   connectOrCreate?: Prisma.CourseCreateOrConnectWithoutCourseCategoriesInput
@@ -947,20 +953,6 @@ export type CourseUpdateOneRequiredWithoutPaymentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutPaymentsInput, Prisma.CourseUpdateWithoutPaymentsInput>, Prisma.CourseUncheckedUpdateWithoutPaymentsInput>
 }
 
-export type CourseCreateNestedOneWithoutAssessmentsInput = {
-  create?: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
-  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutAssessmentsInput
-  connect?: Prisma.CourseWhereUniqueInput
-}
-
-export type CourseUpdateOneRequiredWithoutAssessmentsNestedInput = {
-  create?: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
-  connectOrCreate?: Prisma.CourseCreateOrConnectWithoutAssessmentsInput
-  upsert?: Prisma.CourseUpsertWithoutAssessmentsInput
-  connect?: Prisma.CourseWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutAssessmentsInput, Prisma.CourseUpdateWithoutAssessmentsInput>, Prisma.CourseUncheckedUpdateWithoutAssessmentsInput>
-}
-
 export type CourseCreateNestedOneWithoutSkillsInput = {
   create?: Prisma.XOR<Prisma.CourseCreateWithoutSkillsInput, Prisma.CourseUncheckedCreateWithoutSkillsInput>
   connectOrCreate?: Prisma.CourseCreateOrConnectWithoutSkillsInput
@@ -973,6 +965,150 @@ export type CourseUpdateOneRequiredWithoutSkillsNestedInput = {
   upsert?: Prisma.CourseUpsertWithoutSkillsInput
   connect?: Prisma.CourseWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CourseUpdateToOneWithWhereWithoutSkillsInput, Prisma.CourseUpdateWithoutSkillsInput>, Prisma.CourseUncheckedUpdateWithoutSkillsInput>
+}
+
+export type CourseCreateWithoutAssessmentsInput = {
+  id?: string
+  title: string
+  slug: string
+  shortDescription: string
+  description?: string | null
+  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  thumbnailUrl?: string | null
+  cloudinaryPublicId?: string | null
+  level: $Enums.CourseLevel
+  status?: $Enums.CourseStatus
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  language?: string | null
+  durationInMinutes?: number | null
+  isActive?: boolean
+  certificateEnabled?: boolean
+  publishedAt?: Date | string | null
+  reviewClaimedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sections?: Prisma.CourseSectionCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutCourseInput
+  instructors?: Prisma.CourseInstructorCreateNestedManyWithoutCourseInput
+  courseCategories?: Prisma.CourseCategoryCreateNestedManyWithoutCourseInput
+  reviews?: Prisma.CourseReviewCreateNestedManyWithoutCourseInput
+  reviewClaimedBy?: Prisma.UserCreateNestedOneWithoutClaimedReviewCoursesInput
+  skills?: Prisma.SkillCreateNestedManyWithoutCourseInput
+}
+
+export type CourseUncheckedCreateWithoutAssessmentsInput = {
+  id?: string
+  title: string
+  slug: string
+  shortDescription: string
+  description?: string | null
+  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  thumbnailUrl?: string | null
+  cloudinaryPublicId?: string | null
+  level: $Enums.CourseLevel
+  status?: $Enums.CourseStatus
+  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  language?: string | null
+  durationInMinutes?: number | null
+  isActive?: boolean
+  certificateEnabled?: boolean
+  publishedAt?: Date | string | null
+  reviewClaimedById?: string | null
+  reviewClaimedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  sections?: Prisma.CourseSectionUncheckedCreateNestedManyWithoutCourseInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCourseInput
+  instructors?: Prisma.CourseInstructorUncheckedCreateNestedManyWithoutCourseInput
+  courseCategories?: Prisma.CourseCategoryUncheckedCreateNestedManyWithoutCourseInput
+  reviews?: Prisma.CourseReviewUncheckedCreateNestedManyWithoutCourseInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCourseInput
+}
+
+export type CourseCreateOrConnectWithoutAssessmentsInput = {
+  where: Prisma.CourseWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
+}
+
+export type CourseUpsertWithoutAssessmentsInput = {
+  update: Prisma.XOR<Prisma.CourseUpdateWithoutAssessmentsInput, Prisma.CourseUncheckedUpdateWithoutAssessmentsInput>
+  create: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
+  where?: Prisma.CourseWhereInput
+}
+
+export type CourseUpdateToOneWithWhereWithoutAssessmentsInput = {
+  where?: Prisma.CourseWhereInput
+  data: Prisma.XOR<Prisma.CourseUpdateWithoutAssessmentsInput, Prisma.CourseUncheckedUpdateWithoutAssessmentsInput>
+}
+
+export type CourseUpdateWithoutAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cloudinaryPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  level?: Prisma.EnumCourseLevelFieldUpdateOperationsInput | $Enums.CourseLevel
+  status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationInMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  certificateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewClaimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sections?: Prisma.CourseSectionUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutCourseNestedInput
+  instructors?: Prisma.CourseInstructorUpdateManyWithoutCourseNestedInput
+  courseCategories?: Prisma.CourseCategoryUpdateManyWithoutCourseNestedInput
+  reviews?: Prisma.CourseReviewUpdateManyWithoutCourseNestedInput
+  reviewClaimedBy?: Prisma.UserUpdateOneWithoutClaimedReviewCoursesNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutCourseNestedInput
+}
+
+export type CourseUncheckedUpdateWithoutAssessmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  cloudinaryPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  level?: Prisma.EnumCourseLevelFieldUpdateOperationsInput | $Enums.CourseLevel
+  status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationInMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  certificateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewClaimedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewClaimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sections?: Prisma.CourseSectionUncheckedUpdateManyWithoutCourseNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutCourseNestedInput
+  instructors?: Prisma.CourseInstructorUncheckedUpdateManyWithoutCourseNestedInput
+  courseCategories?: Prisma.CourseCategoryUncheckedUpdateManyWithoutCourseNestedInput
+  reviews?: Prisma.CourseReviewUncheckedUpdateManyWithoutCourseNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutCourseNestedInput
 }
 
 export type CourseCreateWithoutReviewClaimedByInput = {
@@ -1954,150 +2090,6 @@ export type CourseUncheckedUpdateWithoutPaymentsInput = {
   courseCategories?: Prisma.CourseCategoryUncheckedUpdateManyWithoutCourseNestedInput
   reviews?: Prisma.CourseReviewUncheckedUpdateManyWithoutCourseNestedInput
   assessments?: Prisma.AssessmentUncheckedUpdateManyWithoutCourseNestedInput
-  skills?: Prisma.SkillUncheckedUpdateManyWithoutCourseNestedInput
-}
-
-export type CourseCreateWithoutAssessmentsInput = {
-  id?: string
-  title: string
-  slug: string
-  shortDescription: string
-  description?: string | null
-  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  thumbnailUrl?: string | null
-  cloudinaryPublicId?: string | null
-  level: $Enums.CourseLevel
-  status?: $Enums.CourseStatus
-  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  language?: string | null
-  durationInMinutes?: number | null
-  isActive?: boolean
-  certificateEnabled?: boolean
-  publishedAt?: Date | string | null
-  reviewClaimedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deletedAt?: Date | string | null
-  sections?: Prisma.CourseSectionCreateNestedManyWithoutCourseInput
-  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutCourseInput
-  payments?: Prisma.PaymentCreateNestedManyWithoutCourseInput
-  instructors?: Prisma.CourseInstructorCreateNestedManyWithoutCourseInput
-  courseCategories?: Prisma.CourseCategoryCreateNestedManyWithoutCourseInput
-  reviews?: Prisma.CourseReviewCreateNestedManyWithoutCourseInput
-  reviewClaimedBy?: Prisma.UserCreateNestedOneWithoutClaimedReviewCoursesInput
-  skills?: Prisma.SkillCreateNestedManyWithoutCourseInput
-}
-
-export type CourseUncheckedCreateWithoutAssessmentsInput = {
-  id?: string
-  title: string
-  slug: string
-  shortDescription: string
-  description?: string | null
-  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  thumbnailUrl?: string | null
-  cloudinaryPublicId?: string | null
-  level: $Enums.CourseLevel
-  status?: $Enums.CourseStatus
-  price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  language?: string | null
-  durationInMinutes?: number | null
-  isActive?: boolean
-  certificateEnabled?: boolean
-  publishedAt?: Date | string | null
-  reviewClaimedById?: string | null
-  reviewClaimedAt?: Date | string | null
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deletedAt?: Date | string | null
-  sections?: Prisma.CourseSectionUncheckedCreateNestedManyWithoutCourseInput
-  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutCourseInput
-  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutCourseInput
-  instructors?: Prisma.CourseInstructorUncheckedCreateNestedManyWithoutCourseInput
-  courseCategories?: Prisma.CourseCategoryUncheckedCreateNestedManyWithoutCourseInput
-  reviews?: Prisma.CourseReviewUncheckedCreateNestedManyWithoutCourseInput
-  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutCourseInput
-}
-
-export type CourseCreateOrConnectWithoutAssessmentsInput = {
-  where: Prisma.CourseWhereUniqueInput
-  create: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
-}
-
-export type CourseUpsertWithoutAssessmentsInput = {
-  update: Prisma.XOR<Prisma.CourseUpdateWithoutAssessmentsInput, Prisma.CourseUncheckedUpdateWithoutAssessmentsInput>
-  create: Prisma.XOR<Prisma.CourseCreateWithoutAssessmentsInput, Prisma.CourseUncheckedCreateWithoutAssessmentsInput>
-  where?: Prisma.CourseWhereInput
-}
-
-export type CourseUpdateToOneWithWhereWithoutAssessmentsInput = {
-  where?: Prisma.CourseWhereInput
-  data: Prisma.XOR<Prisma.CourseUpdateWithoutAssessmentsInput, Prisma.CourseUncheckedUpdateWithoutAssessmentsInput>
-}
-
-export type CourseUpdateWithoutAssessmentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  slug?: Prisma.StringFieldUpdateOperationsInput | string
-  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cloudinaryPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  level?: Prisma.EnumCourseLevelFieldUpdateOperationsInput | $Enums.CourseLevel
-  status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
-  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationInMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  certificateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reviewClaimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  sections?: Prisma.CourseSectionUpdateManyWithoutCourseNestedInput
-  enrollments?: Prisma.EnrollmentUpdateManyWithoutCourseNestedInput
-  payments?: Prisma.PaymentUpdateManyWithoutCourseNestedInput
-  instructors?: Prisma.CourseInstructorUpdateManyWithoutCourseNestedInput
-  courseCategories?: Prisma.CourseCategoryUpdateManyWithoutCourseNestedInput
-  reviews?: Prisma.CourseReviewUpdateManyWithoutCourseNestedInput
-  reviewClaimedBy?: Prisma.UserUpdateOneWithoutClaimedReviewCoursesNestedInput
-  skills?: Prisma.SkillUpdateManyWithoutCourseNestedInput
-}
-
-export type CourseUncheckedUpdateWithoutAssessmentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  title?: Prisma.StringFieldUpdateOperationsInput | string
-  slug?: Prisma.StringFieldUpdateOperationsInput | string
-  shortDescription?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  whatYouWillLearn?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  requirements?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
-  thumbnailUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  cloudinaryPublicId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  level?: Prisma.EnumCourseLevelFieldUpdateOperationsInput | $Enums.CourseLevel
-  status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
-  price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  durationInMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  certificateEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  reviewClaimedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  reviewClaimedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  sections?: Prisma.CourseSectionUncheckedUpdateManyWithoutCourseNestedInput
-  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutCourseNestedInput
-  payments?: Prisma.PaymentUncheckedUpdateManyWithoutCourseNestedInput
-  instructors?: Prisma.CourseInstructorUncheckedUpdateManyWithoutCourseNestedInput
-  courseCategories?: Prisma.CourseCategoryUncheckedUpdateManyWithoutCourseNestedInput
-  reviews?: Prisma.CourseReviewUncheckedUpdateManyWithoutCourseNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutCourseNestedInput
 }
 

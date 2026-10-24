@@ -20,10 +20,11 @@ model Skill {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt DateTime?
 
-  course   Course   @relation(fields: [courseId], references: [id], onDelete: Restrict)
-  parent   Skill?   @relation("SkillHierarchy", fields: [parentId], references: [id])
-  children Skill[]  @relation("SkillHierarchy")
-  lessons  Lesson[] @relation("LessonSkills")
+  course              Course               @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  parent              Skill?               @relation("SkillHierarchy", fields: [parentId], references: [id])
+  children            Skill[]              @relation("SkillHierarchy")
+  lessons             Lesson[]             @relation("LessonSkills")
+  assessmentQuestions AssessmentQuestion[] @relation("AssessmentQuestionSkills")
 
   @@unique([courseId, canonicalName])
   @@index([parentId])

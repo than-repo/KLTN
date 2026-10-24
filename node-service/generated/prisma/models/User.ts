@@ -523,6 +523,11 @@ export type UserUncheckedUpdateManyInput = {
   lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
+}
+
 export type UserOrderByRelevanceInput = {
   fields: Prisma.UserOrderByRelevanceFieldEnum | Prisma.UserOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
@@ -580,26 +585,23 @@ export type UserMinOrderByAggregateInput = {
   lastLoginAt?: Prisma.SortOrder
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
-}
-
 export type UserNullableScalarRelationFilter = {
   is?: Prisma.UserWhereInput | null
   isNot?: Prisma.UserWhereInput | null
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
+export type UserCreateNestedOneWithoutAssessmentAttemptsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssessmentAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
+export type UserUpdateOneRequiredWithoutAssessmentAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssessmentAttemptsInput
+  upsert?: Prisma.UserUpsertWithoutAssessmentAttemptsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssessmentAttemptsInput, Prisma.UserUpdateWithoutAssessmentAttemptsInput>, Prisma.UserUncheckedUpdateWithoutAssessmentAttemptsInput>
 }
 
 export type NullableEnumGenderEnumFieldUpdateOperationsInput = {
@@ -608,14 +610,6 @@ export type NullableEnumGenderEnumFieldUpdateOperationsInput = {
 
 export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type UserCreateNestedOneWithoutIdentitiesInput = {
@@ -746,18 +740,124 @@ export type UserUpdateOneRequiredWithoutPaymentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPaymentsInput, Prisma.UserUpdateWithoutPaymentsInput>, Prisma.UserUncheckedUpdateWithoutPaymentsInput>
 }
 
-export type UserCreateNestedOneWithoutAssessmentAttemptsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssessmentAttemptsInput
-  connect?: Prisma.UserWhereUniqueInput
+export type UserCreateWithoutAssessmentAttemptsInput = {
+  id?: string
+  fullName: string
+  email: string
+  passwordHash?: string | null
+  phoneNumber?: string | null
+  dateOfBirth?: Date | string | null
+  gender?: $Enums.GenderEnum | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  isActive?: boolean
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  identities?: Prisma.UserIdentityCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
+  courseInstructors?: Prisma.CourseInstructorCreateNestedManyWithoutInstructorInput
+  assignedReviewCategories?: Prisma.CourseReviewerCategoryCreateNestedManyWithoutReviewerInput
+  courseReviews?: Prisma.CourseReviewCreateNestedManyWithoutReviewerInput
+  claimedReviewCourses?: Prisma.CourseCreateNestedManyWithoutReviewClaimedByInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
 }
 
-export type UserUpdateOneRequiredWithoutAssessmentAttemptsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutAssessmentAttemptsInput
-  upsert?: Prisma.UserUpsertWithoutAssessmentAttemptsInput
-  connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAssessmentAttemptsInput, Prisma.UserUpdateWithoutAssessmentAttemptsInput>, Prisma.UserUncheckedUpdateWithoutAssessmentAttemptsInput>
+export type UserUncheckedCreateWithoutAssessmentAttemptsInput = {
+  id?: string
+  fullName: string
+  email: string
+  passwordHash?: string | null
+  phoneNumber?: string | null
+  dateOfBirth?: Date | string | null
+  gender?: $Enums.GenderEnum | null
+  avatarUrl?: string | null
+  role?: $Enums.UserRole
+  isActive?: boolean
+  emailVerified?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  lastLoginAt?: Date | string | null
+  identities?: Prisma.UserIdentityUncheckedCreateNestedManyWithoutUserInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
+  courseInstructors?: Prisma.CourseInstructorUncheckedCreateNestedManyWithoutInstructorInput
+  assignedReviewCategories?: Prisma.CourseReviewerCategoryUncheckedCreateNestedManyWithoutReviewerInput
+  courseReviews?: Prisma.CourseReviewUncheckedCreateNestedManyWithoutReviewerInput
+  claimedReviewCourses?: Prisma.CourseUncheckedCreateNestedManyWithoutReviewClaimedByInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutAssessmentAttemptsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
+}
+
+export type UserUpsertWithoutAssessmentAttemptsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedUpdateWithoutAssessmentAttemptsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutAssessmentAttemptsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedUpdateWithoutAssessmentAttemptsInput>
+}
+
+export type UserUpdateWithoutAssessmentAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableEnumGenderEnumFieldUpdateOperationsInput | $Enums.GenderEnum | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  identities?: Prisma.UserIdentityUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
+  courseInstructors?: Prisma.CourseInstructorUpdateManyWithoutInstructorNestedInput
+  assignedReviewCategories?: Prisma.CourseReviewerCategoryUpdateManyWithoutReviewerNestedInput
+  courseReviews?: Prisma.CourseReviewUpdateManyWithoutReviewerNestedInput
+  claimedReviewCourses?: Prisma.CourseUpdateManyWithoutReviewClaimedByNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutAssessmentAttemptsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  gender?: Prisma.NullableEnumGenderEnumFieldUpdateOperationsInput | $Enums.GenderEnum | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  identities?: Prisma.UserIdentityUncheckedUpdateManyWithoutUserNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
+  courseInstructors?: Prisma.CourseInstructorUncheckedUpdateManyWithoutInstructorNestedInput
+  assignedReviewCategories?: Prisma.CourseReviewerCategoryUncheckedUpdateManyWithoutReviewerNestedInput
+  courseReviews?: Prisma.CourseReviewUncheckedUpdateManyWithoutReviewerNestedInput
+  claimedReviewCourses?: Prisma.CourseUncheckedUpdateManyWithoutReviewClaimedByNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutIdentitiesInput = {
@@ -1838,126 +1938,6 @@ export type UserUncheckedUpdateWithoutPaymentsInput = {
   claimedReviewCourses?: Prisma.CourseUncheckedUpdateManyWithoutReviewClaimedByNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
   assessmentAttempts?: Prisma.AssessmentAttemptUncheckedUpdateManyWithoutLearnerNestedInput
-}
-
-export type UserCreateWithoutAssessmentAttemptsInput = {
-  id?: string
-  fullName: string
-  email: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  dateOfBirth?: Date | string | null
-  gender?: $Enums.GenderEnum | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
-  isActive?: boolean
-  emailVerified?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  lastLoginAt?: Date | string | null
-  identities?: Prisma.UserIdentityCreateNestedManyWithoutUserInput
-  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
-  enrollments?: Prisma.EnrollmentCreateNestedManyWithoutUserInput
-  payments?: Prisma.PaymentCreateNestedManyWithoutUserInput
-  courseInstructors?: Prisma.CourseInstructorCreateNestedManyWithoutInstructorInput
-  assignedReviewCategories?: Prisma.CourseReviewerCategoryCreateNestedManyWithoutReviewerInput
-  courseReviews?: Prisma.CourseReviewCreateNestedManyWithoutReviewerInput
-  claimedReviewCourses?: Prisma.CourseCreateNestedManyWithoutReviewClaimedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutUserInput
-}
-
-export type UserUncheckedCreateWithoutAssessmentAttemptsInput = {
-  id?: string
-  fullName: string
-  email: string
-  passwordHash?: string | null
-  phoneNumber?: string | null
-  dateOfBirth?: Date | string | null
-  gender?: $Enums.GenderEnum | null
-  avatarUrl?: string | null
-  role?: $Enums.UserRole
-  isActive?: boolean
-  emailVerified?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  lastLoginAt?: Date | string | null
-  identities?: Prisma.UserIdentityUncheckedCreateNestedManyWithoutUserInput
-  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
-  enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutUserInput
-  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutUserInput
-  courseInstructors?: Prisma.CourseInstructorUncheckedCreateNestedManyWithoutInstructorInput
-  assignedReviewCategories?: Prisma.CourseReviewerCategoryUncheckedCreateNestedManyWithoutReviewerInput
-  courseReviews?: Prisma.CourseReviewUncheckedCreateNestedManyWithoutReviewerInput
-  claimedReviewCourses?: Prisma.CourseUncheckedCreateNestedManyWithoutReviewClaimedByInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutUserInput
-}
-
-export type UserCreateOrConnectWithoutAssessmentAttemptsInput = {
-  where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
-}
-
-export type UserUpsertWithoutAssessmentAttemptsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedUpdateWithoutAssessmentAttemptsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedCreateWithoutAssessmentAttemptsInput>
-  where?: Prisma.UserWhereInput
-}
-
-export type UserUpdateToOneWithWhereWithoutAssessmentAttemptsInput = {
-  where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutAssessmentAttemptsInput, Prisma.UserUncheckedUpdateWithoutAssessmentAttemptsInput>
-}
-
-export type UserUpdateWithoutAssessmentAttemptsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  fullName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gender?: Prisma.NullableEnumGenderEnumFieldUpdateOperationsInput | $Enums.GenderEnum | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  identities?: Prisma.UserIdentityUpdateManyWithoutUserNestedInput
-  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
-  enrollments?: Prisma.EnrollmentUpdateManyWithoutUserNestedInput
-  payments?: Prisma.PaymentUpdateManyWithoutUserNestedInput
-  courseInstructors?: Prisma.CourseInstructorUpdateManyWithoutInstructorNestedInput
-  assignedReviewCategories?: Prisma.CourseReviewerCategoryUpdateManyWithoutReviewerNestedInput
-  courseReviews?: Prisma.CourseReviewUpdateManyWithoutReviewerNestedInput
-  claimedReviewCourses?: Prisma.CourseUpdateManyWithoutReviewClaimedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutUserNestedInput
-}
-
-export type UserUncheckedUpdateWithoutAssessmentAttemptsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  fullName?: Prisma.StringFieldUpdateOperationsInput | string
-  email?: Prisma.StringFieldUpdateOperationsInput | string
-  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  dateOfBirth?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  gender?: Prisma.NullableEnumGenderEnumFieldUpdateOperationsInput | $Enums.GenderEnum | null
-  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  identities?: Prisma.UserIdentityUncheckedUpdateManyWithoutUserNestedInput
-  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
-  enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutUserNestedInput
-  payments?: Prisma.PaymentUncheckedUpdateManyWithoutUserNestedInput
-  courseInstructors?: Prisma.CourseInstructorUncheckedUpdateManyWithoutInstructorNestedInput
-  assignedReviewCategories?: Prisma.CourseReviewerCategoryUncheckedUpdateManyWithoutReviewerNestedInput
-  courseReviews?: Prisma.CourseReviewUncheckedUpdateManyWithoutReviewerNestedInput
-  claimedReviewCourses?: Prisma.CourseUncheckedUpdateManyWithoutReviewClaimedByNestedInput
-  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutUserNestedInput
 }
 
 

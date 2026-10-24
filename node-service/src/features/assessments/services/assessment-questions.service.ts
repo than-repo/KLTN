@@ -240,6 +240,10 @@ export class AssessmentQuestionsService {
     });
   }
 
+  async getSkillCountForQuestion(questionId: string): Promise<number> {
+    return this.iAssessmentQuestionRepository.countSkill(questionId);
+  }
+
   private ensureAssessmentIsDraft(status: AssessmentStatus): void {
     if (status !== AssessmentStatus.DRAFT) {
       throw new BadRequestException(

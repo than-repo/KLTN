@@ -11,9 +11,54 @@ from app.services.face_monitor import FaceMonitor
 from app.services.verifier import FaceVerifier
 from app.services.embedding import EmbeddingService
 
+import os
+import secrets
+
+from dotenv import load_dotenv
+from fastapi import (
+    Depends,
+    FastAPI,
+    HTTPException,
+    WebSocket,
+    WebSocketException,
+)
+from starlette.requests import HTTPConnection
+load_dotenv()
+
+AI_SERVICE_API_KEY = os.getenv("AI_SERVICE_API_KEY")
+if not AI_SERVICE_API_KEY or not AI_SERVICE_API_KEY.strip():
+    raise RuntimeError("AI_SERVICE_API_KEY is missing or empty")
+
+
+async def require_service_key(connection: HTTPConnection) -> None:
+    authorization = connection.headers.get("Authorization", "")
+    scheme, _, token = authorization.partition(" ")
+
+    if scheme.lower() == "bearer" and secrets.compare_digest(
+        token.encode("utf-8"),
+        AI_SERVICE_API_KEY.encode("utf-8"),
+    ):
+        return
+
+    if connection.scope["type"] == "websocket":
+        raise WebSocketException(code=1008, reason="Unauthorized")
+
+    raise HTTPException(
+        status_code=401,
+        detail="Invalid or missing service API key",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+
+
 app = FastAPI(
     title="E-Learning AI Server",
     version="0.1.0",
+    dependencies=[Depends(require_service_key)],
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
 )
 
 
