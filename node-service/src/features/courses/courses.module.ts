@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CourseRepository } from './repositories/course.repository';
 
 import { PrismaService } from 'src/core/database/prisma.service';
@@ -83,8 +83,8 @@ import { SkillModule } from '../skill/skill.module';
       useClass: ReviewerCategoryAuthorizationRepository,
     },
   ],
-  exports: [],
-  imports: [PrismaModule, SkillModule],
+  exports: [CourseAccessService, CoursesService],
+  imports: [PrismaModule, forwardRef(() => SkillModule)],
   controllers: [
     PublicCoursesController,
     InstructorCoursesController,

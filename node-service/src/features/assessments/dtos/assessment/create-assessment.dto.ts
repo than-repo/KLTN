@@ -25,8 +25,8 @@ const TITLE_MAX_LENGTH = 255;
 const DESCRIPTION_MAX_LENGTH = 10_000;
 const MAX_ORDER_VALUE = 10_000;
 const MAX_PASSING_SCORE = 100;
-const MAX_ATTEMPTS = 10;
-const MAX_TIME_LIMIT_MINUTES = 60;
+const MAX_ATTEMPTS = 20;
+const MAX_TIME_LIMIT_MINUTES = 180;
 const Max_TOTAL_SCORE = 100;
 
 function trim(value: unknown): unknown {

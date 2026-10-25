@@ -73,6 +73,21 @@ export class CourseRepository implements ICourseRepository {
 
   ///=====================================================
 
+  async canEdit(id: string): Promise<boolean> {
+    const count = await this.prisma.course.count({
+      where: {
+        id,
+        status: {
+          in: [CourseStatus.DRAFT, CourseStatus.CHANGES_REQUESTED],
+        },
+        deletedAt: null,
+        isActive: true,
+      },
+    });
+
+    return count === 1;
+  }
+
   private toCourseModel(course: PrismaCourse): CourseModel {
     return {
       id: course.id,

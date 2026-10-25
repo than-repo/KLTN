@@ -518,48 +518,6 @@ export type AssessmentAttemptScalarRelationFilter = {
   isNot?: Prisma.AssessmentAttemptWhereInput
 }
 
-export type AssessmentAttemptCreateNestedManyWithoutLearnerInput = {
-  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
-  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
-  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
-  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-}
-
-export type AssessmentAttemptUncheckedCreateNestedManyWithoutLearnerInput = {
-  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
-  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
-  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
-  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-}
-
-export type AssessmentAttemptUpdateManyWithoutLearnerNestedInput = {
-  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
-  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
-  upsert?: Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput[]
-  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
-  set?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  disconnect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  delete?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  update?: Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput[]
-  updateMany?: Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput | Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput[]
-  deleteMany?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
-}
-
-export type AssessmentAttemptUncheckedUpdateManyWithoutLearnerNestedInput = {
-  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
-  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
-  upsert?: Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput[]
-  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
-  set?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  disconnect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  delete?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
-  update?: Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput[]
-  updateMany?: Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput | Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput[]
-  deleteMany?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
-}
-
 export type AssessmentAttemptCreateNestedManyWithoutAssessmentInput = {
   create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutAssessmentInput, Prisma.AssessmentAttemptUncheckedCreateWithoutAssessmentInput> | Prisma.AssessmentAttemptCreateWithoutAssessmentInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutAssessmentInput[]
   connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutAssessmentInput | Prisma.AssessmentAttemptCreateOrConnectWithoutAssessmentInput[]
@@ -642,74 +600,46 @@ export type AssessmentAttemptUpdateOneRequiredWithoutProjectSubmissionNestedInpu
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentAttemptUpdateToOneWithWhereWithoutProjectSubmissionInput, Prisma.AssessmentAttemptUpdateWithoutProjectSubmissionInput>, Prisma.AssessmentAttemptUncheckedUpdateWithoutProjectSubmissionInput>
 }
 
-export type AssessmentAttemptCreateWithoutLearnerInput = {
-  id?: string
-  attemptNumber?: number
-  status?: $Enums.AssessmentAttemptStatus
-  score?: number | null
-  maxScore?: number | null
-  passed?: boolean
-  startedAt?: Date | string
-  submittedAt?: Date | string | null
-  assessment: Prisma.AssessmentCreateNestedOneWithoutAttemptsInput
-  answers?: Prisma.AssessmentAttemptAnswerCreateNestedManyWithoutAttemptInput
-  projectSubmission?: Prisma.ProjectSubmissionCreateNestedOneWithoutAttemptInput
+export type AssessmentAttemptCreateNestedManyWithoutLearnerInput = {
+  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
+  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
+  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
+  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
 }
 
-export type AssessmentAttemptUncheckedCreateWithoutLearnerInput = {
-  id?: string
-  attemptNumber?: number
-  status?: $Enums.AssessmentAttemptStatus
-  score?: number | null
-  maxScore?: number | null
-  passed?: boolean
-  startedAt?: Date | string
-  submittedAt?: Date | string | null
-  assessmentId: string
-  answers?: Prisma.AssessmentAttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
-  projectSubmission?: Prisma.ProjectSubmissionUncheckedCreateNestedOneWithoutAttemptInput
+export type AssessmentAttemptUncheckedCreateNestedManyWithoutLearnerInput = {
+  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
+  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
+  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
+  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
 }
 
-export type AssessmentAttemptCreateOrConnectWithoutLearnerInput = {
-  where: Prisma.AssessmentAttemptWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput>
+export type AssessmentAttemptUpdateManyWithoutLearnerNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
+  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
+  upsert?: Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput[]
+  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
+  set?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  disconnect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  delete?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  update?: Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput[]
+  updateMany?: Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput | Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput[]
+  deleteMany?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
 }
 
-export type AssessmentAttemptCreateManyLearnerInputEnvelope = {
-  data: Prisma.AssessmentAttemptCreateManyLearnerInput | Prisma.AssessmentAttemptCreateManyLearnerInput[]
-  skipDuplicates?: boolean
-}
-
-export type AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput = {
-  where: Prisma.AssessmentAttemptWhereUniqueInput
-  update: Prisma.XOR<Prisma.AssessmentAttemptUpdateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedUpdateWithoutLearnerInput>
-  create: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput>
-}
-
-export type AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput = {
-  where: Prisma.AssessmentAttemptWhereUniqueInput
-  data: Prisma.XOR<Prisma.AssessmentAttemptUpdateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedUpdateWithoutLearnerInput>
-}
-
-export type AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput = {
-  where: Prisma.AssessmentAttemptScalarWhereInput
-  data: Prisma.XOR<Prisma.AssessmentAttemptUpdateManyMutationInput, Prisma.AssessmentAttemptUncheckedUpdateManyWithoutLearnerInput>
-}
-
-export type AssessmentAttemptScalarWhereInput = {
-  AND?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
-  OR?: Prisma.AssessmentAttemptScalarWhereInput[]
-  NOT?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
-  id?: Prisma.StringFilter<"AssessmentAttempt"> | string
-  attemptNumber?: Prisma.IntFilter<"AssessmentAttempt"> | number
-  status?: Prisma.EnumAssessmentAttemptStatusFilter<"AssessmentAttempt"> | $Enums.AssessmentAttemptStatus
-  score?: Prisma.FloatNullableFilter<"AssessmentAttempt"> | number | null
-  maxScore?: Prisma.FloatNullableFilter<"AssessmentAttempt"> | number | null
-  passed?: Prisma.BoolFilter<"AssessmentAttempt"> | boolean
-  startedAt?: Prisma.DateTimeFilter<"AssessmentAttempt"> | Date | string
-  submittedAt?: Prisma.DateTimeNullableFilter<"AssessmentAttempt"> | Date | string | null
-  assessmentId?: Prisma.StringFilter<"AssessmentAttempt"> | string
-  learnerId?: Prisma.StringFilter<"AssessmentAttempt"> | string
+export type AssessmentAttemptUncheckedUpdateManyWithoutLearnerNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput> | Prisma.AssessmentAttemptCreateWithoutLearnerInput[] | Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput[]
+  connectOrCreate?: Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput | Prisma.AssessmentAttemptCreateOrConnectWithoutLearnerInput[]
+  upsert?: Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput[]
+  createMany?: Prisma.AssessmentAttemptCreateManyLearnerInputEnvelope
+  set?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  disconnect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  delete?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  connect?: Prisma.AssessmentAttemptWhereUniqueInput | Prisma.AssessmentAttemptWhereUniqueInput[]
+  update?: Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput | Prisma.AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput[]
+  updateMany?: Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput | Prisma.AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput[]
+  deleteMany?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
 }
 
 export type AssessmentAttemptCreateWithoutAssessmentInput = {
@@ -764,6 +694,22 @@ export type AssessmentAttemptUpdateWithWhereUniqueWithoutAssessmentInput = {
 export type AssessmentAttemptUpdateManyWithWhereWithoutAssessmentInput = {
   where: Prisma.AssessmentAttemptScalarWhereInput
   data: Prisma.XOR<Prisma.AssessmentAttemptUpdateManyMutationInput, Prisma.AssessmentAttemptUncheckedUpdateManyWithoutAssessmentInput>
+}
+
+export type AssessmentAttemptScalarWhereInput = {
+  AND?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
+  OR?: Prisma.AssessmentAttemptScalarWhereInput[]
+  NOT?: Prisma.AssessmentAttemptScalarWhereInput | Prisma.AssessmentAttemptScalarWhereInput[]
+  id?: Prisma.StringFilter<"AssessmentAttempt"> | string
+  attemptNumber?: Prisma.IntFilter<"AssessmentAttempt"> | number
+  status?: Prisma.EnumAssessmentAttemptStatusFilter<"AssessmentAttempt"> | $Enums.AssessmentAttemptStatus
+  score?: Prisma.FloatNullableFilter<"AssessmentAttempt"> | number | null
+  maxScore?: Prisma.FloatNullableFilter<"AssessmentAttempt"> | number | null
+  passed?: Prisma.BoolFilter<"AssessmentAttempt"> | boolean
+  startedAt?: Prisma.DateTimeFilter<"AssessmentAttempt"> | Date | string
+  submittedAt?: Prisma.DateTimeNullableFilter<"AssessmentAttempt"> | Date | string | null
+  assessmentId?: Prisma.StringFilter<"AssessmentAttempt"> | string
+  learnerId?: Prisma.StringFilter<"AssessmentAttempt"> | string
 }
 
 export type AssessmentAttemptCreateWithoutAnswersInput = {
@@ -910,7 +856,21 @@ export type AssessmentAttemptUncheckedUpdateWithoutProjectSubmissionInput = {
   answers?: Prisma.AssessmentAttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
 }
 
-export type AssessmentAttemptCreateManyLearnerInput = {
+export type AssessmentAttemptCreateWithoutLearnerInput = {
+  id?: string
+  attemptNumber?: number
+  status?: $Enums.AssessmentAttemptStatus
+  score?: number | null
+  maxScore?: number | null
+  passed?: boolean
+  startedAt?: Date | string
+  submittedAt?: Date | string | null
+  assessment: Prisma.AssessmentCreateNestedOneWithoutAttemptsInput
+  answers?: Prisma.AssessmentAttemptAnswerCreateNestedManyWithoutAttemptInput
+  projectSubmission?: Prisma.ProjectSubmissionCreateNestedOneWithoutAttemptInput
+}
+
+export type AssessmentAttemptUncheckedCreateWithoutLearnerInput = {
   id?: string
   attemptNumber?: number
   status?: $Enums.AssessmentAttemptStatus
@@ -920,46 +880,34 @@ export type AssessmentAttemptCreateManyLearnerInput = {
   startedAt?: Date | string
   submittedAt?: Date | string | null
   assessmentId: string
+  answers?: Prisma.AssessmentAttemptAnswerUncheckedCreateNestedManyWithoutAttemptInput
+  projectSubmission?: Prisma.ProjectSubmissionUncheckedCreateNestedOneWithoutAttemptInput
 }
 
-export type AssessmentAttemptUpdateWithoutLearnerInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  attemptNumber?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.EnumAssessmentAttemptStatusFieldUpdateOperationsInput | $Enums.AssessmentAttemptStatus
-  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  maxScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutAttemptsNestedInput
-  answers?: Prisma.AssessmentAttemptAnswerUpdateManyWithoutAttemptNestedInput
-  projectSubmission?: Prisma.ProjectSubmissionUpdateOneWithoutAttemptNestedInput
+export type AssessmentAttemptCreateOrConnectWithoutLearnerInput = {
+  where: Prisma.AssessmentAttemptWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput>
 }
 
-export type AssessmentAttemptUncheckedUpdateWithoutLearnerInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  attemptNumber?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.EnumAssessmentAttemptStatusFieldUpdateOperationsInput | $Enums.AssessmentAttemptStatus
-  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  maxScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  assessmentId?: Prisma.StringFieldUpdateOperationsInput | string
-  answers?: Prisma.AssessmentAttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
-  projectSubmission?: Prisma.ProjectSubmissionUncheckedUpdateOneWithoutAttemptNestedInput
+export type AssessmentAttemptCreateManyLearnerInputEnvelope = {
+  data: Prisma.AssessmentAttemptCreateManyLearnerInput | Prisma.AssessmentAttemptCreateManyLearnerInput[]
+  skipDuplicates?: boolean
 }
 
-export type AssessmentAttemptUncheckedUpdateManyWithoutLearnerInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  attemptNumber?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.EnumAssessmentAttemptStatusFieldUpdateOperationsInput | $Enums.AssessmentAttemptStatus
-  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  maxScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
-  passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  assessmentId?: Prisma.StringFieldUpdateOperationsInput | string
+export type AssessmentAttemptUpsertWithWhereUniqueWithoutLearnerInput = {
+  where: Prisma.AssessmentAttemptWhereUniqueInput
+  update: Prisma.XOR<Prisma.AssessmentAttemptUpdateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedUpdateWithoutLearnerInput>
+  create: Prisma.XOR<Prisma.AssessmentAttemptCreateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedCreateWithoutLearnerInput>
+}
+
+export type AssessmentAttemptUpdateWithWhereUniqueWithoutLearnerInput = {
+  where: Prisma.AssessmentAttemptWhereUniqueInput
+  data: Prisma.XOR<Prisma.AssessmentAttemptUpdateWithoutLearnerInput, Prisma.AssessmentAttemptUncheckedUpdateWithoutLearnerInput>
+}
+
+export type AssessmentAttemptUpdateManyWithWhereWithoutLearnerInput = {
+  where: Prisma.AssessmentAttemptScalarWhereInput
+  data: Prisma.XOR<Prisma.AssessmentAttemptUpdateManyMutationInput, Prisma.AssessmentAttemptUncheckedUpdateManyWithoutLearnerInput>
 }
 
 export type AssessmentAttemptCreateManyAssessmentInput = {
@@ -1012,6 +960,58 @@ export type AssessmentAttemptUncheckedUpdateManyWithoutAssessmentInput = {
   startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   learnerId?: Prisma.StringFieldUpdateOperationsInput | string
+}
+
+export type AssessmentAttemptCreateManyLearnerInput = {
+  id?: string
+  attemptNumber?: number
+  status?: $Enums.AssessmentAttemptStatus
+  score?: number | null
+  maxScore?: number | null
+  passed?: boolean
+  startedAt?: Date | string
+  submittedAt?: Date | string | null
+  assessmentId: string
+}
+
+export type AssessmentAttemptUpdateWithoutLearnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attemptNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAssessmentAttemptStatusFieldUpdateOperationsInput | $Enums.AssessmentAttemptStatus
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  maxScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessment?: Prisma.AssessmentUpdateOneRequiredWithoutAttemptsNestedInput
+  answers?: Prisma.AssessmentAttemptAnswerUpdateManyWithoutAttemptNestedInput
+  projectSubmission?: Prisma.ProjectSubmissionUpdateOneWithoutAttemptNestedInput
+}
+
+export type AssessmentAttemptUncheckedUpdateWithoutLearnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attemptNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAssessmentAttemptStatusFieldUpdateOperationsInput | $Enums.AssessmentAttemptStatus
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  maxScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentId?: Prisma.StringFieldUpdateOperationsInput | string
+  answers?: Prisma.AssessmentAttemptAnswerUncheckedUpdateManyWithoutAttemptNestedInput
+  projectSubmission?: Prisma.ProjectSubmissionUncheckedUpdateOneWithoutAttemptNestedInput
+}
+
+export type AssessmentAttemptUncheckedUpdateManyWithoutLearnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  attemptNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumAssessmentAttemptStatusFieldUpdateOperationsInput | $Enums.AssessmentAttemptStatus
+  score?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  maxScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  passed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  submittedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 

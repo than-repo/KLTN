@@ -62,7 +62,12 @@ export class LessonsService {
     );
 
     if (dto.skillIds !== undefined) {
-      await this.skillService.validateSkillIds(dto.skillIds);
+      const isValid = await this.skillService.verifySkillsBelongToCourse(
+        courseId,
+        dto.skillIds,
+      );
+
+      if (!isValid) throw new BadRequestException('Invalid skill ids');
     }
 
     const input: CreateLessonAtEndInput = {
@@ -98,7 +103,12 @@ export class LessonsService {
     );
 
     if (dto.skillIds !== undefined) {
-      await this.skillService.validateSkillIds(dto.skillIds);
+      const isValid = await this.skillService.verifySkillsBelongToCourse(
+        courseId,
+        dto.skillIds,
+      );
+
+      if (!isValid) throw new BadRequestException('Invalid skill ids');
     }
 
     const input = this.buildUpdateLessonInput(dto);

@@ -19,27 +19,52 @@ import { plainToInstance } from 'class-transformer';
 import { SkillResponseDto } from '../dtos/skill-response.dto';
 import { UpdateSkillDto } from '../dtos/update-skill.dto';
 import { EmbeddingBatchItem } from '../interfaces/embedding.interfaces';
+import { CourseAccessService } from 'src/features/courses/services/course-access.service';
+import { CourseRepository } from 'src/features/courses/repositories/course.repository';
+import { AssessmentAccessService } from 'src/features/assessments/services/assessment-access.service';
+import { AssessmentQuestionsService } from 'src/features/assessments/services/assessment-questions.service';
+import { GetSkillsQueryDto } from '../dtos/get-skills-query.dto';
+import { CoursesService } from 'src/features/courses/services/courses.service';
 
 @Injectable()
 export class SkillService {
   constructor(
     private readonly embeddingService: EmbeddingService,
     private readonly skillRepository: SkillRepository,
+    private readonly courseAccessService: CourseAccessService,
+    private readonly assessmentAccessService: AssessmentAccessService,
+    private readonly assessmentQuestionsService: AssessmentQuestionsService,
+    private readonly coursesService: CoursesService,
   ) {}
 
-  async createSkill(dto: CreateSkillDto): Promise<SkillResponseDto> {
-    const exists = await this.skillRepository.getSkillByName(dto.canonicalName);
+  async createSkill(
+    dto: CreateSkillDto,
+
+    instructorId: string,
+  ): Promise<SkillResponseDto> {
+    const courseId: string = dto.courseId;
+    await this.courseAccessService.ensureInstructorCanManageCourse(
+      courseId,
+      instructorId,
+    );
+    const exists = await this.skillRepository.getSkillByName(
+      dto.canonicalName,
+      courseId,
+    );
 
     if (exists) {
       throw new ConflictException(
-        'A skill with this canonical name already exists',
+        'A skill name with this canonical name already exists',
       );
     }
 
     let level = 0;
 
     if (dto.parentId != null) {
-      const parent = await this.skillRepository.getSkillById(dto.parentId);
+      const parent = await this.skillRepository.getSkillById(
+        dto.parentId,
+        courseId,
+      );
 
       if (!parent || !parent.isActive || parent.deletedAt !== null) {
         throw new BadRequestException('Parent skill does not exist');
@@ -104,7 +129,7 @@ export class SkillService {
       throw new BadGatewayException('Inconsistent embedding dimensions');
     }
 
-    const input = this.mapCreateSkillInput(dto, embeddings, level);
+    const input = this.mapCreateSkillInput(dto, embeddings, level, courseId);
 
     const createdSkill = await this.skillRepository.createSkill(input);
 
@@ -112,11 +137,11 @@ export class SkillService {
       excludeExtraneousValues: true,
     });
   }
-
   private mapCreateSkillInput(
     dto: CreateSkillDto,
     embeddings: SkillEmbeddings,
     level: number,
+    courseId: string,
   ): CreateSkillInput {
     return {
       canonicalName: dto.canonicalName,
@@ -126,13 +151,20 @@ export class SkillService {
       parentId: dto.parentId,
       level,
       difficulty: dto.difficulty ?? Difficulty.EASY,
+      courseId,
     };
   }
   async updateSkill(
     dto: UpdateSkillDto,
     skillId: string,
+    courseId: string,
+    instructorId: string,
   ): Promise<SkillResponseDto> {
-    const skill = await this.skillRepository.getSkillById(skillId);
+    await this.courseAccessService.ensureInstructorCanManageCourse(
+      courseId,
+      instructorId,
+    );
+    const skill = await this.skillRepository.getSkillById(skillId, courseId);
 
     if (!skill || !skill.isActive || skill.deletedAt !== null) {
       throw new NotFoundException('Skill not found');
@@ -150,6 +182,7 @@ export class SkillService {
     ) {
       const existing = await this.skillRepository.getSkillByName(
         dto.canonicalName,
+        courseId,
       );
 
       if (existing && existing.id !== skillId) {
@@ -212,7 +245,6 @@ export class SkillService {
       excludeExtraneousValues: true,
     });
   }
-
   private async generateSkillEmbeddings(
     canonicalName: string,
     description: string | null | undefined,
@@ -271,7 +303,6 @@ export class SkillService {
       ),
     };
   }
-
   private readSkillAliases(value: unknown): string[] | null {
     if (value === null) {
       return null;
@@ -288,31 +319,154 @@ export class SkillService {
 
     return value as string[];
   }
-  async softDeleteSkill(skillId: string): Promise<void> {
-    const skill = await this.skillRepository.getSkillById(skillId);
+  async softDeleteSkill(
+    skillId: string,
+    courseId: string,
+    instructorId: string,
+  ): Promise<void> {
+    await this.courseAccessService.ensureInstructorCanManageCourse(
+      courseId,
+      instructorId,
+    );
+    const skill = await this.skillRepository.getSkillDetails(skillId, courseId);
 
-    if (!skill || skill.deletedAt !== null) {
+    if (!skill) {
       throw new NotFoundException('Skill not found');
+    }
+
+    if (skill.assessmentQuestions.length > 0 || skill.lessons.length > 0) {
+      throw new BadRequestException(
+        'Cannot delete a skill attached to lessons or questions',
+      );
     }
 
     await this.skillRepository.softDeleteSkill(skillId);
   }
+  async getSkillsByCourseId(courseId: string) {
+    return this.skillRepository.getSkillsByCourseId(courseId);
+  }
+  async attachSkillToLesson(
+    courseId: string,
+    sectionId: string,
+    lessonId: string,
+    skillId: string,
+    instructorId: string,
+  ): Promise<SkillResponseDto> {
+    const [, skill, canEdit] = await Promise.all([
+      this.courseAccessService.ensureInstructorCanManageLesson(
+        courseId,
+        instructorId,
+        sectionId,
+        lessonId,
+      ),
+      this.skillRepository.getSkillById(skillId, courseId),
+      this.coursesService.canEditCourse(courseId),
+    ]);
+    if (!canEdit) throw new BadRequestException('Can not modify this course');
 
-  async validateSkillIds(skillIds: string[]): Promise<void> {
-    if (skillIds.length === 0) {
-      return;
+    if (!skill) throw new BadRequestException('Skill not found');
+
+    const attach = await this.skillRepository.connectSkillToLesson(
+      lessonId,
+      skillId,
+    );
+    return plainToInstance(SkillResponseDto, attach);
+  }
+  async attachSkillToQuestion(
+    instructorId: string,
+    courseId: string,
+    assessmentId: string,
+    questionId: string,
+    skillId: string,
+  ): Promise<SkillResponseDto> {
+    await this.assessmentAccessService.ensureInstructorCanManageQuestion(
+      instructorId,
+      courseId,
+      assessmentId,
+      questionId,
+    );
+
+    const skill = await this.skillRepository.getSkillById(skillId, courseId);
+
+    if (!skill || skill.courseId !== courseId) {
+      throw new NotFoundException('Skill not found in this course');
     }
 
-    if (new Set(skillIds).size !== skillIds.length) {
-      throw new BadRequestException('Skill IDs must be unique');
-    }
+    const attach = await this.skillRepository.connectSkillToQuestion(
+      skillId,
+      questionId,
+    );
 
-    const count = await this.skillRepository.checkSkillByIds(skillIds);
-
-    if (count !== skillIds.length) {
-      throw new BadRequestException(
-        'Some skills do not exist, are inactive, or were deleted',
+    return plainToInstance(SkillResponseDto, attach, {
+      excludeExtraneousValues: true,
+    });
+  }
+  async detachSkillFromQuestion(
+    instructorId: string,
+    courseId: string,
+    assessmentId: string,
+    questionId: string,
+    skillId: string,
+  ): Promise<boolean> {
+    await this.assessmentAccessService.ensureInstructorCanManageQuestion(
+      instructorId,
+      courseId,
+      assessmentId,
+      questionId,
+    );
+    const countSkills =
+      await this.assessmentQuestionsService.getSkillCountForQuestion(
+        questionId,
       );
+
+    if (countSkills <= 1)
+      throw new BadRequestException('A question must have at least one skill');
+
+    const existsInQuestion = await this.skillRepository.existInQuestion(
+      skillId,
+      questionId,
+    );
+
+    if (!existsInQuestion) {
+      throw new NotFoundException('Skill not found in this question');
     }
+
+    return this.skillRepository.detachFromQuestion(skillId, questionId);
+  }
+  async findListSkill(
+    query: GetSkillsQueryDto,
+    instructorId: string,
+    courseId: string,
+  ): Promise<SkillResponseDto[]> {
+    const { page, take } = query;
+    await this.assessmentAccessService.ensureInstructorCanManageCourse(
+      instructorId,
+      courseId,
+    );
+
+    const skip = take * page;
+
+    const skills = await this.skillRepository.getSkillsByCourseIdPagination(
+      courseId,
+      take,
+      skip,
+    );
+
+    return skills.map((skill) => {
+      return plainToInstance(SkillResponseDto, skill, {
+        excludeExtraneousValues: true,
+      });
+    });
+  }
+  async verifySkillsBelongToCourse(
+    courseId: string,
+    skillIds: string[],
+  ): Promise<boolean> {
+    const validSkills =
+      await this.skillRepository.getSkillsByCourseId(courseId);
+
+    const validIds = new Set(validSkills.map((skill) => skill.id));
+
+    return skillIds.every((id) => validIds.has(id));
   }
 }

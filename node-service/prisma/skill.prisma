@@ -6,7 +6,8 @@ enum Difficulty {
 
 model Skill {
   id            String     @id @default(cuid())
-  canonicalName String     @unique @map("canonical_name")
+  courseId      String     @map("course_id")
+  canonicalName String     @map("canonical_name")
   description   String?    @db.Text
   aliases       Json?
   embedding     Json?
@@ -19,10 +20,13 @@ model Skill {
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt DateTime?
 
-  parent   Skill?  @relation("SkillHierarchy", fields: [parentId], references: [id])
-  children Skill[] @relation("SkillHierarchy")
-  lessons  Lesson[] @relation("LessonSkills")
+  course              Course               @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  parent              Skill?               @relation("SkillHierarchy", fields: [parentId], references: [id])
+  children            Skill[]              @relation("SkillHierarchy")
+  lessons             Lesson[]             @relation("LessonSkills")
+  assessmentQuestions AssessmentQuestion[] @relation("AssessmentQuestionSkills")
 
+  @@unique([courseId, canonicalName])
   @@index([parentId])
   @@index([isActive])
   @@map("skills")

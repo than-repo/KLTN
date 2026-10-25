@@ -19,6 +19,28 @@ import { AssessmentQuestionsMapper } from '../mappers/assessment-questions.mappe
 @Injectable()
 export class AssessmentQuestionsRepository implements IAssessmentQuestionRepository {
   constructor(private readonly prisma: PrismaService) {}
+  async countSkill(questionId: string): Promise<number> {
+    const result = await this.prisma.assessmentQuestion.findUnique({
+      where: {
+        id: questionId,
+        deletedAt: null,
+        isActive: true,
+      },
+      select: {
+        _count: {
+          select: {
+            skills: {
+              where: {
+                isActive: true,
+                deletedAt: null,
+              },
+            },
+          },
+        },
+      },
+    });
+    return result?._count.skills ?? 0;
+  }
 
   async createQuestionAndSyncTotalPoints(
     input: CreateAssessmentQuestionInput,
@@ -82,6 +104,9 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
     const questions = await this.prisma.assessmentQuestion.findMany({
       where: this.buildWhere(where),
       orderBy: [this.buildOrder(orderBy), { createdAt: 'asc' }],
+      include: {
+        skills: true,
+      },
       skip,
       take,
     });

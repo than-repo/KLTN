@@ -58,6 +58,6 @@ import { PrismaModule } from 'src/core/database/prisma.module';
   ],
   imports: [PrismaModule],
   controllers: [InstructorAssessmentsController, LearnerAssessmentsController],
-  exports: [],
+  exports: [AssessmentQuestionsService, AssessmentAccessService],
 })
 export class AssessmentsModule {}

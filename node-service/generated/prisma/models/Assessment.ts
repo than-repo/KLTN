@@ -616,16 +616,6 @@ export type AssessmentUncheckedUpdateManyInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
-export type AssessmentListRelationFilter = {
-  every?: Prisma.AssessmentWhereInput
-  some?: Prisma.AssessmentWhereInput
-  none?: Prisma.AssessmentWhereInput
-}
-
-export type AssessmentOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type AssessmentOrderByRelevanceInput = {
   fields: Prisma.AssessmentOrderByRelevanceFieldEnum | Prisma.AssessmentOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
@@ -719,6 +709,96 @@ export type AssessmentScalarRelationFilter = {
   isNot?: Prisma.AssessmentWhereInput
 }
 
+export type AssessmentListRelationFilter = {
+  every?: Prisma.AssessmentWhereInput
+  some?: Prisma.AssessmentWhereInput
+  none?: Prisma.AssessmentWhereInput
+}
+
+export type AssessmentOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type EnumAssessmentTypeFieldUpdateOperationsInput = {
+  set?: $Enums.AssessmentType
+}
+
+export type EnumAssessmentStatusFieldUpdateOperationsInput = {
+  set?: $Enums.AssessmentStatus
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type EnumAssessmentReviewTimingFieldUpdateOperationsInput = {
+  set?: $Enums.AssessmentReviewTiming
+}
+
+export type EnumAssessmentReviewContentFieldUpdateOperationsInput = {
+  set?: $Enums.AssessmentReviewContent
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
+export type AssessmentCreateNestedOneWithoutQuestionsInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutQuestionsInput, Prisma.AssessmentUncheckedCreateWithoutQuestionsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutQuestionsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+}
+
+export type AssessmentUpdateOneRequiredWithoutQuestionsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutQuestionsInput, Prisma.AssessmentUncheckedCreateWithoutQuestionsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutQuestionsInput
+  upsert?: Prisma.AssessmentUpsertWithoutQuestionsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentUpdateToOneWithWhereWithoutQuestionsInput, Prisma.AssessmentUpdateWithoutQuestionsInput>, Prisma.AssessmentUncheckedUpdateWithoutQuestionsInput>
+}
+
+export type AssessmentCreateNestedOneWithoutAttemptsInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAttemptsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+}
+
+export type AssessmentUpdateOneRequiredWithoutAttemptsNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAttemptsInput
+  upsert?: Prisma.AssessmentUpsertWithoutAttemptsInput
+  connect?: Prisma.AssessmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentUpdateToOneWithWhereWithoutAttemptsInput, Prisma.AssessmentUpdateWithoutAttemptsInput>, Prisma.AssessmentUncheckedUpdateWithoutAttemptsInput>
+}
+
 export type AssessmentCreateNestedManyWithoutCourseInput = {
   create?: Prisma.XOR<Prisma.AssessmentCreateWithoutCourseInput, Prisma.AssessmentUncheckedCreateWithoutCourseInput> | Prisma.AssessmentCreateWithoutCourseInput[] | Prisma.AssessmentUncheckedCreateWithoutCourseInput[]
   connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutCourseInput | Prisma.AssessmentCreateOrConnectWithoutCourseInput[]
@@ -759,147 +839,6 @@ export type AssessmentUncheckedUpdateManyWithoutCourseNestedInput = {
   update?: Prisma.AssessmentUpdateWithWhereUniqueWithoutCourseInput | Prisma.AssessmentUpdateWithWhereUniqueWithoutCourseInput[]
   updateMany?: Prisma.AssessmentUpdateManyWithWhereWithoutCourseInput | Prisma.AssessmentUpdateManyWithWhereWithoutCourseInput[]
   deleteMany?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
-}
-
-export type EnumAssessmentTypeFieldUpdateOperationsInput = {
-  set?: $Enums.AssessmentType
-}
-
-export type EnumAssessmentStatusFieldUpdateOperationsInput = {
-  set?: $Enums.AssessmentStatus
-}
-
-export type EnumAssessmentReviewTimingFieldUpdateOperationsInput = {
-  set?: $Enums.AssessmentReviewTiming
-}
-
-export type EnumAssessmentReviewContentFieldUpdateOperationsInput = {
-  set?: $Enums.AssessmentReviewContent
-}
-
-export type AssessmentCreateNestedOneWithoutQuestionsInput = {
-  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutQuestionsInput, Prisma.AssessmentUncheckedCreateWithoutQuestionsInput>
-  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutQuestionsInput
-  connect?: Prisma.AssessmentWhereUniqueInput
-}
-
-export type AssessmentUpdateOneRequiredWithoutQuestionsNestedInput = {
-  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutQuestionsInput, Prisma.AssessmentUncheckedCreateWithoutQuestionsInput>
-  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutQuestionsInput
-  upsert?: Prisma.AssessmentUpsertWithoutQuestionsInput
-  connect?: Prisma.AssessmentWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentUpdateToOneWithWhereWithoutQuestionsInput, Prisma.AssessmentUpdateWithoutQuestionsInput>, Prisma.AssessmentUncheckedUpdateWithoutQuestionsInput>
-}
-
-export type AssessmentCreateNestedOneWithoutAttemptsInput = {
-  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
-  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAttemptsInput
-  connect?: Prisma.AssessmentWhereUniqueInput
-}
-
-export type AssessmentUpdateOneRequiredWithoutAttemptsNestedInput = {
-  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAttemptsInput, Prisma.AssessmentUncheckedCreateWithoutAttemptsInput>
-  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAttemptsInput
-  upsert?: Prisma.AssessmentUpsertWithoutAttemptsInput
-  connect?: Prisma.AssessmentWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentUpdateToOneWithWhereWithoutAttemptsInput, Prisma.AssessmentUpdateWithoutAttemptsInput>, Prisma.AssessmentUncheckedUpdateWithoutAttemptsInput>
-}
-
-export type AssessmentCreateWithoutCourseInput = {
-  id?: string
-  title: string
-  description?: string | null
-  type: $Enums.AssessmentType
-  status?: $Enums.AssessmentStatus
-  order?: number
-  totalPoints?: number
-  passingScore?: number | null
-  maxAttempts?: number | null
-  timeLimitMinutes?: number | null
-  availableFrom?: Date | string | null
-  availableUntil?: Date | string | null
-  reviewTiming?: $Enums.AssessmentReviewTiming
-  reviewContent?: $Enums.AssessmentReviewContent
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deletedAt?: Date | string | null
-  questions?: Prisma.AssessmentQuestionCreateNestedManyWithoutAssessmentInput
-  attempts?: Prisma.AssessmentAttemptCreateNestedManyWithoutAssessmentInput
-}
-
-export type AssessmentUncheckedCreateWithoutCourseInput = {
-  id?: string
-  title: string
-  description?: string | null
-  type: $Enums.AssessmentType
-  status?: $Enums.AssessmentStatus
-  order?: number
-  totalPoints?: number
-  passingScore?: number | null
-  maxAttempts?: number | null
-  timeLimitMinutes?: number | null
-  availableFrom?: Date | string | null
-  availableUntil?: Date | string | null
-  reviewTiming?: $Enums.AssessmentReviewTiming
-  reviewContent?: $Enums.AssessmentReviewContent
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deletedAt?: Date | string | null
-  questions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutAssessmentInput
-  attempts?: Prisma.AssessmentAttemptUncheckedCreateNestedManyWithoutAssessmentInput
-}
-
-export type AssessmentCreateOrConnectWithoutCourseInput = {
-  where: Prisma.AssessmentWhereUniqueInput
-  create: Prisma.XOR<Prisma.AssessmentCreateWithoutCourseInput, Prisma.AssessmentUncheckedCreateWithoutCourseInput>
-}
-
-export type AssessmentCreateManyCourseInputEnvelope = {
-  data: Prisma.AssessmentCreateManyCourseInput | Prisma.AssessmentCreateManyCourseInput[]
-  skipDuplicates?: boolean
-}
-
-export type AssessmentUpsertWithWhereUniqueWithoutCourseInput = {
-  where: Prisma.AssessmentWhereUniqueInput
-  update: Prisma.XOR<Prisma.AssessmentUpdateWithoutCourseInput, Prisma.AssessmentUncheckedUpdateWithoutCourseInput>
-  create: Prisma.XOR<Prisma.AssessmentCreateWithoutCourseInput, Prisma.AssessmentUncheckedCreateWithoutCourseInput>
-}
-
-export type AssessmentUpdateWithWhereUniqueWithoutCourseInput = {
-  where: Prisma.AssessmentWhereUniqueInput
-  data: Prisma.XOR<Prisma.AssessmentUpdateWithoutCourseInput, Prisma.AssessmentUncheckedUpdateWithoutCourseInput>
-}
-
-export type AssessmentUpdateManyWithWhereWithoutCourseInput = {
-  where: Prisma.AssessmentScalarWhereInput
-  data: Prisma.XOR<Prisma.AssessmentUpdateManyMutationInput, Prisma.AssessmentUncheckedUpdateManyWithoutCourseInput>
-}
-
-export type AssessmentScalarWhereInput = {
-  AND?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
-  OR?: Prisma.AssessmentScalarWhereInput[]
-  NOT?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
-  id?: Prisma.StringFilter<"Assessment"> | string
-  courseId?: Prisma.StringFilter<"Assessment"> | string
-  title?: Prisma.StringFilter<"Assessment"> | string
-  description?: Prisma.StringNullableFilter<"Assessment"> | string | null
-  type?: Prisma.EnumAssessmentTypeFilter<"Assessment"> | $Enums.AssessmentType
-  status?: Prisma.EnumAssessmentStatusFilter<"Assessment"> | $Enums.AssessmentStatus
-  order?: Prisma.IntFilter<"Assessment"> | number
-  totalPoints?: Prisma.IntFilter<"Assessment"> | number
-  passingScore?: Prisma.IntNullableFilter<"Assessment"> | number | null
-  maxAttempts?: Prisma.IntNullableFilter<"Assessment"> | number | null
-  timeLimitMinutes?: Prisma.IntNullableFilter<"Assessment"> | number | null
-  availableFrom?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
-  availableUntil?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
-  reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
-  reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
-  isActive?: Prisma.BoolFilter<"Assessment"> | boolean
-  createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
-  deletedAt?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
 }
 
 export type AssessmentCreateWithoutQuestionsInput = {
@@ -1116,6 +1055,103 @@ export type AssessmentUncheckedUpdateWithoutAttemptsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   questions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutAssessmentNestedInput
+}
+
+export type AssessmentCreateWithoutCourseInput = {
+  id?: string
+  title: string
+  description?: string | null
+  type: $Enums.AssessmentType
+  status?: $Enums.AssessmentStatus
+  order?: number
+  totalPoints?: number
+  passingScore?: number | null
+  maxAttempts?: number | null
+  timeLimitMinutes?: number | null
+  availableFrom?: Date | string | null
+  availableUntil?: Date | string | null
+  reviewTiming?: $Enums.AssessmentReviewTiming
+  reviewContent?: $Enums.AssessmentReviewContent
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  questions?: Prisma.AssessmentQuestionCreateNestedManyWithoutAssessmentInput
+  attempts?: Prisma.AssessmentAttemptCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentUncheckedCreateWithoutCourseInput = {
+  id?: string
+  title: string
+  description?: string | null
+  type: $Enums.AssessmentType
+  status?: $Enums.AssessmentStatus
+  order?: number
+  totalPoints?: number
+  passingScore?: number | null
+  maxAttempts?: number | null
+  timeLimitMinutes?: number | null
+  availableFrom?: Date | string | null
+  availableUntil?: Date | string | null
+  reviewTiming?: $Enums.AssessmentReviewTiming
+  reviewContent?: $Enums.AssessmentReviewContent
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  questions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutAssessmentInput
+  attempts?: Prisma.AssessmentAttemptUncheckedCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentCreateOrConnectWithoutCourseInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutCourseInput, Prisma.AssessmentUncheckedCreateWithoutCourseInput>
+}
+
+export type AssessmentCreateManyCourseInputEnvelope = {
+  data: Prisma.AssessmentCreateManyCourseInput | Prisma.AssessmentCreateManyCourseInput[]
+  skipDuplicates?: boolean
+}
+
+export type AssessmentUpsertWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.AssessmentUpdateWithoutCourseInput, Prisma.AssessmentUncheckedUpdateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutCourseInput, Prisma.AssessmentUncheckedCreateWithoutCourseInput>
+}
+
+export type AssessmentUpdateWithWhereUniqueWithoutCourseInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.AssessmentUpdateWithoutCourseInput, Prisma.AssessmentUncheckedUpdateWithoutCourseInput>
+}
+
+export type AssessmentUpdateManyWithWhereWithoutCourseInput = {
+  where: Prisma.AssessmentScalarWhereInput
+  data: Prisma.XOR<Prisma.AssessmentUpdateManyMutationInput, Prisma.AssessmentUncheckedUpdateManyWithoutCourseInput>
+}
+
+export type AssessmentScalarWhereInput = {
+  AND?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
+  OR?: Prisma.AssessmentScalarWhereInput[]
+  NOT?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
+  id?: Prisma.StringFilter<"Assessment"> | string
+  courseId?: Prisma.StringFilter<"Assessment"> | string
+  title?: Prisma.StringFilter<"Assessment"> | string
+  description?: Prisma.StringNullableFilter<"Assessment"> | string | null
+  type?: Prisma.EnumAssessmentTypeFilter<"Assessment"> | $Enums.AssessmentType
+  status?: Prisma.EnumAssessmentStatusFilter<"Assessment"> | $Enums.AssessmentStatus
+  order?: Prisma.IntFilter<"Assessment"> | number
+  totalPoints?: Prisma.IntFilter<"Assessment"> | number
+  passingScore?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  maxAttempts?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  timeLimitMinutes?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  availableFrom?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
+  availableUntil?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
+  reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
+  reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
+  isActive?: Prisma.BoolFilter<"Assessment"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
 }
 
 export type AssessmentCreateManyCourseInput = {

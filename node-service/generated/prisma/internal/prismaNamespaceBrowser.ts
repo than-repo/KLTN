@@ -51,6 +51,12 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
+  Assessment: 'Assessment',
+  AssessmentQuestion: 'AssessmentQuestion',
+  AssessmentAnswer: 'AssessmentAnswer',
+  AssessmentAttempt: 'AssessmentAttempt',
+  AssessmentAttemptAnswer: 'AssessmentAttemptAnswer',
+  ProjectSubmission: 'ProjectSubmission',
   User: 'User',
   UserIdentity: 'UserIdentity',
   RefreshToken: 'RefreshToken',
@@ -66,12 +72,6 @@ export const ModelName = {
   FileMedia: 'FileMedia',
   Enrollment: 'Enrollment',
   Payment: 'Payment',
-  Assessment: 'Assessment',
-  AssessmentQuestion: 'AssessmentQuestion',
-  AssessmentAnswer: 'AssessmentAnswer',
-  AssessmentAttempt: 'AssessmentAttempt',
-  AssessmentAttemptAnswer: 'AssessmentAttemptAnswer',
-  ProjectSubmission: 'ProjectSubmission',
   Skill: 'Skill'
 } as const
 
@@ -89,6 +89,111 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const AssessmentScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  status: 'status',
+  order: 'order',
+  totalPoints: 'totalPoints',
+  passingScore: 'passingScore',
+  maxAttempts: 'maxAttempts',
+  timeLimitMinutes: 'timeLimitMinutes',
+  availableFrom: 'availableFrom',
+  availableUntil: 'availableUntil',
+  reviewTiming: 'reviewTiming',
+  reviewContent: 'reviewContent',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type AssessmentScalarFieldEnum = (typeof AssessmentScalarFieldEnum)[keyof typeof AssessmentScalarFieldEnum]
+
+
+export const AssessmentQuestionScalarFieldEnum = {
+  id: 'id',
+  assessmentId: 'assessmentId',
+  questionText: 'questionText',
+  type: 'type',
+  explanation: 'explanation',
+  points: 'points',
+  order: 'order',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type AssessmentQuestionScalarFieldEnum = (typeof AssessmentQuestionScalarFieldEnum)[keyof typeof AssessmentQuestionScalarFieldEnum]
+
+
+export const AssessmentAnswerScalarFieldEnum = {
+  id: 'id',
+  correctOptionAnswer: 'correctOptionAnswer',
+  correctTextAnswer: 'correctTextAnswer',
+  wrongAnswers: 'wrongAnswers',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  questionId: 'questionId'
+} as const
+
+export type AssessmentAnswerScalarFieldEnum = (typeof AssessmentAnswerScalarFieldEnum)[keyof typeof AssessmentAnswerScalarFieldEnum]
+
+
+export const AssessmentAttemptScalarFieldEnum = {
+  id: 'id',
+  attemptNumber: 'attemptNumber',
+  status: 'status',
+  score: 'score',
+  maxScore: 'maxScore',
+  passed: 'passed',
+  startedAt: 'startedAt',
+  submittedAt: 'submittedAt',
+  assessmentId: 'assessmentId',
+  learnerId: 'learnerId'
+} as const
+
+export type AssessmentAttemptScalarFieldEnum = (typeof AssessmentAttemptScalarFieldEnum)[keyof typeof AssessmentAttemptScalarFieldEnum]
+
+
+export const AssessmentAttemptAnswerScalarFieldEnum = {
+  id: 'id',
+  textAnswer: 'textAnswer',
+  answerSnapshot: 'answerSnapshot',
+  isCorrect: 'isCorrect',
+  pointsEarned: 'pointsEarned',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  attemptId: 'attemptId',
+  questionId: 'questionId'
+} as const
+
+export type AssessmentAttemptAnswerScalarFieldEnum = (typeof AssessmentAttemptAnswerScalarFieldEnum)[keyof typeof AssessmentAttemptAnswerScalarFieldEnum]
+
+
+export const ProjectSubmissionScalarFieldEnum = {
+  id: 'id',
+  attemptId: 'attemptId',
+  githubUrl: 'githubUrl',
+  deployUrl: 'deployUrl',
+  documentUrl: 'documentUrl',
+  note: 'note',
+  status: 'status',
+  score: 'score',
+  feedback: 'feedback',
+  gradedAt: 'gradedAt',
+  submittedAt: 'submittedAt',
+  updatedAt: 'updatedAt',
+  graderId: 'graderId'
+} as const
+
+export type ProjectSubmissionScalarFieldEnum = (typeof ProjectSubmissionScalarFieldEnum)[keyof typeof ProjectSubmissionScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -332,113 +437,9 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
-export const AssessmentScalarFieldEnum = {
-  id: 'id',
-  courseId: 'courseId',
-  title: 'title',
-  description: 'description',
-  type: 'type',
-  status: 'status',
-  order: 'order',
-  totalPoints: 'totalPoints',
-  passingScore: 'passingScore',
-  maxAttempts: 'maxAttempts',
-  timeLimitMinutes: 'timeLimitMinutes',
-  availableFrom: 'availableFrom',
-  availableUntil: 'availableUntil',
-  reviewTiming: 'reviewTiming',
-  reviewContent: 'reviewContent',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-} as const
-
-export type AssessmentScalarFieldEnum = (typeof AssessmentScalarFieldEnum)[keyof typeof AssessmentScalarFieldEnum]
-
-
-export const AssessmentQuestionScalarFieldEnum = {
-  id: 'id',
-  assessmentId: 'assessmentId',
-  questionText: 'questionText',
-  type: 'type',
-  explanation: 'explanation',
-  points: 'points',
-  order: 'order',
-  isActive: 'isActive',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-} as const
-
-export type AssessmentQuestionScalarFieldEnum = (typeof AssessmentQuestionScalarFieldEnum)[keyof typeof AssessmentQuestionScalarFieldEnum]
-
-
-export const AssessmentAnswerScalarFieldEnum = {
-  id: 'id',
-  correctOptionAnswer: 'correctOptionAnswer',
-  correctTextAnswer: 'correctTextAnswer',
-  wrongAnswers: 'wrongAnswers',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  questionId: 'questionId'
-} as const
-
-export type AssessmentAnswerScalarFieldEnum = (typeof AssessmentAnswerScalarFieldEnum)[keyof typeof AssessmentAnswerScalarFieldEnum]
-
-
-export const AssessmentAttemptScalarFieldEnum = {
-  id: 'id',
-  attemptNumber: 'attemptNumber',
-  status: 'status',
-  score: 'score',
-  maxScore: 'maxScore',
-  passed: 'passed',
-  startedAt: 'startedAt',
-  submittedAt: 'submittedAt',
-  assessmentId: 'assessmentId',
-  learnerId: 'learnerId'
-} as const
-
-export type AssessmentAttemptScalarFieldEnum = (typeof AssessmentAttemptScalarFieldEnum)[keyof typeof AssessmentAttemptScalarFieldEnum]
-
-
-export const AssessmentAttemptAnswerScalarFieldEnum = {
-  id: 'id',
-  textAnswer: 'textAnswer',
-  answerSnapshot: 'answerSnapshot',
-  isCorrect: 'isCorrect',
-  pointsEarned: 'pointsEarned',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  attemptId: 'attemptId',
-  questionId: 'questionId'
-} as const
-
-export type AssessmentAttemptAnswerScalarFieldEnum = (typeof AssessmentAttemptAnswerScalarFieldEnum)[keyof typeof AssessmentAttemptAnswerScalarFieldEnum]
-
-
-export const ProjectSubmissionScalarFieldEnum = {
-  id: 'id',
-  attemptId: 'attemptId',
-  githubUrl: 'githubUrl',
-  deployUrl: 'deployUrl',
-  documentUrl: 'documentUrl',
-  note: 'note',
-  status: 'status',
-  score: 'score',
-  feedback: 'feedback',
-  gradedAt: 'gradedAt',
-  submittedAt: 'submittedAt',
-  updatedAt: 'updatedAt',
-  graderId: 'graderId'
-} as const
-
-export type ProjectSubmissionScalarFieldEnum = (typeof ProjectSubmissionScalarFieldEnum)[keyof typeof ProjectSubmissionScalarFieldEnum]
-
-
 export const SkillScalarFieldEnum = {
   id: 'id',
+  courseId: 'courseId',
   canonicalName: 'canonicalName',
   description: 'description',
   aliases: 'aliases',
@@ -477,6 +478,87 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const AssessmentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  title: 'title',
+  description: 'description'
+} as const
+
+export type AssessmentOrderByRelevanceFieldEnum = (typeof AssessmentOrderByRelevanceFieldEnum)[keyof typeof AssessmentOrderByRelevanceFieldEnum]
+
+
+export const AssessmentQuestionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  assessmentId: 'assessmentId',
+  questionText: 'questionText',
+  explanation: 'explanation'
+} as const
+
+export type AssessmentQuestionOrderByRelevanceFieldEnum = (typeof AssessmentQuestionOrderByRelevanceFieldEnum)[keyof typeof AssessmentQuestionOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const AssessmentAnswerOrderByRelevanceFieldEnum = {
+  id: 'id',
+  correctOptionAnswer: 'correctOptionAnswer',
+  correctTextAnswer: 'correctTextAnswer',
+  questionId: 'questionId'
+} as const
+
+export type AssessmentAnswerOrderByRelevanceFieldEnum = (typeof AssessmentAnswerOrderByRelevanceFieldEnum)[keyof typeof AssessmentAnswerOrderByRelevanceFieldEnum]
+
+
+export const AssessmentAttemptOrderByRelevanceFieldEnum = {
+  id: 'id',
+  assessmentId: 'assessmentId',
+  learnerId: 'learnerId'
+} as const
+
+export type AssessmentAttemptOrderByRelevanceFieldEnum = (typeof AssessmentAttemptOrderByRelevanceFieldEnum)[keyof typeof AssessmentAttemptOrderByRelevanceFieldEnum]
+
+
+export const AssessmentAttemptAnswerOrderByRelevanceFieldEnum = {
+  id: 'id',
+  textAnswer: 'textAnswer',
+  answerSnapshot: 'answerSnapshot',
+  attemptId: 'attemptId',
+  questionId: 'questionId'
+} as const
+
+export type AssessmentAttemptAnswerOrderByRelevanceFieldEnum = (typeof AssessmentAttemptAnswerOrderByRelevanceFieldEnum)[keyof typeof AssessmentAttemptAnswerOrderByRelevanceFieldEnum]
+
+
+export const ProjectSubmissionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  attemptId: 'attemptId',
+  githubUrl: 'githubUrl',
+  deployUrl: 'deployUrl',
+  documentUrl: 'documentUrl',
+  note: 'note',
+  feedback: 'feedback',
+  graderId: 'graderId'
+} as const
+
+export type ProjectSubmissionOrderByRelevanceFieldEnum = (typeof ProjectSubmissionOrderByRelevanceFieldEnum)[keyof typeof ProjectSubmissionOrderByRelevanceFieldEnum]
 
 
 export const UserOrderByRelevanceFieldEnum = {
@@ -547,23 +629,6 @@ export const CourseInstructorOrderByRelevanceFieldEnum = {
 } as const
 
 export type CourseInstructorOrderByRelevanceFieldEnum = (typeof CourseInstructorOrderByRelevanceFieldEnum)[keyof typeof CourseInstructorOrderByRelevanceFieldEnum]
-
-
-export const JsonNullValueFilter = {
-  DbNull: DbNull,
-  JsonNull: JsonNull,
-  AnyNull: AnyNull
-} as const
-
-export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
-
-
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive'
-} as const
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
 export const CourseOrderByRelevanceFieldEnum = {
@@ -655,72 +720,9 @@ export const PaymentOrderByRelevanceFieldEnum = {
 export type PaymentOrderByRelevanceFieldEnum = (typeof PaymentOrderByRelevanceFieldEnum)[keyof typeof PaymentOrderByRelevanceFieldEnum]
 
 
-export const AssessmentOrderByRelevanceFieldEnum = {
-  id: 'id',
-  courseId: 'courseId',
-  title: 'title',
-  description: 'description'
-} as const
-
-export type AssessmentOrderByRelevanceFieldEnum = (typeof AssessmentOrderByRelevanceFieldEnum)[keyof typeof AssessmentOrderByRelevanceFieldEnum]
-
-
-export const AssessmentQuestionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  assessmentId: 'assessmentId',
-  questionText: 'questionText',
-  explanation: 'explanation'
-} as const
-
-export type AssessmentQuestionOrderByRelevanceFieldEnum = (typeof AssessmentQuestionOrderByRelevanceFieldEnum)[keyof typeof AssessmentQuestionOrderByRelevanceFieldEnum]
-
-
-export const AssessmentAnswerOrderByRelevanceFieldEnum = {
-  id: 'id',
-  correctOptionAnswer: 'correctOptionAnswer',
-  correctTextAnswer: 'correctTextAnswer',
-  questionId: 'questionId'
-} as const
-
-export type AssessmentAnswerOrderByRelevanceFieldEnum = (typeof AssessmentAnswerOrderByRelevanceFieldEnum)[keyof typeof AssessmentAnswerOrderByRelevanceFieldEnum]
-
-
-export const AssessmentAttemptOrderByRelevanceFieldEnum = {
-  id: 'id',
-  assessmentId: 'assessmentId',
-  learnerId: 'learnerId'
-} as const
-
-export type AssessmentAttemptOrderByRelevanceFieldEnum = (typeof AssessmentAttemptOrderByRelevanceFieldEnum)[keyof typeof AssessmentAttemptOrderByRelevanceFieldEnum]
-
-
-export const AssessmentAttemptAnswerOrderByRelevanceFieldEnum = {
-  id: 'id',
-  textAnswer: 'textAnswer',
-  answerSnapshot: 'answerSnapshot',
-  attemptId: 'attemptId',
-  questionId: 'questionId'
-} as const
-
-export type AssessmentAttemptAnswerOrderByRelevanceFieldEnum = (typeof AssessmentAttemptAnswerOrderByRelevanceFieldEnum)[keyof typeof AssessmentAttemptAnswerOrderByRelevanceFieldEnum]
-
-
-export const ProjectSubmissionOrderByRelevanceFieldEnum = {
-  id: 'id',
-  attemptId: 'attemptId',
-  githubUrl: 'githubUrl',
-  deployUrl: 'deployUrl',
-  documentUrl: 'documentUrl',
-  note: 'note',
-  feedback: 'feedback',
-  graderId: 'graderId'
-} as const
-
-export type ProjectSubmissionOrderByRelevanceFieldEnum = (typeof ProjectSubmissionOrderByRelevanceFieldEnum)[keyof typeof ProjectSubmissionOrderByRelevanceFieldEnum]
-
-
 export const SkillOrderByRelevanceFieldEnum = {
   id: 'id',
+  courseId: 'courseId',
   canonicalName: 'canonicalName',
   description: 'description',
   parentId: 'parentId'

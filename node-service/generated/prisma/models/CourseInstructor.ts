@@ -406,6 +406,11 @@ export type CourseInstructorUncheckedUpdateManyInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
+export type CourseInstructorNullableScalarRelationFilter = {
+  is?: Prisma.CourseInstructorWhereInput | null
+  isNot?: Prisma.CourseInstructorWhereInput | null
+}
+
 export type CourseInstructorListRelationFilter = {
   every?: Prisma.CourseInstructorWhereInput
   some?: Prisma.CourseInstructorWhereInput
@@ -471,9 +476,20 @@ export type CourseInstructorSumOrderByAggregateInput = {
   order?: Prisma.SortOrder
 }
 
-export type CourseInstructorNullableScalarRelationFilter = {
-  is?: Prisma.CourseInstructorWhereInput | null
-  isNot?: Prisma.CourseInstructorWhereInput | null
+export type CourseInstructorCreateNestedOneWithoutGradedProjectSubmissionsInput = {
+  create?: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
+  connectOrCreate?: Prisma.CourseInstructorCreateOrConnectWithoutGradedProjectSubmissionsInput
+  connect?: Prisma.CourseInstructorWhereUniqueInput
+}
+
+export type CourseInstructorUpdateOneWithoutGradedProjectSubmissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
+  connectOrCreate?: Prisma.CourseInstructorCreateOrConnectWithoutGradedProjectSubmissionsInput
+  upsert?: Prisma.CourseInstructorUpsertWithoutGradedProjectSubmissionsInput
+  disconnect?: Prisma.CourseInstructorWhereInput | boolean
+  delete?: Prisma.CourseInstructorWhereInput | boolean
+  connect?: Prisma.CourseInstructorWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseInstructorUpdateToOneWithWhereWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUpdateWithoutGradedProjectSubmissionsInput>, Prisma.CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput>
 }
 
 export type CourseInstructorCreateNestedManyWithoutInstructorInput = {
@@ -518,14 +534,6 @@ export type CourseInstructorUncheckedUpdateManyWithoutInstructorNestedInput = {
   deleteMany?: Prisma.CourseInstructorScalarWhereInput | Prisma.CourseInstructorScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CourseInstructorCreateNestedManyWithoutCourseInput = {
   create?: Prisma.XOR<Prisma.CourseInstructorCreateWithoutCourseInput, Prisma.CourseInstructorUncheckedCreateWithoutCourseInput> | Prisma.CourseInstructorCreateWithoutCourseInput[] | Prisma.CourseInstructorUncheckedCreateWithoutCourseInput[]
   connectOrCreate?: Prisma.CourseInstructorCreateOrConnectWithoutCourseInput | Prisma.CourseInstructorCreateOrConnectWithoutCourseInput[]
@@ -568,20 +576,68 @@ export type CourseInstructorUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.CourseInstructorScalarWhereInput | Prisma.CourseInstructorScalarWhereInput[]
 }
 
-export type CourseInstructorCreateNestedOneWithoutGradedProjectSubmissionsInput = {
-  create?: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
-  connectOrCreate?: Prisma.CourseInstructorCreateOrConnectWithoutGradedProjectSubmissionsInput
-  connect?: Prisma.CourseInstructorWhereUniqueInput
+export type CourseInstructorCreateWithoutGradedProjectSubmissionsInput = {
+  id?: string
+  isPrimary?: boolean
+  order?: number
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  course: Prisma.CourseCreateNestedOneWithoutInstructorsInput
+  instructor: Prisma.UserCreateNestedOneWithoutCourseInstructorsInput
 }
 
-export type CourseInstructorUpdateOneWithoutGradedProjectSubmissionsNestedInput = {
-  create?: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
-  connectOrCreate?: Prisma.CourseInstructorCreateOrConnectWithoutGradedProjectSubmissionsInput
-  upsert?: Prisma.CourseInstructorUpsertWithoutGradedProjectSubmissionsInput
-  disconnect?: Prisma.CourseInstructorWhereInput | boolean
-  delete?: Prisma.CourseInstructorWhereInput | boolean
-  connect?: Prisma.CourseInstructorWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CourseInstructorUpdateToOneWithWhereWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUpdateWithoutGradedProjectSubmissionsInput>, Prisma.CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput>
+export type CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput = {
+  id?: string
+  courseId: string
+  instructorId: string
+  isPrimary?: boolean
+  order?: number
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type CourseInstructorCreateOrConnectWithoutGradedProjectSubmissionsInput = {
+  where: Prisma.CourseInstructorWhereUniqueInput
+  create: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
+}
+
+export type CourseInstructorUpsertWithoutGradedProjectSubmissionsInput = {
+  update: Prisma.XOR<Prisma.CourseInstructorUpdateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput>
+  create: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
+  where?: Prisma.CourseInstructorWhereInput
+}
+
+export type CourseInstructorUpdateToOneWithWhereWithoutGradedProjectSubmissionsInput = {
+  where?: Prisma.CourseInstructorWhereInput
+  data: Prisma.XOR<Prisma.CourseInstructorUpdateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput>
+}
+
+export type CourseInstructorUpdateWithoutGradedProjectSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course?: Prisma.CourseUpdateOneRequiredWithoutInstructorsNestedInput
+  instructor?: Prisma.UserUpdateOneRequiredWithoutCourseInstructorsNestedInput
+}
+
+export type CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  instructorId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type CourseInstructorCreateWithoutInstructorInput = {
@@ -697,70 +753,6 @@ export type CourseInstructorUpdateWithWhereUniqueWithoutCourseInput = {
 export type CourseInstructorUpdateManyWithWhereWithoutCourseInput = {
   where: Prisma.CourseInstructorScalarWhereInput
   data: Prisma.XOR<Prisma.CourseInstructorUpdateManyMutationInput, Prisma.CourseInstructorUncheckedUpdateManyWithoutCourseInput>
-}
-
-export type CourseInstructorCreateWithoutGradedProjectSubmissionsInput = {
-  id?: string
-  isPrimary?: boolean
-  order?: number
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deletedAt?: Date | string | null
-  course: Prisma.CourseCreateNestedOneWithoutInstructorsInput
-  instructor: Prisma.UserCreateNestedOneWithoutCourseInstructorsInput
-}
-
-export type CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput = {
-  id?: string
-  courseId: string
-  instructorId: string
-  isPrimary?: boolean
-  order?: number
-  isActive?: boolean
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deletedAt?: Date | string | null
-}
-
-export type CourseInstructorCreateOrConnectWithoutGradedProjectSubmissionsInput = {
-  where: Prisma.CourseInstructorWhereUniqueInput
-  create: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
-}
-
-export type CourseInstructorUpsertWithoutGradedProjectSubmissionsInput = {
-  update: Prisma.XOR<Prisma.CourseInstructorUpdateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput>
-  create: Prisma.XOR<Prisma.CourseInstructorCreateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedCreateWithoutGradedProjectSubmissionsInput>
-  where?: Prisma.CourseInstructorWhereInput
-}
-
-export type CourseInstructorUpdateToOneWithWhereWithoutGradedProjectSubmissionsInput = {
-  where?: Prisma.CourseInstructorWhereInput
-  data: Prisma.XOR<Prisma.CourseInstructorUpdateWithoutGradedProjectSubmissionsInput, Prisma.CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput>
-}
-
-export type CourseInstructorUpdateWithoutGradedProjectSubmissionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  order?: Prisma.IntFieldUpdateOperationsInput | number
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  course?: Prisma.CourseUpdateOneRequiredWithoutInstructorsNestedInput
-  instructor?: Prisma.UserUpdateOneRequiredWithoutCourseInstructorsNestedInput
-}
-
-export type CourseInstructorUncheckedUpdateWithoutGradedProjectSubmissionsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
-  instructorId?: Prisma.StringFieldUpdateOperationsInput | string
-  isPrimary?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  order?: Prisma.IntFieldUpdateOperationsInput | number
-  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type CourseInstructorCreateManyInstructorInput = {

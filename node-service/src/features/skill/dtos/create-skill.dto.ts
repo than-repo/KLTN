@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   MinLength,
   ValidateIf,
@@ -13,6 +14,11 @@ import {
 import { Difficulty } from 'generated/prisma/enums';
 
 export class CreateSkillDto {
+  @IsString()
+  @IsNotEmpty()
+  @IsUUID()
+  courseId!: string;
+
   @IsString()
   @IsNotEmpty()
   @MinLength(3)

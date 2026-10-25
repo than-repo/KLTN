@@ -25,6 +25,7 @@ export interface IAssessmentRepository {
   ): Promise<Assessment[]>;
 
   count(where: WhereAssessmentInput): Promise<number>;
+
 }
 export interface CreateAssessmentInput {
   courseId: string;

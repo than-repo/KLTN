@@ -19,6 +19,9 @@ export class EmbeddingService {
   private getPyEnpoint() {
     return this.configService.getOrThrow<string>('PYTHON_EMBEDDING_URL');
   }
+  private getAIServiceKey() {
+    return this.configService.getOrThrow<string>('AI_SERVICE_API_KEY');
+  }
 
   async generateEmbedding(text: string): Promise<number[]> {
     const normalizedText = text.trim();
@@ -35,6 +38,7 @@ export class EmbeddingService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getAIServiceKey()}`,
         },
         body: JSON.stringify({ text: normalizedText }),
         signal,
@@ -109,6 +113,7 @@ export class EmbeddingService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getAIServiceKey()}`,
         },
         body: JSON.stringify({ items }),
         signal,

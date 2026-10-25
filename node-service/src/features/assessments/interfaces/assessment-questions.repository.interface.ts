@@ -1,5 +1,7 @@
 // src/features/assessments/interfaces/assessment-questions.repository.interface.ts
 
+import { Difficulty, Prisma } from 'generated/prisma/client';
+
 export interface IAssessmentQuestionRepository {
   createQuestionAndSyncTotalPoints(
     input: CreateAssessmentQuestionInput,
@@ -34,6 +36,8 @@ export interface IAssessmentQuestionRepository {
   sumActiveQuestionPoints(assessmentId: string): Promise<number>;
 
   syncAssessmentTotalPointsTx(tx: unknown, assessmentId: string): Promise<void>;
+
+  countSkill(questionId: string): Promise<number>;
 }
 
 export const AssessmentQuestionType = {
@@ -84,6 +88,9 @@ export interface AssessmentQuestion {
   points: number;
   order: number;
 
+  //skills
+  skills?: Skill[];
+
   isActive: boolean;
 
   createdAt: Date;
@@ -131,6 +138,22 @@ export interface WhereAssessmentQuestionInput {
 
   createdAtGte?: Date;
   updatedAtGte?: Date;
+}
+
+export interface Skill {
+  id: string;
+  courseId: string;
+  canonicalName: string;
+  description: string | null;
+  aliases: Prisma.JsonValue;
+  embedding: Prisma.JsonValue;
+  parentId: string | null;
+  level: number;
+  difficulty: Difficulty;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface OrderAssessmentQuestionInput {
