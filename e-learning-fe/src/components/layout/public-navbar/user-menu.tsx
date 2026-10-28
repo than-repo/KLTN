@@ -104,6 +104,16 @@ export function UserMenu({ onLogout, user }: UserMenuProps) {
               Admin Dashboard
             </Link>
           ) : null}
+          {user.role === "REVIEWER" ? (
+            <Link
+              href="/reviewer"
+              className="mt-2 block rounded-md px-3 py-2 text-sm font-normal hover:bg-muted"
+              onClick={() => setIsOpen(false)}
+              role="menuitem"
+            >
+              Reviewer Dashboard
+            </Link>
+          ) : null}
           <Link
             href="/profile"
             className="block rounded-md px-3 py-2 text-sm font-normal hover:bg-muted"

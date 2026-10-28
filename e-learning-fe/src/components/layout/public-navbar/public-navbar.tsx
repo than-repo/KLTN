@@ -96,6 +96,10 @@ function addRoleLinks(links: PublicNavLink[], role: UserRole) {
     return addLinkIfMissing(links, { href: "/admin", label: "Dashboard" });
   }
 
+  if (role === "REVIEWER") {
+    return addLinkIfMissing(links, { href: "/reviewer", label: "Dashboard" });
+  }
+
   return links;
 }
 

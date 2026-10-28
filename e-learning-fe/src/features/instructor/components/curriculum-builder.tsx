@@ -28,6 +28,7 @@ import {
   reorderInstructorCourseLessons,
   updateInstructorCourseLesson,
 } from "../api/instructor-lesson-api";
+import { attachInstructorSkillToLesson, detachInstructorSkillFromLesson } from "../api/instructor-skill-api";
 import {
   createInstructorLessonFile,
   deleteInstructorLessonFile,
@@ -42,6 +43,8 @@ import type {
   MediaType,
   Section,
 } from "../types/instructor-course";
+import type { Skill } from "../types/instructor-skill";
+import { AssignSkillToLessonDialog } from "./assign-skill-to-lesson-dialog";
 import { isCourseEditable } from "../utils/course-status";
 import { formatFileSize, getErrorMessage } from "../utils/instructor-format";
 import {
@@ -55,6 +58,7 @@ import {
   type LessonMediaType,
 } from "../utils/lesson-media";
 import { InstructorModal } from "./instructor-modal";
+import { Toast } from "@/components/ui/toast";
 
 const fieldClasses =
   "mt-2 min-h-11 w-full rounded-md border border-border bg-background px-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-focus/20";
@@ -177,6 +181,12 @@ export function CurriculumBuilder() {
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [editLessonTitle, setEditLessonTitle] = useState("");
   const [editLessonDescription, setEditLessonDescription] = useState("");
+  const [assignedSkills, setAssignedSkills] = useState<Record<string, Skill[]>>(
+    {},
+  );
+  const [skillDialogLesson, setSkillDialogLesson] = useState<Lesson | null>(
+    null,
+  );
 
   const [sectionToDelete, setSectionToDelete] = useState<Section | null>(null);
   const [lessonToDelete, setLessonToDelete] = useState<{
@@ -744,6 +754,39 @@ export function CurriculumBuilder() {
     }
   }
 
+  async function handleAssignSkillToLesson(
+    sectionId: string,
+    lesson: Lesson,
+    skill: Skill,
+  ) {
+    if (!ensureCourseEditable() || !accessToken) return;
+
+    try {
+      setError("");
+      setSuccessMessage("");
+
+      await attachInstructorSkillToLesson(
+        courseId,
+        sectionId,
+        lesson.id,
+        skill.id,
+        accessToken,
+      );
+
+      setAssignedSkills((prev) => ({
+        ...prev,
+        [lesson.id]: [...(prev[lesson.id] ?? []), skill],
+      }));
+
+      showSuccess(`Skill "${skill.canonicalName}" assigned to lesson.`);
+      await fetchSectionsAndLessons(true);
+    } catch (assignError) {
+      showError(
+        getErrorMessage(assignError, "Failed to assign skill to lesson."),
+      );
+    }
+  }
+
   async function confirmDeleteLesson() {
     if (!lessonToDelete || !accessToken) return;
     if (!ensureCourseEditable()) return;
@@ -1158,23 +1201,11 @@ export function CurriculumBuilder() {
           </p>
         ) : null}
 
-        {error ? (
-          <p
-            className="mt-4 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm leading-6 text-danger"
-            role="alert"
-          >
-            {error}
-          </p>
-        ) : null}
-
-        {successMessage ? (
-          <p
-            className="mt-4 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm leading-6 text-success"
-            role="status"
-          >
-            {successMessage}
-          </p>
-        ) : null}
+        <Toast
+          key={successMessage ?? error ?? ""}
+          error={error}
+          successMessage={successMessage}
+        />
       </div>
 
       {sections.length === 0 ? (
@@ -1373,6 +1404,17 @@ export function CurriculumBuilder() {
                                       {(uploadedFiles[lesson.id] ?? []).length}{" "}
                                       media
                                     </Badge>
+                                    {(assignedSkills[lesson.id] ?? []).map(
+                                      (skill) => (
+                                        <Badge
+                                          key={skill.id}
+                                          variant="action"
+                                          title={skill.canonicalName}
+                                        >
+                                          {skill.canonicalName}
+                                        </Badge>
+                                      ),
+                                    )}
                                   </div>
                                 </div>
 
@@ -1401,6 +1443,11 @@ export function CurriculumBuilder() {
                                     disabled={!canEditCourse}
                                     label="Edit"
                                     onClick={() => startEditLesson(lesson)}
+                                  />
+                                  <MiniButton
+                                    disabled={!canEditCourse}
+                                    label="Assign skill"
+                                    onClick={() => setSkillDialogLesson(lesson)}
                                   />
                                   <MiniButton
                                     disabled={!canEditCourse}
@@ -1939,6 +1986,22 @@ export function CurriculumBuilder() {
           </button>
         </div>
       </InstructorModal>
+
+      {skillDialogLesson && (
+        <AssignSkillToLessonDialog
+          courseId={courseId}
+          lessonTitle={skillDialogLesson.title}
+          assignedSkills={assignedSkills[skillDialogLesson.id] ?? []}
+          onClose={() => setSkillDialogLesson(null)}
+          onAssign={(skill) =>
+            handleAssignSkillToLesson(
+              skillDialogLesson.sectionId,
+              skillDialogLesson,
+              skill,
+            )
+          }
+        />
+      )}
     </div>
   );
 }

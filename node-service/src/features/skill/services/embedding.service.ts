@@ -192,21 +192,38 @@ export class EmbeddingService {
       );
 
       return results;
+    // } catch (error: unknown) {
+    //   if (signal.aborted) {
+    //     throw new GatewayTimeoutException(
+    //       'Python batch embedding request timed out',
+    //     );
+    //   }
+
+    //   if (error instanceof BadGatewayException) {
+    //     throw error;
+    //   }
+
+    //   throw new BadGatewayException(
+    //     'Failed to obtain batch embeddings from Python',
+    //   );
+    // }
     } catch (error: unknown) {
-      if (signal.aborted) {
-        throw new GatewayTimeoutException(
-          'Python batch embedding request timed out',
-        );
-      }
+  if (signal.aborted) {
+    throw new GatewayTimeoutException(
+      'Python batch embedding request timed out',
+    );
+  }
 
-      if (error instanceof BadGatewayException) {
-        throw error;
-      }
+  if (error instanceof BadGatewayException) {
+    throw error;
+  }
 
-      throw new BadGatewayException(
-        'Failed to obtain batch embeddings from Python',
-      );
-    }
+  console.error('Batch embedding request failed:', error);
+
+  throw new BadGatewayException(
+    'Failed to obtain batch embeddings from Python',
+  );
+}
   }
 
   async generateEmbeddings(
