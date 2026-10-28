@@ -28,3 +28,17 @@ export interface SkillEmbeddings {
   descriptionVector: number[] | null;
   aliasVectors: number[][];
 }
+
+export interface DetachSkillFromQuestionInput {
+  courseId: string;
+  assessmentId: string;
+  questionId: string;
+  skillId: string;
+  minimumRemainingSkills: number;
+}
+
+export type DetachSkillFromQuestionResult =
+  | 'DETACHED'
+  | 'QUESTION_NOT_FOUND'
+  | 'SKILL_NOT_ATTACHED'
+  | 'MINIMUM_SKILLS_REACHED';

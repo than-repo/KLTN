@@ -16,6 +16,8 @@ model Skill {
   difficulty    Difficulty @default(EASY)
   isActive      Boolean    @default(true)
 
+  version Int @default(0)
+
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt DateTime?

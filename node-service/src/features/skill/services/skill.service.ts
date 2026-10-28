@@ -239,7 +239,18 @@ export class SkillService {
       });
     }
 
-    const updatedSkill = await this.skillRepository.updateSkill(skillId, input);
+    const updatedSkill = await this.skillRepository.updateSkill(
+      skillId,
+      courseId,
+      skill.version,
+      input,
+    );
+
+    if (!updatedSkill) {
+      throw new ConflictException(
+        'The skill changed or is no longer available. Reload and try again.',
+      );
+    }
 
     return plainToInstance(SkillResponseDto, updatedSkill, {
       excludeExtraneousValues: true,
@@ -414,24 +425,29 @@ export class SkillService {
       assessmentId,
       questionId,
     );
-    const countSkills =
-      await this.assessmentQuestionsService.getSkillCountForQuestion(
-        questionId,
-      );
-
-    if (countSkills <= 1)
-      throw new BadRequestException('A question must have at least one skill');
-
-    const existsInQuestion = await this.skillRepository.existInQuestion(
-      skillId,
+    const result = await this.skillRepository.detachFromQuestion({
+      courseId,
+      assessmentId,
       questionId,
-    );
+      skillId,
+      minimumRemainingSkills: 1,
+    });
 
-    if (!existsInQuestion) {
-      throw new NotFoundException('Skill not found in this question');
+    switch (result) {
+      case 'QUESTION_NOT_FOUND':
+        throw new NotFoundException('Question not found');
+
+      case 'SKILL_NOT_ATTACHED':
+        throw new NotFoundException('Skill not found in this question');
+
+      case 'MINIMUM_SKILLS_REACHED':
+        throw new BadRequestException(
+          'A question must have at least one skill',
+        );
+
+      case 'DETACHED':
+        return true;
     }
-
-    return this.skillRepository.detachFromQuestion(skillId, questionId);
   }
   async findListSkill(
     query: GetSkillsQueryDto,

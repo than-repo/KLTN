@@ -21,7 +21,7 @@ export class CreateSkillDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(3)
+  @MinLength(1)
   @MaxLength(50)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   canonicalName!: string;

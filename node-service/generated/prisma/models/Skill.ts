@@ -28,10 +28,12 @@ export type AggregateSkill = {
 
 export type SkillAvgAggregateOutputType = {
   level: number | null
+  version: number | null
 }
 
 export type SkillSumAggregateOutputType = {
   level: number | null
+  version: number | null
 }
 
 export type SkillMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type SkillMinAggregateOutputType = {
   level: number | null
   difficulty: $Enums.Difficulty | null
   isActive: boolean | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -57,6 +60,7 @@ export type SkillMaxAggregateOutputType = {
   level: number | null
   difficulty: $Enums.Difficulty | null
   isActive: boolean | null
+  version: number | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -73,6 +77,7 @@ export type SkillCountAggregateOutputType = {
   level: number
   difficulty: number
   isActive: number
+  version: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -82,10 +87,12 @@ export type SkillCountAggregateOutputType = {
 
 export type SkillAvgAggregateInputType = {
   level?: true
+  version?: true
 }
 
 export type SkillSumAggregateInputType = {
   level?: true
+  version?: true
 }
 
 export type SkillMinAggregateInputType = {
@@ -97,6 +104,7 @@ export type SkillMinAggregateInputType = {
   level?: true
   difficulty?: true
   isActive?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -111,6 +119,7 @@ export type SkillMaxAggregateInputType = {
   level?: true
   difficulty?: true
   isActive?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -127,6 +136,7 @@ export type SkillCountAggregateInputType = {
   level?: true
   difficulty?: true
   isActive?: true
+  version?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -230,6 +240,7 @@ export type SkillGroupByOutputType = {
   level: number
   difficulty: $Enums.Difficulty
   isActive: boolean
+  version: number
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -269,6 +280,7 @@ export type SkillWhereInput = {
   level?: Prisma.IntFilter<"Skill"> | number
   difficulty?: Prisma.EnumDifficultyFilter<"Skill"> | $Enums.Difficulty
   isActive?: Prisma.BoolFilter<"Skill"> | boolean
+  version?: Prisma.IntFilter<"Skill"> | number
   createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Skill"> | Date | string | null
@@ -290,6 +302,7 @@ export type SkillOrderByWithRelationInput = {
   level?: Prisma.SortOrder
   difficulty?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -316,6 +329,7 @@ export type SkillWhereUniqueInput = Prisma.AtLeast<{
   level?: Prisma.IntFilter<"Skill"> | number
   difficulty?: Prisma.EnumDifficultyFilter<"Skill"> | $Enums.Difficulty
   isActive?: Prisma.BoolFilter<"Skill"> | boolean
+  version?: Prisma.IntFilter<"Skill"> | number
   createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Skill"> | Date | string | null
@@ -337,6 +351,7 @@ export type SkillOrderByWithAggregationInput = {
   level?: Prisma.SortOrder
   difficulty?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -361,6 +376,7 @@ export type SkillScalarWhereWithAggregatesInput = {
   level?: Prisma.IntWithAggregatesFilter<"Skill"> | number
   difficulty?: Prisma.EnumDifficultyWithAggregatesFilter<"Skill"> | $Enums.Difficulty
   isActive?: Prisma.BoolWithAggregatesFilter<"Skill"> | boolean
+  version?: Prisma.IntWithAggregatesFilter<"Skill"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Skill"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Skill"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Skill"> | Date | string | null
@@ -375,6 +391,7 @@ export type SkillCreateInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -396,6 +413,7 @@ export type SkillUncheckedCreateInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -413,6 +431,7 @@ export type SkillUpdateInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -434,6 +453,7 @@ export type SkillUncheckedUpdateInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -453,6 +473,7 @@ export type SkillCreateManyInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -467,6 +488,7 @@ export type SkillUpdateManyMutationInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -483,6 +505,7 @@ export type SkillUncheckedUpdateManyInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -525,6 +548,7 @@ export type SkillCountOrderByAggregateInput = {
   level?: Prisma.SortOrder
   difficulty?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -532,6 +556,7 @@ export type SkillCountOrderByAggregateInput = {
 
 export type SkillAvgOrderByAggregateInput = {
   level?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type SkillMaxOrderByAggregateInput = {
@@ -543,6 +568,7 @@ export type SkillMaxOrderByAggregateInput = {
   level?: Prisma.SortOrder
   difficulty?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -557,6 +583,7 @@ export type SkillMinOrderByAggregateInput = {
   level?: Prisma.SortOrder
   difficulty?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -564,6 +591,7 @@ export type SkillMinOrderByAggregateInput = {
 
 export type SkillSumOrderByAggregateInput = {
   level?: Prisma.SortOrder
+  version?: Prisma.SortOrder
 }
 
 export type SkillCreateNestedManyWithoutAssessmentQuestionsInput = {
@@ -755,6 +783,7 @@ export type SkillCreateWithoutAssessmentQuestionsInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -775,6 +804,7 @@ export type SkillUncheckedCreateWithoutAssessmentQuestionsInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -817,6 +847,7 @@ export type SkillScalarWhereInput = {
   level?: Prisma.IntFilter<"Skill"> | number
   difficulty?: Prisma.EnumDifficultyFilter<"Skill"> | $Enums.Difficulty
   isActive?: Prisma.BoolFilter<"Skill"> | boolean
+  version?: Prisma.IntFilter<"Skill"> | number
   createdAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Skill"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Skill"> | Date | string | null
@@ -831,6 +862,7 @@ export type SkillCreateWithoutCourseInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -850,6 +882,7 @@ export type SkillUncheckedCreateWithoutCourseInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -893,6 +926,7 @@ export type SkillCreateWithoutLessonsInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -913,6 +947,7 @@ export type SkillUncheckedCreateWithoutLessonsInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -950,6 +985,7 @@ export type SkillCreateWithoutChildrenInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -970,6 +1006,7 @@ export type SkillUncheckedCreateWithoutChildrenInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -991,6 +1028,7 @@ export type SkillCreateWithoutParentInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1010,6 +1048,7 @@ export type SkillUncheckedCreateWithoutParentInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1048,6 +1087,7 @@ export type SkillUpdateWithoutChildrenInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1068,6 +1108,7 @@ export type SkillUncheckedUpdateWithoutChildrenInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1100,6 +1141,7 @@ export type SkillUpdateWithoutAssessmentQuestionsInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1120,6 +1162,7 @@ export type SkillUncheckedUpdateWithoutAssessmentQuestionsInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1138,6 +1181,7 @@ export type SkillUncheckedUpdateManyWithoutAssessmentQuestionsInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1153,6 +1197,7 @@ export type SkillCreateManyCourseInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1167,6 +1212,7 @@ export type SkillUpdateWithoutCourseInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1186,6 +1232,7 @@ export type SkillUncheckedUpdateWithoutCourseInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1204,6 +1251,7 @@ export type SkillUncheckedUpdateManyWithoutCourseInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1218,6 +1266,7 @@ export type SkillUpdateWithoutLessonsInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1238,6 +1287,7 @@ export type SkillUncheckedUpdateWithoutLessonsInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1256,6 +1306,7 @@ export type SkillUncheckedUpdateManyWithoutLessonsInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1271,6 +1322,7 @@ export type SkillCreateManyParentInput = {
   level?: number
   difficulty?: $Enums.Difficulty
   isActive?: boolean
+  version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1285,6 +1337,7 @@ export type SkillUpdateWithoutParentInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1304,6 +1357,7 @@ export type SkillUncheckedUpdateWithoutParentInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1322,6 +1376,7 @@ export type SkillUncheckedUpdateManyWithoutParentInput = {
   level?: Prisma.IntFieldUpdateOperationsInput | number
   difficulty?: Prisma.EnumDifficultyFieldUpdateOperationsInput | $Enums.Difficulty
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1387,6 +1442,7 @@ export type SkillSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   level?: boolean
   difficulty?: boolean
   isActive?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1411,12 +1467,13 @@ export type SkillSelectScalar = {
   level?: boolean
   difficulty?: boolean
   isActive?: boolean
+  version?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type SkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "canonicalName" | "description" | "aliases" | "embedding" | "parentId" | "level" | "difficulty" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["skill"]>
+export type SkillOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "canonicalName" | "description" | "aliases" | "embedding" | "parentId" | "level" | "difficulty" | "isActive" | "version" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["skill"]>
 export type SkillInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   parent?: boolean | Prisma.Skill$parentArgs<ExtArgs>
@@ -1446,6 +1503,7 @@ export type $SkillPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     level: number
     difficulty: $Enums.Difficulty
     isActive: boolean
+    version: number
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1833,6 +1891,7 @@ export interface SkillFieldRefs {
   readonly level: Prisma.FieldRef<"Skill", 'Int'>
   readonly difficulty: Prisma.FieldRef<"Skill", 'Difficulty'>
   readonly isActive: Prisma.FieldRef<"Skill", 'Boolean'>
+  readonly version: Prisma.FieldRef<"Skill", 'Int'>
   readonly createdAt: Prisma.FieldRef<"Skill", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Skill", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Skill", 'DateTime'>

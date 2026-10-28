@@ -1,20 +1,28 @@
-import { AssessmentQuestionSelect } from './../../../../generated/prisma/models/AssessmentQuestion';
 import { Injectable } from '@nestjs/common';
 import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/database/prisma.service';
 import {
   CreateSkillInput,
+  DetachSkillFromQuestionInput,
+  DetachSkillFromQuestionResult,
   UpdateSkillInput,
 } from '../interfaces/skill.interfaces';
-import {
-  SkillUncheckedCreateInput,
-  SkillUncheckedUpdateInput,
-} from 'generated/prisma/models';
+import { SkillUncheckedUpdateInput } from 'generated/prisma/models';
 
 const skillWithItsInclude = {
   course: true,
-  lessons: true,
-  assessmentQuestions: true,
+  lessons: {
+    where: {
+      isActive: true,
+      deletedAt: null,
+    },
+  },
+  assessmentQuestions: {
+    where: {
+      isActive: true,
+      deletedAt: null,
+    },
+  },
 } satisfies Prisma.SkillInclude;
 
 export type SkillDetails = Prisma.SkillGetPayload<{
@@ -73,8 +81,10 @@ export class SkillRepository {
 
   async updateSkill(
     id: string,
+    courseId: string,
+    expectedVersion: number,
     input: UpdateSkillInput,
-  ): Promise<Prisma.SkillModel> {
+  ): Promise<Prisma.SkillModel | null> {
     const { aliases, embeddings, ...fields } = input;
 
     const data: SkillUncheckedUpdateInput = {
@@ -89,16 +99,31 @@ export class SkillRepository {
             },
           }
         : {}),
+      version: { increment: 1 },
     };
 
-    return this.prisma.skill.update({
-      where: {
-        id,
-        isActive: true,
-        deletedAt: null,
-      },
-      data,
-    });
+    try {
+      return await this.prisma.skill.update({
+        where: {
+          id,
+          courseId,
+          version: expectedVersion,
+          isActive: true,
+          deletedAt: null,
+        },
+        data,
+      });
+    } catch (error: unknown) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        // The version changed, or the skill became unavailable.
+        return null;
+      }
+
+      throw error;
+    }
   }
 
   async softDeleteSkill(id: string): Promise<Prisma.SkillModel | null> {
@@ -213,26 +238,76 @@ export class SkillRepository {
   }
 
   async detachFromQuestion(
-    skillId: string,
-    questionId: string,
-  ): Promise<boolean> {
-    const skill = await this.prisma.skill.update({
-      where: {
-        id: skillId,
-        deletedAt: null,
-        isActive: true,
-        assessmentQuestions: {
-          some: {
-            id: questionId,
+    input: DetachSkillFromQuestionInput,
+  ): Promise<DetachSkillFromQuestionResult> {
+    return this.prisma.$transaction(
+      async (tx): Promise<DetachSkillFromQuestionResult> => {
+        const lockedQuestion = await tx.$queryRaw<{ id: string }[]>`
+        SELECT id
+        FROM assessment_questions
+        WHERE id = ${input.questionId}
+          AND assessmentId = ${input.assessmentId}
+          AND isActive = true
+          AND deletedAt Is NULL
+        FOR UPDATE
+        `;
+
+        if (lockedQuestion.length === 0) {
+          return 'QUESTION_NOT_FOUND';
+        }
+
+        const attachedSkills = await tx.skill.findMany({
+          where: {
+            courseId: input.courseId,
+            deletedAt: null,
+            isActive: true,
+            assessmentQuestions: {
+              some: {
+                id: input.questionId,
+              },
+            },
           },
-        },
+          select: {
+            id: true,
+          },
+        });
+
+        const isAttached = attachedSkills.some(
+          (skill) => skill.id === input.skillId,
+        );
+
+        if (!isAttached) {
+          return 'SKILL_NOT_ATTACHED';
+        }
+
+        if (attachedSkills.length <= input.minimumRemainingSkills) {
+          return 'MINIMUM_SKILLS_REACHED';
+        }
+
+        await tx.skill.update({
+          where: {
+            id: input.skillId,
+            isActive: true,
+            deletedAt: null,
+          },
+          data: {
+            assessmentQuestions: {
+              disconnect: {
+                id: input.questionId,
+              },
+            },
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        return 'DETACHED';
       },
-      data: {
-        assessmentQuestions: {
-          disconnect: { id: questionId },
-        },
+
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
       },
-    });
-    return skill ? true : false;
+    );
   }
 }
