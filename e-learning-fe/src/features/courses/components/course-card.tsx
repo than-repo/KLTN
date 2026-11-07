@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { WishlistToggleButton } from "@/features/wishlist/components/wishlist-toggle-button";
 
 import type { PublicCourse } from "../types/course";
 import {
@@ -22,7 +23,14 @@ export function CourseCard({ course }: CourseCardProps) {
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-      <CourseImage course={course} />
+      <div className="relative">
+        <CourseImage course={course} />
+        <WishlistToggleButton
+          course={course}
+          size="md"
+          className="absolute right-3 top-3 z-10"
+        />
+      </div>
 
       <div className="flex flex-1 flex-col p-4">
         <div className="flex flex-wrap items-center gap-2">
@@ -86,12 +94,14 @@ export function CourseCard({ course }: CourseCardProps) {
           ) : null}
         </div>
 
-        <Link
-          className="mt-auto pt-5 text-sm font-semibold text-primary transition-colors hover:text-primary-focus"
-          href={`/courses/${course.slug}`}
-        >
-          View course details
-        </Link>
+        <div className="mt-auto pt-5 flex items-center gap-3">
+          <Link
+            className="flex-1 min-h-9 inline-flex items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-focus"
+            href={`/courses/${course.slug}`}
+          >
+            View course details
+          </Link>
+        </div>
       </div>
     </article>
   );

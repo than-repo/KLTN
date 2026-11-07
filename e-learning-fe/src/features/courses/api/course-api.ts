@@ -30,6 +30,14 @@ export function getPublicCourseBySlug(slug: string) {
   );
 }
 
+export function getPublicCoursesByIds(ids: string[]) {
+  const query = new URLSearchParams({ ids: ids.join(",") });
+  return apiRequest<PublicCourse[]>(`/courses/public/by-ids?${query}`, {
+    method: "GET",
+    timeoutMs: 10000,
+  });
+}
+
 export function getPublicCategoryTree() {
   return apiRequest<CategoryTreeNode[]>("/courses/public/category-tree", {
     method: "GET",

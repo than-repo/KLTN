@@ -82,10 +82,15 @@ export function PublicNavbar({
 
 function addRoleLinks(links: PublicNavLink[], role: UserRole) {
   if (role === "LEARNER") {
-    return addLinkIfMissing(links, {
+    links = addLinkIfMissing(links, {
+      href: "/wishlist",
+      label: "Wishlist",
+    });
+    links = addLinkIfMissing(links, {
       href: "/my-courses",
       label: "My Courses",
     });
+    return links;
   }
 
   if (role === "INSTRUCTOR") {

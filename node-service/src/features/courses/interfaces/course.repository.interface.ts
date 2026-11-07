@@ -153,6 +153,8 @@ export interface ICourseRepository {
 
   findBySlug(slug: string): Promise<CourseModel | null>;
 
+  findPublicByIds(ids: string[]): Promise<CourseModel[]>;
+
   findMany(params?: FindManyCourseParams): Promise<CourseModel[]>;
 
   count(where?: CourseWhereInput): Promise<number>;

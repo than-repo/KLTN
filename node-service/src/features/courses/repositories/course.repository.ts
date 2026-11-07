@@ -389,6 +389,20 @@ export class CourseRepository implements ICourseRepository {
     return course ? this.toCourseWithDetailsModel(course) : null;
   }
 
+  async findPublicByIds(ids: string[]): Promise<CourseModel[]> {
+    const courses = await this.prisma.course.findMany({
+      where: {
+        id: { in: ids },
+        deletedAt: null,
+        isActive: true,
+        status: CourseStatus.PUBLISHED,
+      },
+      include: courseWithPublicDetail,
+    });
+
+    return courses.map((course) => this.toCourseWithDetailsModel(course));
+  }
+
   async count(where?: CourseWhereInput): Promise<number> {
     return this.prisma.course.count({
       where: this.buildWhere(where),

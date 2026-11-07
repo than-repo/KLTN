@@ -1,6 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsDateString,
   IsIn,
@@ -161,3 +164,19 @@ export class InstructorCourseQueryDto extends BaseCourseQueryDto {
 }
 
 export class LearnerCourseQueryDto extends BaseCourseQueryDto {}
+
+export class PublicCourseIdsQueryDto {
+  @ApiProperty({
+    description: 'Comma-separated course UUIDs; at most 50 IDs.',
+    example:
+      '11111111-1111-4111-8111-111111111111,22222222-2222-4222-8222-222222222222',
+  })
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.split(',').map((id) => id.trim()) : value,
+  )
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(50)
+  @IsUUID('4', { each: true })
+  ids!: string[];
+}

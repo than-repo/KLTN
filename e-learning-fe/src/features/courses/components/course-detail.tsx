@@ -11,9 +11,14 @@ import { CourseImage } from "./course-image";
 type CourseDetailProps = {
   course: PublicCourse;
   enrollmentPanel?: ReactNode;
+  wishlistPanel?: ReactNode;
 };
 
-export function CourseDetail({ course, enrollmentPanel }: CourseDetailProps) {
+export function CourseDetail({
+  course,
+  enrollmentPanel,
+  wishlistPanel,
+}: CourseDetailProps) {
   const primaryInstructor = course.instructors?.[0]?.fullName;
   const categoryNames =
     course.categories?.map((category) => category.name) ?? [];
@@ -66,6 +71,7 @@ export function CourseDetail({ course, enrollmentPanel }: CourseDetailProps) {
         <aside className="rounded-lg border border-border bg-card p-5 shadow-sm lg:hidden">
           <CourseImage course={course} />
           <CourseFacts course={course} primaryInstructor={primaryInstructor} />
+          {wishlistPanel}
           {enrollmentPanel}
         </aside>
 
@@ -199,6 +205,7 @@ export function CourseDetail({ course, enrollmentPanel }: CourseDetailProps) {
         <CourseImage course={course} />
         <div className="p-5">
           <CourseFacts course={course} primaryInstructor={primaryInstructor} />
+          {wishlistPanel}
           {enrollmentPanel}
         </div>
       </aside>

@@ -252,6 +252,20 @@ export class CoursesService {
     });
   }
 
+  async findPublicCoursesByIds(ids: string[]): Promise<CourseResponseDto[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const courses = await this.iCourseRepository.findPublicByIds(ids);
+    return courses.map((course) =>
+      plainToInstance(CourseResponseDto, course, {
+        excludeExtraneousValues: true,
+        groups: [COURSE_VIEW_GROUPS.PUBLIC],
+      }),
+    );
+  }
+
   async createDraftCourse(
     instructorId: string,
     dto: CreateCourseDto,

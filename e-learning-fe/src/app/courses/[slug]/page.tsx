@@ -5,6 +5,7 @@ import { PublicNavbar } from "@/components/layout/public-navbar/public-navbar";
 import { CourseDetail } from "@/features/courses/components/course-detail";
 import { getPublicCourseBySlug } from "@/features/courses/api/course-api";
 import { EnrollmentCta } from "@/features/enrollments/components/enrollment-cta";
+import { WishlistToggleButton } from "@/features/wishlist/components/wishlist-toggle-button";
 import { ApiError } from "@/lib/api/client";
 import { FooterSection } from "@/app/_components/sections/footer-section";
 import { footerContent } from "@/app/_components/home-content";
@@ -65,6 +66,7 @@ export default async function CourseDetailPage({
         <CourseDetail
           course={course}
           enrollmentPanel={<EnrollmentCta course={course} />}
+          wishlistPanel={<WishlistToggleButton course={course} showLabel />}
         />
       </section>
       <FooterSection

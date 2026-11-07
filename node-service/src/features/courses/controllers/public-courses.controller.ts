@@ -8,7 +8,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { LearnerCourseQueryDto } from '../dtos/course/query-course.dto';
+import {
+  LearnerCourseQueryDto,
+  PublicCourseIdsQueryDto,
+} from '../dtos/course/query-course.dto';
 import { CoursesService } from '../services/courses.service';
 import { PaginatedResponse } from '../dtos/paginated-response.dto';
 import { Throttle } from '@nestjs/throttler';
@@ -47,6 +50,16 @@ export class PublicCoursesController {
     @Query() dto: LearnerCourseQueryDto,
   ): Promise<PaginatedResponse<CourseResponseDto>> {
     return this.coursesService.findAllPublic(dto);
+  }
+
+  @ApiOperation({ summary: 'Gets public courses by IDs - Public API' })
+  @ApiOkResponse({ type: CourseResponseDto, isArray: true })
+  @ApiBadRequestResponse()
+  @Get('/by-ids')
+  async findPublicCoursesByIds(
+    @Query() query: PublicCourseIdsQueryDto,
+  ): Promise<CourseResponseDto[]> {
+    return this.coursesService.findPublicCoursesByIds(query.ids);
   }
 
   @ApiOperation({ summary: 'Gets course by slug - Public API' })

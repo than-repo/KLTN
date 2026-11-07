@@ -89,6 +89,7 @@ import type {
 } from '../interfaces/course.repository.interface';
 import { CATEGORY_REPOSITORY } from '../repositories/category-repository.token';
 import { COURSE_REPOSITORY } from '../repositories/course-repository.token';
+import { COURSE_REVIEW_REPOSITORY } from '../repositories/course-review-repository.token';
 import { CourseAccessService } from './course-access.service';
 import { CoursesService } from './courses.service';
 
@@ -135,6 +136,10 @@ describe('CoursesService', () => {
         {
           provide: CATEGORY_REPOSITORY,
           useValue: categoryRepository,
+        },
+        {
+          provide: COURSE_REVIEW_REPOSITORY,
+          useValue: {},
         },
       ],
     }).compile();
@@ -285,6 +290,27 @@ describe('CoursesService', () => {
       await expect(service.findCourseBySlug('missing')).rejects.toThrow(
         'COURSE NOT FOUND',
       );
+    });
+  });
+
+  describe('findPublicCoursesByIds', () => {
+    it('returns published courses from the repository as public DTOs', async () => {
+      const course = makeCourse({
+        status: CourseStatus.PUBLISHED,
+        isActive: true,
+      });
+      courseRepository.findPublicByIds.mockResolvedValue([course]);
+
+      const result = await service.findPublicCoursesByIds([courseId]);
+
+      expect(courseRepository.findPublicByIds).toHaveBeenCalledWith([courseId]);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ id: courseId });
+    });
+
+    it('does not query the repository for an empty ID list', async () => {
+      await expect(service.findPublicCoursesByIds([])).resolves.toEqual([]);
+      expect(courseRepository.findPublicByIds).not.toHaveBeenCalled();
     });
   });
 
@@ -858,6 +884,7 @@ function createCourseRepositoryMock(): CourseRepositoryMock {
     findById: jest.fn(),
     findActiveById: jest.fn(),
     findBySlug: jest.fn(),
+    findPublicByIds: jest.fn(),
     findMany: jest.fn(),
     count: jest.fn(),
     update: jest.fn(),
