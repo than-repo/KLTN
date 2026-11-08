@@ -7,6 +7,7 @@ import {
   formatCoursePrice,
 } from "../utils/course-data";
 import { CourseImage } from "./course-image";
+import { InstructorLinks } from "./instructor-links";
 
 type CourseDetailProps = {
   course: PublicCourse;
@@ -19,7 +20,6 @@ export function CourseDetail({
   enrollmentPanel,
   wishlistPanel,
 }: CourseDetailProps) {
-  const primaryInstructor = course.instructors?.[0]?.fullName;
   const categoryNames =
     course.categories?.map((category) => category.name) ?? [];
 
@@ -53,10 +53,9 @@ export function CourseDetail({
             {course.shortDescription}
           </p>
           <dl className="mt-6 grid gap-3 text-sm text-white/75 sm:grid-cols-3">
-            <HeroFact
-              label="Instructor"
-              value={primaryInstructor ?? "Not assigned"}
-            />
+            <HeroFact label="Instructor" valueClassName="text-primary-on-dark">
+              <InstructorLinks instructors={course.instructors ?? []} onDark />
+            </HeroFact>
             <HeroFact
               label="Duration"
               value={formatCourseDuration(course.durationInMinutes)}
@@ -70,7 +69,7 @@ export function CourseDetail({
 
         <aside className="rounded-lg border border-border bg-card p-5 shadow-sm lg:hidden">
           <CourseImage course={course} />
-          <CourseFacts course={course} primaryInstructor={primaryInstructor} />
+          <CourseFacts course={course} />
           {wishlistPanel}
           {enrollmentPanel}
         </aside>
@@ -204,7 +203,7 @@ export function CourseDetail({
       <aside className="hidden overflow-hidden rounded-lg border border-border bg-card shadow-lg lg:sticky lg:top-20 lg:block">
         <CourseImage course={course} />
         <div className="p-5">
-          <CourseFacts course={course} primaryInstructor={primaryInstructor} />
+          <CourseFacts course={course} />
           {wishlistPanel}
           {enrollmentPanel}
         </div>
@@ -213,24 +212,30 @@ export function CourseDetail({
   );
 }
 
-function HeroFact({ label, value }: { label: string; value: string }) {
+function HeroFact({
+  children,
+  label,
+  value,
+  valueClassName,
+}: {
+  children?: ReactNode;
+  label: string;
+  value?: string;
+  valueClassName?: string;
+}) {
   return (
     <div>
       <dt className="text-xs font-semibold uppercase tracking-wide text-white/45">
         {label}
       </dt>
-      <dd className="mt-1 font-semibold text-white">{value}</dd>
+      <dd className={`mt-1 font-semibold text-white ${valueClassName ?? ""}`}>
+        {children ?? value}
+      </dd>
     </div>
   );
 }
 
-function CourseFacts({
-  course,
-  primaryInstructor,
-}: {
-  course: PublicCourse;
-  primaryInstructor?: string;
-}) {
+function CourseFacts({ course }: { course: PublicCourse }) {
   return (
     <>
       <p className="mt-5 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
@@ -249,10 +254,12 @@ function CourseFacts({
           label="Language"
           value={course.language ?? "Not specified"}
         />
-        <DetailRow
-          label="Instructor"
-          value={primaryInstructor ?? "Not assigned"}
-        />
+        <div className="flex items-center justify-between gap-4 border-b border-border pb-3 last:border-b-0 last:pb-0">
+          <dt className="text-muted-foreground">Instructor</dt>
+          <dd className="text-right">
+            <InstructorLinks instructors={course.instructors ?? []} />
+          </dd>
+        </div>
         <DetailRow
           label="Certificate"
           value={course.certificateEnabled ? "Included" : "Not included"}

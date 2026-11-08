@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 
-import { getMyProfile, updateMyProfile } from "../api/profile-api";
+import {
+  getAvatarUploadSignature,
+  getMyProfile,
+  updateMyProfile,
+  uploadAvatar,
+} from "../api/profile-api";
 import type {
   ProfileGender,
   UpdateProfileInput,
@@ -18,7 +24,7 @@ const sectionClasses =
   "rounded-3xl border border-[#d9d9d9] bg-white p-6 shadow-sm";
 
 const primaryButtonClasses =
-  "inline-flex h-12 items-center justify-center rounded-xl bg-[#9fb1cf] px-6 text-base font-semibold text-white transition hover:bg-[#879cbd] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex h-12 items-center justify-center rounded-xl bg-[#0056d2] px-6 text-base font-semibold text-white transition hover:bg-[#00419e] disabled:cursor-not-allowed disabled:bg-[#9fb1cf] disabled:hover:bg-[#9fb1cf] disabled:opacity-60";
 
 const secondaryButtonClasses =
   "inline-flex h-10 items-center justify-center rounded-xl border border-[#d9d9d9] bg-white px-4 text-sm font-semibold text-[#111827] transition hover:bg-[#f7f7f7]";
@@ -38,6 +44,11 @@ type ProfileFormState = {
   phoneNumber: string;
 };
 
+type PendingAvatar = {
+  file: File;
+  previewUrl: string;
+};
+
 const emptyFormState: ProfileFormState = {
   avatarUrl: "",
   dateOfBirth: "",
@@ -54,9 +65,14 @@ export function EditProfileForm() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [pendingAvatar, setPendingAvatar] = useState<PendingAvatar | null>(
+    null,
+  );
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (status !== "authenticated" || !accessToken) {
@@ -104,13 +120,21 @@ export function EditProfileForm() {
   }, [accessToken, retryCount, status]);
 
   useEffect(() => {
+    if (!pendingAvatar) {
+      return;
+    }
+
+    return () => URL.revokeObjectURL(pendingAvatar.previewUrl);
+  }, [pendingAvatar]);
+
+  useEffect(() => {
     if (!successMessage) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       setSuccessMessage(null);
-    }, 3500);
+    }, 3000);
 
     return () => {
       window.clearTimeout(timeoutId);
@@ -150,13 +174,30 @@ export function EditProfileForm() {
     setIsSubmitting(true);
 
     try {
+      let avatarUrl = form.avatarUrl.trim();
+
+      if (pendingAvatar) {
+        setIsUploadingAvatar(true);
+        const userId = profile?.id ?? user?.id;
+
+        if (!userId) {
+          throw new Error(
+            "Unable to identify your account. Please sign in again.",
+          );
+        }
+
+        const signature = await getAvatarUploadSignature(userId, accessToken);
+        avatarUrl = await uploadAvatar(pendingAvatar.file, signature);
+      }
+
       const updatedProfile = await updateMyProfile(
         accessToken,
-        toUpdateProfileInput(form),
+        toUpdateProfileInput({ ...form, avatarUrl }),
       );
 
       setProfile(updatedProfile);
       setForm(toFormState(updatedProfile));
+      setPendingAvatar(null);
       updateUser(updatedProfile);
       setSuccessMessage("Your profile has been updated successfully.");
     } catch (error) {
@@ -167,7 +208,33 @@ export function EditProfileForm() {
       );
     } finally {
       setIsSubmitting(false);
+      setIsUploadingAvatar(false);
     }
+  }
+
+  function handleAvatarSelected(file: File | undefined) {
+    if (avatarInputRef.current) {
+      avatarInputRef.current.value = "";
+    }
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setFormError("Please choose an image file.");
+      if (avatarInputRef.current) {
+        avatarInputRef.current.value = "";
+      }
+      return;
+    }
+
+    setPendingAvatar({
+      file,
+      previewUrl: URL.createObjectURL(file),
+    });
+    setFormError(null);
+    setSuccessMessage(null);
   }
 
   if (isLoadingProfile) {
@@ -202,7 +269,11 @@ export function EditProfileForm() {
   const displayName =
     form.fullName.trim() || displayProfile?.fullName || "User";
 
-  const avatarSrc = form.avatarUrl.trim();
+  const avatarSrc = pendingAvatar?.previewUrl ?? form.avatarUrl.trim();
+  const hasChanges =
+    profile !== null &&
+    (pendingAvatar !== null ||
+      !areProfileFormsEqual(form, toFormState(profile)));
 
   return (
     <>
@@ -346,10 +417,14 @@ export function EditProfileForm() {
           <div className="mt-6">
             <button
               className={primaryButtonClasses}
-              disabled={isSubmitting}
+              disabled={!hasChanges || isSubmitting || isUploadingAvatar}
               type="submit"
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isUploadingAvatar
+                ? "Uploading photo..."
+                : isSubmitting
+                  ? "Saving..."
+                  : "Save Changes"}
             </button>
           </div>
         </section>
@@ -361,11 +436,13 @@ export function EditProfileForm() {
 
           <div className="mt-5 flex flex-col gap-5 sm:flex-row sm:items-start">
             {avatarSrc ? (
-              <img
-                src={avatarSrc}
+              <Image
                 alt={`${displayName} profile photo`}
                 className="h-16 w-16 shrink-0 rounded-full border border-[#d9d9d9] object-cover"
-                referrerPolicy="no-referrer"
+                height={64}
+                src={avatarSrc}
+                unoptimized
+                width={64}
               />
             ) : (
               <div className="grid h-16 w-16 shrink-0 place-items-center rounded-full border border-[#d9d9d9] bg-[#eaf2ff] text-xl font-semibold text-[#0056d2]">
@@ -375,48 +452,55 @@ export function EditProfileForm() {
 
             <div className="flex-1">
               <p className="text-sm text-[#344563]">
-                Add a profile photo using an image URL. Supported formats depend
-                on the image provider.
+                Choose an image from your device. Your photo is uploaded
+                securely when you save your changes.
               </p>
 
-              <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
-                <div>
-                  <label
-                    className="text-sm font-semibold text-[#111827]"
-                    htmlFor="avatarUrl"
-                  >
-                    Avatar URL
-                  </label>
-                  <input
-                    autoComplete="url"
-                    className={inputClasses}
-                    id="avatarUrl"
-                    name="avatarUrl"
-                    onChange={(event) =>
-                      updateField("avatarUrl", event.target.value)
-                    }
-                    placeholder="https://example.com/avatar.jpg"
-                    type="url"
-                    value={form.avatarUrl}
-                  />
-                </div>
-
+              <input
+                accept="image/*"
+                className="sr-only"
+                onChange={(event) =>
+                  handleAvatarSelected(event.target.files?.[0])
+                }
+                ref={avatarInputRef}
+                type="file"
+              />
+              <div className="mt-4 flex flex-wrap gap-3">
                 <button
                   className={secondaryButtonClasses}
-                  onClick={() => updateField("avatarUrl", "")}
+                  onClick={() => avatarInputRef.current?.click()}
                   type="button"
                 >
-                  Remove photo
+                  Choose photo
                 </button>
+                {avatarSrc ? (
+                  <button
+                    className={secondaryButtonClasses}
+                    onClick={() => {
+                      setPendingAvatar(null);
+                      updateField("avatarUrl", "");
+                      if (avatarInputRef.current) {
+                        avatarInputRef.current.value = "";
+                      }
+                    }}
+                    type="button"
+                  >
+                    Remove photo
+                  </button>
+                ) : null}
               </div>
 
               <div className="mt-6">
                 <button
                   className={primaryButtonClasses}
-                  disabled={isSubmitting}
+                  disabled={!hasChanges || isSubmitting || isUploadingAvatar}
                   type="submit"
                 >
-                  {isSubmitting ? "Saving..." : "Save Changes"}
+                  {isUploadingAvatar
+                    ? "Uploading photo..."
+                    : isSubmitting
+                      ? "Saving..."
+                      : "Save Changes"}
                 </button>
               </div>
             </div>
@@ -494,23 +578,24 @@ function toUpdateProfileInput(form: ProfileFormState): UpdateProfileInput {
   };
 }
 
+function areProfileFormsEqual(
+  first: ProfileFormState,
+  second: ProfileFormState,
+) {
+  return (
+    first.avatarUrl.trim() === second.avatarUrl.trim() &&
+    first.dateOfBirth === second.dateOfBirth &&
+    first.fullName.trim() === second.fullName.trim() &&
+    first.gender === second.gender &&
+    first.phoneNumber.trim() === second.phoneNumber.trim()
+  );
+}
+
 function validateForm(form: ProfileFormState) {
   const fullName = form.fullName.trim();
 
   if (fullName.length < 2 || fullName.length > 100) {
     return "Full name must be between 2 and 100 characters.";
-  }
-
-  if (form.avatarUrl.trim()) {
-    try {
-      const avatarUrl = new URL(form.avatarUrl.trim());
-
-      if (!["http:", "https:"].includes(avatarUrl.protocol)) {
-        return "Avatar URL must start with http or https.";
-      }
-    } catch {
-      return "Avatar URL must be a valid URL.";
-    }
   }
 
   return null;

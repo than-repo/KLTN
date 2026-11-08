@@ -2,6 +2,15 @@ import { apiRequest } from "@/lib/api/client";
 
 import type { UpdateProfileInput, UserProfile } from "../types/profile";
 
+type AvatarUploadSignature = {
+  apiKey: string;
+  cloudName: string;
+  folder?: string;
+  signature: string;
+  timestamp: number | string;
+  uploadPreset?: string;
+};
+
 type UpdateProfilePayload = {
   avatarUrl?: string | null;
   dateOfBirth?: string | null;
@@ -26,6 +35,56 @@ export function updateMyProfile(
     body: normalizeUpdateProfileInput(input),
     method: "PATCH",
   });
+}
+
+export function getAvatarUploadSignature(userId: string, accessToken: string) {
+  return apiRequest<AvatarUploadSignature>("/upload/signature", {
+    accessToken,
+    body: {
+      entityId: userId,
+      entityType: "user",
+      resourceType: "image",
+      subFolder: "avatar",
+    },
+    method: "POST",
+  });
+}
+
+export async function uploadAvatar(
+  file: File,
+  signature: AvatarUploadSignature,
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("api_key", signature.apiKey);
+  formData.append("timestamp", String(signature.timestamp));
+  formData.append("signature", signature.signature);
+
+  if (signature.folder) {
+    formData.append("folder", signature.folder);
+  }
+
+  if (signature.uploadPreset) {
+    formData.append("upload_preset", signature.uploadPreset);
+  }
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${signature.cloudName}/image/upload`,
+    { body: formData, method: "POST" },
+  );
+  const payload = (await response.json().catch(() => null)) as {
+    error?: { message?: string };
+    secure_url?: string;
+  } | null;
+
+  if (!response.ok || !payload?.secure_url) {
+    throw new Error(
+      payload?.error?.message ??
+        "Profile photo upload failed. Please try again.",
+    );
+  }
+
+  return payload.secure_url;
 }
 
 export function normalizeUpdateProfileInput(

@@ -10,6 +10,7 @@ import {
   formatCoursePrice,
 } from "../utils/course-data";
 import { CourseImage } from "./course-image";
+import { InstructorLinks } from "./instructor-links";
 
 type CourseCardProps = {
   course: PublicCourse;
@@ -19,7 +20,7 @@ export function CourseCard({ course }: CourseCardProps) {
   const visibleCategories = course.categories?.slice(0, 2) ?? [];
   const remainingCategoryCount =
     (course.categories?.length ?? 0) - visibleCategories.length;
-  const primaryInstructor = course.instructors?.[0]?.fullName;
+  const instructors = course.instructors ?? [];
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
@@ -84,12 +85,13 @@ export function CourseCard({ course }: CourseCardProps) {
               {formatCoursePrice(course.price)}
             </span>
           </div>
-          {primaryInstructor ? (
+          {instructors.length > 0 ? (
             <div className="flex items-center justify-between gap-3">
               <span>Instructor</span>
-              <span className="text-right text-foreground">
-                {primaryInstructor}
-              </span>
+              <InstructorLinks
+                className="text-right text-foreground"
+                instructors={instructors}
+              />
             </div>
           ) : null}
         </div>

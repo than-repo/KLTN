@@ -29,7 +29,12 @@ export class UploadController {
   @ApiAcceptedResponse({ type: SignatureResponseDto })
   @ApiBadRequestResponse()
   @ApiBody({ type: GetUploadSignatureDto })
-  @Roles(UserRole.INSTRUCTOR, UserRole.LEARNER, UserRole.ADMIN)
+  @Roles(
+    UserRole.INSTRUCTOR,
+    UserRole.LEARNER,
+    UserRole.REVIEWER,
+    UserRole.ADMIN,
+  )
   @UseGuards(RolesGuard)
   @Post('signature')
   async getUploadSignature(
