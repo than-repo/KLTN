@@ -31,6 +31,7 @@ import { QueryLessonsDto } from '../dtos/lesson/query-lessons.dto';
 import { PaginatedResponse } from '../dtos/paginated-response.dto';
 import { ReorderLessonsDto } from '../dtos/lesson/reorder-lesson.dto';
 import { SkillService } from 'src/features/skill/services/skill.service';
+import { CoursesService } from './courses.service';
 
 @Injectable()
 export class LessonsService {
@@ -40,6 +41,7 @@ export class LessonsService {
 
     private readonly courseAccessService: CourseAccessService,
     private readonly skillService: SkillService,
+    private readonly coursesService: CoursesService,
   ) {}
 
   private toOwnerLessonResponse(lesson: Lesson): LessonResponseDto {
@@ -101,6 +103,18 @@ export class LessonsService {
       sectionId,
       lessonId,
     );
+
+    const [, canEdit] = await Promise.all([
+      this.courseAccessService.ensureInstructorCanManageLesson(
+        courseId,
+        instructorId,
+        sectionId,
+        lessonId,
+      ),
+      this.coursesService.canEditCourse(courseId),
+    ]);
+
+    if (!canEdit) throw new BadRequestException('This course can not edit');
 
     if (dto.skillIds !== undefined) {
       const isValid = await this.skillService.verifySkillsBelongToCourse(

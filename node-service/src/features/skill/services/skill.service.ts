@@ -25,6 +25,7 @@ import { AssessmentAccessService } from 'src/features/assessments/services/asses
 import { AssessmentQuestionsService } from 'src/features/assessments/services/assessment-questions.service';
 import { GetSkillsQueryDto } from '../dtos/get-skills-query.dto';
 import { CoursesService } from 'src/features/courses/services/courses.service';
+import { Prisma } from 'generated/prisma/client';
 
 @Injectable()
 export class SkillService {
@@ -339,19 +340,44 @@ export class SkillService {
       courseId,
       instructorId,
     );
-    const skill = await this.skillRepository.getSkillDetails(skillId, courseId);
 
-    if (!skill) {
-      throw new NotFoundException('Skill not found');
-    }
+    const MAX_ATTEMPTS = 3;
 
-    if (skill.assessmentQuestions.length > 0 || skill.lessons.length > 0) {
-      throw new BadRequestException(
-        'Cannot delete a skill attached to lessons or questions',
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const skill = await this.skillRepository.getSkillDetails(
+        skillId,
+        courseId,
       );
+
+      if (!skill) {
+        throw new NotFoundException('Skill not found');
+      }
+
+      if (skill.assessmentQuestions.length > 0 || skill.lessons.length > 0) {
+        throw new BadRequestException(
+          'Cannot delete a skill attached to lessons or questions',
+        );
+      }
+
+      try {
+        await this.skillRepository.softDeleteSkill(skillId, skill.version);
+
+        return;
+      } catch (error: unknown) {
+        if (
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          continue;
+        }
+
+        throw error;
+      }
     }
 
-    await this.skillRepository.softDeleteSkill(skillId);
+    throw new ConflictException(
+      'The skill changed during deletion. Please try again.',
+    );
   }
   async getSkillsByCourseId(courseId: string) {
     return this.skillRepository.getSkillsByCourseId(courseId);

@@ -126,12 +126,16 @@ export class SkillRepository {
     }
   }
 
-  async softDeleteSkill(id: string): Promise<Prisma.SkillModel | null> {
+  async softDeleteSkill(
+    id: string,
+    expectedVersion: number,
+  ): Promise<Prisma.SkillModel | null> {
     return this.prisma.skill.update({
-      where: { id, isActive: true, deletedAt: null },
+      where: { id, isActive: true, deletedAt: null, version: expectedVersion },
       data: {
         isActive: false,
         deletedAt: new Date(),
+        version: { increment: 1 },
       },
     });
   }
@@ -200,6 +204,7 @@ export class SkillRepository {
             id: lessonId,
           },
         },
+        version: { increment: 1 },
       },
     });
   }
@@ -216,6 +221,7 @@ export class SkillRepository {
             id: questionId,
           },
         },
+        version: { increment: 1 },
       },
     });
   }

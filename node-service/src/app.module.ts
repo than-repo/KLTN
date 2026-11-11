@@ -15,6 +15,7 @@ import { PaymentsModule } from './features/payment/payments.module';
 import vnpayConfig from './config/vnpay.config';
 import { AssessmentsModule } from './features/assessments/assessments.module';
 import { SkillModule } from './features/skill/skill.module';
+import { BktModule } from './features/bkt/bkt.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { SkillModule } from './features/skill/skill.module';
     PaymentsModule,
     AssessmentsModule,
     SkillModule,
+    BktModule,
   ],
   controllers: [],
   providers: [
