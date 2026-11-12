@@ -248,6 +248,7 @@ export type LessonWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Lesson"> | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentListRelationFilter
   section?: Prisma.XOR<Prisma.CourseSectionScalarRelationFilter, Prisma.CourseSectionWhereInput>
   files?: Prisma.FileMediaListRelationFilter
   skills?: Prisma.SkillListRelationFilter
@@ -263,6 +264,7 @@ export type LessonOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  assessmentsAfter?: Prisma.AssessmentOrderByRelationAggregateInput
   section?: Prisma.CourseSectionOrderByWithRelationInput
   files?: Prisma.FileMediaOrderByRelationAggregateInput
   skills?: Prisma.SkillOrderByRelationAggregateInput
@@ -283,6 +285,7 @@ export type LessonWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Lesson"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Lesson"> | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentListRelationFilter
   section?: Prisma.XOR<Prisma.CourseSectionScalarRelationFilter, Prisma.CourseSectionWhereInput>
   files?: Prisma.FileMediaListRelationFilter
   skills?: Prisma.SkillListRelationFilter
@@ -329,6 +332,7 @@ export type LessonCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentCreateNestedManyWithoutAfterLessonInput
   section: Prisma.CourseSectionCreateNestedOneWithoutLessonsInput
   files?: Prisma.FileMediaCreateNestedManyWithoutLessonInput
   skills?: Prisma.SkillCreateNestedManyWithoutLessonsInput
@@ -344,6 +348,7 @@ export type LessonUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedCreateNestedManyWithoutAfterLessonInput
   files?: Prisma.FileMediaUncheckedCreateNestedManyWithoutLessonInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutLessonsInput
 }
@@ -357,6 +362,7 @@ export type LessonUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUpdateManyWithoutAfterLessonNestedInput
   section?: Prisma.CourseSectionUpdateOneRequiredWithoutLessonsNestedInput
   files?: Prisma.FileMediaUpdateManyWithoutLessonNestedInput
   skills?: Prisma.SkillUpdateManyWithoutLessonsNestedInput
@@ -372,6 +378,7 @@ export type LessonUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedUpdateManyWithoutAfterLessonNestedInput
   files?: Prisma.FileMediaUncheckedUpdateManyWithoutLessonNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutLessonsNestedInput
 }
@@ -409,6 +416,11 @@ export type LessonUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type LessonNullableScalarRelationFilter = {
+  is?: Prisma.LessonWhereInput | null
+  isNot?: Prisma.LessonWhereInput | null
 }
 
 export type LessonListRelationFilter = {
@@ -479,6 +491,22 @@ export type LessonSumOrderByAggregateInput = {
 export type LessonScalarRelationFilter = {
   is?: Prisma.LessonWhereInput
   isNot?: Prisma.LessonWhereInput
+}
+
+export type LessonCreateNestedOneWithoutAssessmentsAfterInput = {
+  create?: Prisma.XOR<Prisma.LessonCreateWithoutAssessmentsAfterInput, Prisma.LessonUncheckedCreateWithoutAssessmentsAfterInput>
+  connectOrCreate?: Prisma.LessonCreateOrConnectWithoutAssessmentsAfterInput
+  connect?: Prisma.LessonWhereUniqueInput
+}
+
+export type LessonUpdateOneWithoutAssessmentsAfterNestedInput = {
+  create?: Prisma.XOR<Prisma.LessonCreateWithoutAssessmentsAfterInput, Prisma.LessonUncheckedCreateWithoutAssessmentsAfterInput>
+  connectOrCreate?: Prisma.LessonCreateOrConnectWithoutAssessmentsAfterInput
+  upsert?: Prisma.LessonUpsertWithoutAssessmentsAfterInput
+  disconnect?: Prisma.LessonWhereInput | boolean
+  delete?: Prisma.LessonWhereInput | boolean
+  connect?: Prisma.LessonWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LessonUpdateToOneWithWhereWithoutAssessmentsAfterInput, Prisma.LessonUpdateWithoutAssessmentsAfterInput>, Prisma.LessonUncheckedUpdateWithoutAssessmentsAfterInput>
 }
 
 export type LessonCreateNestedManyWithoutSectionInput = {
@@ -575,6 +603,78 @@ export type LessonUncheckedUpdateManyWithoutSkillsNestedInput = {
   deleteMany?: Prisma.LessonScalarWhereInput | Prisma.LessonScalarWhereInput[]
 }
 
+export type LessonCreateWithoutAssessmentsAfterInput = {
+  id?: string
+  title: string
+  description?: string | null
+  lessonIndex: number
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  section: Prisma.CourseSectionCreateNestedOneWithoutLessonsInput
+  files?: Prisma.FileMediaCreateNestedManyWithoutLessonInput
+  skills?: Prisma.SkillCreateNestedManyWithoutLessonsInput
+}
+
+export type LessonUncheckedCreateWithoutAssessmentsAfterInput = {
+  id?: string
+  sectionId: string
+  title: string
+  description?: string | null
+  lessonIndex: number
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  files?: Prisma.FileMediaUncheckedCreateNestedManyWithoutLessonInput
+  skills?: Prisma.SkillUncheckedCreateNestedManyWithoutLessonsInput
+}
+
+export type LessonCreateOrConnectWithoutAssessmentsAfterInput = {
+  where: Prisma.LessonWhereUniqueInput
+  create: Prisma.XOR<Prisma.LessonCreateWithoutAssessmentsAfterInput, Prisma.LessonUncheckedCreateWithoutAssessmentsAfterInput>
+}
+
+export type LessonUpsertWithoutAssessmentsAfterInput = {
+  update: Prisma.XOR<Prisma.LessonUpdateWithoutAssessmentsAfterInput, Prisma.LessonUncheckedUpdateWithoutAssessmentsAfterInput>
+  create: Prisma.XOR<Prisma.LessonCreateWithoutAssessmentsAfterInput, Prisma.LessonUncheckedCreateWithoutAssessmentsAfterInput>
+  where?: Prisma.LessonWhereInput
+}
+
+export type LessonUpdateToOneWithWhereWithoutAssessmentsAfterInput = {
+  where?: Prisma.LessonWhereInput
+  data: Prisma.XOR<Prisma.LessonUpdateWithoutAssessmentsAfterInput, Prisma.LessonUncheckedUpdateWithoutAssessmentsAfterInput>
+}
+
+export type LessonUpdateWithoutAssessmentsAfterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lessonIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  section?: Prisma.CourseSectionUpdateOneRequiredWithoutLessonsNestedInput
+  files?: Prisma.FileMediaUpdateManyWithoutLessonNestedInput
+  skills?: Prisma.SkillUpdateManyWithoutLessonsNestedInput
+}
+
+export type LessonUncheckedUpdateWithoutAssessmentsAfterInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lessonIndex?: Prisma.IntFieldUpdateOperationsInput | number
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  files?: Prisma.FileMediaUncheckedUpdateManyWithoutLessonNestedInput
+  skills?: Prisma.SkillUncheckedUpdateManyWithoutLessonsNestedInput
+}
+
 export type LessonCreateWithoutSectionInput = {
   id?: string
   title: string
@@ -584,6 +684,7 @@ export type LessonCreateWithoutSectionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentCreateNestedManyWithoutAfterLessonInput
   files?: Prisma.FileMediaCreateNestedManyWithoutLessonInput
   skills?: Prisma.SkillCreateNestedManyWithoutLessonsInput
 }
@@ -597,6 +698,7 @@ export type LessonUncheckedCreateWithoutSectionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedCreateNestedManyWithoutAfterLessonInput
   files?: Prisma.FileMediaUncheckedCreateNestedManyWithoutLessonInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutLessonsInput
 }
@@ -651,6 +753,7 @@ export type LessonCreateWithoutFilesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentCreateNestedManyWithoutAfterLessonInput
   section: Prisma.CourseSectionCreateNestedOneWithoutLessonsInput
   skills?: Prisma.SkillCreateNestedManyWithoutLessonsInput
 }
@@ -665,6 +768,7 @@ export type LessonUncheckedCreateWithoutFilesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedCreateNestedManyWithoutAfterLessonInput
   skills?: Prisma.SkillUncheckedCreateNestedManyWithoutLessonsInput
 }
 
@@ -693,6 +797,7 @@ export type LessonUpdateWithoutFilesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUpdateManyWithoutAfterLessonNestedInput
   section?: Prisma.CourseSectionUpdateOneRequiredWithoutLessonsNestedInput
   skills?: Prisma.SkillUpdateManyWithoutLessonsNestedInput
 }
@@ -707,6 +812,7 @@ export type LessonUncheckedUpdateWithoutFilesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedUpdateManyWithoutAfterLessonNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutLessonsNestedInput
 }
 
@@ -719,6 +825,7 @@ export type LessonCreateWithoutSkillsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentCreateNestedManyWithoutAfterLessonInput
   section: Prisma.CourseSectionCreateNestedOneWithoutLessonsInput
   files?: Prisma.FileMediaCreateNestedManyWithoutLessonInput
 }
@@ -733,6 +840,7 @@ export type LessonUncheckedCreateWithoutSkillsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedCreateNestedManyWithoutAfterLessonInput
   files?: Prisma.FileMediaUncheckedCreateNestedManyWithoutLessonInput
 }
 
@@ -777,6 +885,7 @@ export type LessonUpdateWithoutSectionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUpdateManyWithoutAfterLessonNestedInput
   files?: Prisma.FileMediaUpdateManyWithoutLessonNestedInput
   skills?: Prisma.SkillUpdateManyWithoutLessonsNestedInput
 }
@@ -790,6 +899,7 @@ export type LessonUncheckedUpdateWithoutSectionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedUpdateManyWithoutAfterLessonNestedInput
   files?: Prisma.FileMediaUncheckedUpdateManyWithoutLessonNestedInput
   skills?: Prisma.SkillUncheckedUpdateManyWithoutLessonsNestedInput
 }
@@ -814,6 +924,7 @@ export type LessonUpdateWithoutSkillsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUpdateManyWithoutAfterLessonNestedInput
   section?: Prisma.CourseSectionUpdateOneRequiredWithoutLessonsNestedInput
   files?: Prisma.FileMediaUpdateManyWithoutLessonNestedInput
 }
@@ -828,6 +939,7 @@ export type LessonUncheckedUpdateWithoutSkillsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentsAfter?: Prisma.AssessmentUncheckedUpdateManyWithoutAfterLessonNestedInput
   files?: Prisma.FileMediaUncheckedUpdateManyWithoutLessonNestedInput
 }
 
@@ -849,11 +961,13 @@ export type LessonUncheckedUpdateManyWithoutSkillsInput = {
  */
 
 export type LessonCountOutputType = {
+  assessmentsAfter: number
   files: number
   skills: number
 }
 
 export type LessonCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessmentsAfter?: boolean | LessonCountOutputTypeCountAssessmentsAfterArgs
   files?: boolean | LessonCountOutputTypeCountFilesArgs
   skills?: boolean | LessonCountOutputTypeCountSkillsArgs
 }
@@ -866,6 +980,13 @@ export type LessonCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exten
    * Select specific fields to fetch from the LessonCountOutputType
    */
   select?: Prisma.LessonCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * LessonCountOutputType without action
+ */
+export type LessonCountOutputTypeCountAssessmentsAfterArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AssessmentWhereInput
 }
 
 /**
@@ -893,6 +1014,7 @@ export type LessonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  assessmentsAfter?: boolean | Prisma.Lesson$assessmentsAfterArgs<ExtArgs>
   section?: boolean | Prisma.CourseSectionDefaultArgs<ExtArgs>
   files?: boolean | Prisma.Lesson$filesArgs<ExtArgs>
   skills?: boolean | Prisma.Lesson$skillsArgs<ExtArgs>
@@ -915,6 +1037,7 @@ export type LessonSelectScalar = {
 
 export type LessonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sectionId" | "title" | "description" | "lessonIndex" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["lesson"]>
 export type LessonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  assessmentsAfter?: boolean | Prisma.Lesson$assessmentsAfterArgs<ExtArgs>
   section?: boolean | Prisma.CourseSectionDefaultArgs<ExtArgs>
   files?: boolean | Prisma.Lesson$filesArgs<ExtArgs>
   skills?: boolean | Prisma.Lesson$skillsArgs<ExtArgs>
@@ -924,6 +1047,7 @@ export type LessonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type $LessonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Lesson"
   objects: {
+    assessmentsAfter: Prisma.$AssessmentPayload<ExtArgs>[]
     section: Prisma.$CourseSectionPayload<ExtArgs>
     files: Prisma.$FileMediaPayload<ExtArgs>[]
     skills: Prisma.$SkillPayload<ExtArgs>[]
@@ -1278,6 +1402,7 @@ readonly fields: LessonFieldRefs;
  */
 export interface Prisma__LessonClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  assessmentsAfter<T extends Prisma.Lesson$assessmentsAfterArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$assessmentsAfterArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   section<T extends Prisma.CourseSectionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseSectionDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseSectionClient<runtime.Types.Result.GetResult<Prisma.$CourseSectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   files<T extends Prisma.Lesson$filesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$filesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FileMediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   skills<T extends Prisma.Lesson$skillsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Lesson$skillsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SkillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1664,6 +1789,30 @@ export type LessonDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Limit how many Lessons to delete.
    */
   limit?: number
+}
+
+/**
+ * Lesson.assessmentsAfter
+ */
+export type Lesson$assessmentsAfterArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Assessment
+   */
+  select?: Prisma.AssessmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Assessment
+   */
+  omit?: Prisma.AssessmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AssessmentInclude<ExtArgs> | null
+  where?: Prisma.AssessmentWhereInput
+  orderBy?: Prisma.AssessmentOrderByWithRelationInput | Prisma.AssessmentOrderByWithRelationInput[]
+  cursor?: Prisma.AssessmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AssessmentScalarFieldEnum | Prisma.AssessmentScalarFieldEnum[]
 }
 
 /**

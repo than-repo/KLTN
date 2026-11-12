@@ -61,12 +61,16 @@ model Assessment {
   reviewTiming  AssessmentReviewTiming  @default(AFTER_GRADED)
   reviewContent AssessmentReviewContent @default(SCORE_ONLY)
 
+  afterLessonId String?
+
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  afterLesson Lesson? @relation("AssessmentsAfterLesson", fields: [afterLessonId], references: [id], onDelete: SetNull)
 
   questions AssessmentQuestion[]
   attempts  AssessmentAttempt[]

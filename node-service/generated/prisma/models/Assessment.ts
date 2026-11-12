@@ -58,6 +58,7 @@ export type AssessmentMinAggregateOutputType = {
   availableUntil: Date | null
   reviewTiming: $Enums.AssessmentReviewTiming | null
   reviewContent: $Enums.AssessmentReviewContent | null
+  afterLessonId: string | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -80,6 +81,7 @@ export type AssessmentMaxAggregateOutputType = {
   availableUntil: Date | null
   reviewTiming: $Enums.AssessmentReviewTiming | null
   reviewContent: $Enums.AssessmentReviewContent | null
+  afterLessonId: string | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -102,6 +104,7 @@ export type AssessmentCountAggregateOutputType = {
   availableUntil: number
   reviewTiming: number
   reviewContent: number
+  afterLessonId: number
   isActive: number
   createdAt: number
   updatedAt: number
@@ -142,6 +145,7 @@ export type AssessmentMinAggregateInputType = {
   availableUntil?: true
   reviewTiming?: true
   reviewContent?: true
+  afterLessonId?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -164,6 +168,7 @@ export type AssessmentMaxAggregateInputType = {
   availableUntil?: true
   reviewTiming?: true
   reviewContent?: true
+  afterLessonId?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -186,6 +191,7 @@ export type AssessmentCountAggregateInputType = {
   availableUntil?: true
   reviewTiming?: true
   reviewContent?: true
+  afterLessonId?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -295,6 +301,7 @@ export type AssessmentGroupByOutputType = {
   availableUntil: Date | null
   reviewTiming: $Enums.AssessmentReviewTiming
   reviewContent: $Enums.AssessmentReviewContent
+  afterLessonId: string | null
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -340,11 +347,13 @@ export type AssessmentWhereInput = {
   availableUntil?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.StringNullableFilter<"Assessment"> | string | null
   isActive?: Prisma.BoolFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
+  afterLesson?: Prisma.XOR<Prisma.LessonNullableScalarRelationFilter, Prisma.LessonWhereInput> | null
   questions?: Prisma.AssessmentQuestionListRelationFilter
   attempts?: Prisma.AssessmentAttemptListRelationFilter
 }
@@ -365,11 +374,13 @@ export type AssessmentOrderByWithRelationInput = {
   availableUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
+  afterLessonId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   course?: Prisma.CourseOrderByWithRelationInput
+  afterLesson?: Prisma.LessonOrderByWithRelationInput
   questions?: Prisma.AssessmentQuestionOrderByRelationAggregateInput
   attempts?: Prisma.AssessmentAttemptOrderByRelationAggregateInput
   _relevance?: Prisma.AssessmentOrderByRelevanceInput
@@ -394,11 +405,13 @@ export type AssessmentWhereUniqueInput = Prisma.AtLeast<{
   availableUntil?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.StringNullableFilter<"Assessment"> | string | null
   isActive?: Prisma.BoolFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
   course?: Prisma.XOR<Prisma.CourseScalarRelationFilter, Prisma.CourseWhereInput>
+  afterLesson?: Prisma.XOR<Prisma.LessonNullableScalarRelationFilter, Prisma.LessonWhereInput> | null
   questions?: Prisma.AssessmentQuestionListRelationFilter
   attempts?: Prisma.AssessmentAttemptListRelationFilter
 }, "id">
@@ -419,6 +432,7 @@ export type AssessmentOrderByWithAggregationInput = {
   availableUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
+  afterLessonId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -449,6 +463,7 @@ export type AssessmentScalarWhereWithAggregatesInput = {
   availableUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"Assessment"> | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingWithAggregatesFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentWithAggregatesFilter<"Assessment"> | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.StringNullableWithAggregatesFilter<"Assessment"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Assessment"> | Date | string
@@ -475,6 +490,7 @@ export type AssessmentCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   course: Prisma.CourseCreateNestedOneWithoutAssessmentsInput
+  afterLesson?: Prisma.LessonCreateNestedOneWithoutAssessmentsAfterInput
   questions?: Prisma.AssessmentQuestionCreateNestedManyWithoutAssessmentInput
   attempts?: Prisma.AssessmentAttemptCreateNestedManyWithoutAssessmentInput
 }
@@ -495,6 +511,7 @@ export type AssessmentUncheckedCreateInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  afterLessonId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -523,6 +540,7 @@ export type AssessmentUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   course?: Prisma.CourseUpdateOneRequiredWithoutAssessmentsNestedInput
+  afterLesson?: Prisma.LessonUpdateOneWithoutAssessmentsAfterNestedInput
   questions?: Prisma.AssessmentQuestionUpdateManyWithoutAssessmentNestedInput
   attempts?: Prisma.AssessmentAttemptUpdateManyWithoutAssessmentNestedInput
 }
@@ -543,6 +561,7 @@ export type AssessmentUncheckedUpdateInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -567,6 +586,7 @@ export type AssessmentCreateManyInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  afterLessonId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -610,6 +630,7 @@ export type AssessmentUncheckedUpdateManyInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -638,6 +659,7 @@ export type AssessmentCountOrderByAggregateInput = {
   availableUntil?: Prisma.SortOrder
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
+  afterLessonId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -668,6 +690,7 @@ export type AssessmentMaxOrderByAggregateInput = {
   availableUntil?: Prisma.SortOrder
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
+  afterLessonId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -690,6 +713,7 @@ export type AssessmentMinOrderByAggregateInput = {
   availableUntil?: Prisma.SortOrder
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
+  afterLessonId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -841,6 +865,48 @@ export type AssessmentUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
 }
 
+export type AssessmentCreateNestedManyWithoutAfterLessonInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAfterLessonInput, Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput> | Prisma.AssessmentCreateWithoutAfterLessonInput[] | Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput[]
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput | Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput[]
+  createMany?: Prisma.AssessmentCreateManyAfterLessonInputEnvelope
+  connect?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+}
+
+export type AssessmentUncheckedCreateNestedManyWithoutAfterLessonInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAfterLessonInput, Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput> | Prisma.AssessmentCreateWithoutAfterLessonInput[] | Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput[]
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput | Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput[]
+  createMany?: Prisma.AssessmentCreateManyAfterLessonInputEnvelope
+  connect?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+}
+
+export type AssessmentUpdateManyWithoutAfterLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAfterLessonInput, Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput> | Prisma.AssessmentCreateWithoutAfterLessonInput[] | Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput[]
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput | Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput[]
+  upsert?: Prisma.AssessmentUpsertWithWhereUniqueWithoutAfterLessonInput | Prisma.AssessmentUpsertWithWhereUniqueWithoutAfterLessonInput[]
+  createMany?: Prisma.AssessmentCreateManyAfterLessonInputEnvelope
+  set?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  disconnect?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  delete?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  connect?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  update?: Prisma.AssessmentUpdateWithWhereUniqueWithoutAfterLessonInput | Prisma.AssessmentUpdateWithWhereUniqueWithoutAfterLessonInput[]
+  updateMany?: Prisma.AssessmentUpdateManyWithWhereWithoutAfterLessonInput | Prisma.AssessmentUpdateManyWithWhereWithoutAfterLessonInput[]
+  deleteMany?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
+}
+
+export type AssessmentUncheckedUpdateManyWithoutAfterLessonNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCreateWithoutAfterLessonInput, Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput> | Prisma.AssessmentCreateWithoutAfterLessonInput[] | Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput[]
+  connectOrCreate?: Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput | Prisma.AssessmentCreateOrConnectWithoutAfterLessonInput[]
+  upsert?: Prisma.AssessmentUpsertWithWhereUniqueWithoutAfterLessonInput | Prisma.AssessmentUpsertWithWhereUniqueWithoutAfterLessonInput[]
+  createMany?: Prisma.AssessmentCreateManyAfterLessonInputEnvelope
+  set?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  disconnect?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  delete?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  connect?: Prisma.AssessmentWhereUniqueInput | Prisma.AssessmentWhereUniqueInput[]
+  update?: Prisma.AssessmentUpdateWithWhereUniqueWithoutAfterLessonInput | Prisma.AssessmentUpdateWithWhereUniqueWithoutAfterLessonInput[]
+  updateMany?: Prisma.AssessmentUpdateManyWithWhereWithoutAfterLessonInput | Prisma.AssessmentUpdateManyWithWhereWithoutAfterLessonInput[]
+  deleteMany?: Prisma.AssessmentScalarWhereInput | Prisma.AssessmentScalarWhereInput[]
+}
+
 export type AssessmentCreateWithoutQuestionsInput = {
   id?: string
   title: string
@@ -861,6 +927,7 @@ export type AssessmentCreateWithoutQuestionsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   course: Prisma.CourseCreateNestedOneWithoutAssessmentsInput
+  afterLesson?: Prisma.LessonCreateNestedOneWithoutAssessmentsAfterInput
   attempts?: Prisma.AssessmentAttemptCreateNestedManyWithoutAssessmentInput
 }
 
@@ -880,6 +947,7 @@ export type AssessmentUncheckedCreateWithoutQuestionsInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  afterLessonId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -923,6 +991,7 @@ export type AssessmentUpdateWithoutQuestionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   course?: Prisma.CourseUpdateOneRequiredWithoutAssessmentsNestedInput
+  afterLesson?: Prisma.LessonUpdateOneWithoutAssessmentsAfterNestedInput
   attempts?: Prisma.AssessmentAttemptUpdateManyWithoutAssessmentNestedInput
 }
 
@@ -942,6 +1011,7 @@ export type AssessmentUncheckedUpdateWithoutQuestionsInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -969,6 +1039,7 @@ export type AssessmentCreateWithoutAttemptsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   course: Prisma.CourseCreateNestedOneWithoutAssessmentsInput
+  afterLesson?: Prisma.LessonCreateNestedOneWithoutAssessmentsAfterInput
   questions?: Prisma.AssessmentQuestionCreateNestedManyWithoutAssessmentInput
 }
 
@@ -988,6 +1059,7 @@ export type AssessmentUncheckedCreateWithoutAttemptsInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  afterLessonId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1031,6 +1103,7 @@ export type AssessmentUpdateWithoutAttemptsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   course?: Prisma.CourseUpdateOneRequiredWithoutAssessmentsNestedInput
+  afterLesson?: Prisma.LessonUpdateOneWithoutAssessmentsAfterNestedInput
   questions?: Prisma.AssessmentQuestionUpdateManyWithoutAssessmentNestedInput
 }
 
@@ -1050,6 +1123,7 @@ export type AssessmentUncheckedUpdateWithoutAttemptsInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1076,6 +1150,7 @@ export type AssessmentCreateWithoutCourseInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  afterLesson?: Prisma.LessonCreateNestedOneWithoutAssessmentsAfterInput
   questions?: Prisma.AssessmentQuestionCreateNestedManyWithoutAssessmentInput
   attempts?: Prisma.AssessmentAttemptCreateNestedManyWithoutAssessmentInput
 }
@@ -1095,6 +1170,7 @@ export type AssessmentUncheckedCreateWithoutCourseInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  afterLessonId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1148,10 +1224,85 @@ export type AssessmentScalarWhereInput = {
   availableUntil?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.StringNullableFilter<"Assessment"> | string | null
   isActive?: Prisma.BoolFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Assessment"> | Date | string | null
+}
+
+export type AssessmentCreateWithoutAfterLessonInput = {
+  id?: string
+  title: string
+  description?: string | null
+  type: $Enums.AssessmentType
+  status?: $Enums.AssessmentStatus
+  order?: number
+  totalPoints?: number
+  passingScore?: number | null
+  maxAttempts?: number | null
+  timeLimitMinutes?: number | null
+  availableFrom?: Date | string | null
+  availableUntil?: Date | string | null
+  reviewTiming?: $Enums.AssessmentReviewTiming
+  reviewContent?: $Enums.AssessmentReviewContent
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  course: Prisma.CourseCreateNestedOneWithoutAssessmentsInput
+  questions?: Prisma.AssessmentQuestionCreateNestedManyWithoutAssessmentInput
+  attempts?: Prisma.AssessmentAttemptCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentUncheckedCreateWithoutAfterLessonInput = {
+  id?: string
+  courseId: string
+  title: string
+  description?: string | null
+  type: $Enums.AssessmentType
+  status?: $Enums.AssessmentStatus
+  order?: number
+  totalPoints?: number
+  passingScore?: number | null
+  maxAttempts?: number | null
+  timeLimitMinutes?: number | null
+  availableFrom?: Date | string | null
+  availableUntil?: Date | string | null
+  reviewTiming?: $Enums.AssessmentReviewTiming
+  reviewContent?: $Enums.AssessmentReviewContent
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  questions?: Prisma.AssessmentQuestionUncheckedCreateNestedManyWithoutAssessmentInput
+  attempts?: Prisma.AssessmentAttemptUncheckedCreateNestedManyWithoutAssessmentInput
+}
+
+export type AssessmentCreateOrConnectWithoutAfterLessonInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutAfterLessonInput, Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput>
+}
+
+export type AssessmentCreateManyAfterLessonInputEnvelope = {
+  data: Prisma.AssessmentCreateManyAfterLessonInput | Prisma.AssessmentCreateManyAfterLessonInput[]
+  skipDuplicates?: boolean
+}
+
+export type AssessmentUpsertWithWhereUniqueWithoutAfterLessonInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  update: Prisma.XOR<Prisma.AssessmentUpdateWithoutAfterLessonInput, Prisma.AssessmentUncheckedUpdateWithoutAfterLessonInput>
+  create: Prisma.XOR<Prisma.AssessmentCreateWithoutAfterLessonInput, Prisma.AssessmentUncheckedCreateWithoutAfterLessonInput>
+}
+
+export type AssessmentUpdateWithWhereUniqueWithoutAfterLessonInput = {
+  where: Prisma.AssessmentWhereUniqueInput
+  data: Prisma.XOR<Prisma.AssessmentUpdateWithoutAfterLessonInput, Prisma.AssessmentUncheckedUpdateWithoutAfterLessonInput>
+}
+
+export type AssessmentUpdateManyWithWhereWithoutAfterLessonInput = {
+  where: Prisma.AssessmentScalarWhereInput
+  data: Prisma.XOR<Prisma.AssessmentUpdateManyMutationInput, Prisma.AssessmentUncheckedUpdateManyWithoutAfterLessonInput>
 }
 
 export type AssessmentCreateManyCourseInput = {
@@ -1169,6 +1320,7 @@ export type AssessmentCreateManyCourseInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  afterLessonId?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1194,12 +1346,106 @@ export type AssessmentUpdateWithoutCourseInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  afterLesson?: Prisma.LessonUpdateOneWithoutAssessmentsAfterNestedInput
   questions?: Prisma.AssessmentQuestionUpdateManyWithoutAssessmentNestedInput
   attempts?: Prisma.AssessmentAttemptUpdateManyWithoutAssessmentNestedInput
 }
 
 export type AssessmentUncheckedUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumAssessmentTypeFieldUpdateOperationsInput | $Enums.AssessmentType
+  status?: Prisma.EnumAssessmentStatusFieldUpdateOperationsInput | $Enums.AssessmentStatus
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  passingScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  timeLimitMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
+  reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  questions?: Prisma.AssessmentQuestionUncheckedUpdateManyWithoutAssessmentNestedInput
+  attempts?: Prisma.AssessmentAttemptUncheckedUpdateManyWithoutAssessmentNestedInput
+}
+
+export type AssessmentUncheckedUpdateManyWithoutCourseInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumAssessmentTypeFieldUpdateOperationsInput | $Enums.AssessmentType
+  status?: Prisma.EnumAssessmentStatusFieldUpdateOperationsInput | $Enums.AssessmentStatus
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  passingScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  timeLimitMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
+  reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type AssessmentCreateManyAfterLessonInput = {
+  id?: string
+  courseId: string
+  title: string
+  description?: string | null
+  type: $Enums.AssessmentType
+  status?: $Enums.AssessmentStatus
+  order?: number
+  totalPoints?: number
+  passingScore?: number | null
+  maxAttempts?: number | null
+  timeLimitMinutes?: number | null
+  availableFrom?: Date | string | null
+  availableUntil?: Date | string | null
+  reviewTiming?: $Enums.AssessmentReviewTiming
+  reviewContent?: $Enums.AssessmentReviewContent
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type AssessmentUpdateWithoutAfterLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumAssessmentTypeFieldUpdateOperationsInput | $Enums.AssessmentType
+  status?: Prisma.EnumAssessmentStatusFieldUpdateOperationsInput | $Enums.AssessmentStatus
+  order?: Prisma.IntFieldUpdateOperationsInput | number
+  totalPoints?: Prisma.IntFieldUpdateOperationsInput | number
+  passingScore?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maxAttempts?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  timeLimitMinutes?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  availableFrom?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
+  reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  course?: Prisma.CourseUpdateOneRequiredWithoutAssessmentsNestedInput
+  questions?: Prisma.AssessmentQuestionUpdateManyWithoutAssessmentNestedInput
+  attempts?: Prisma.AssessmentAttemptUpdateManyWithoutAssessmentNestedInput
+}
+
+export type AssessmentUncheckedUpdateWithoutAfterLessonInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumAssessmentTypeFieldUpdateOperationsInput | $Enums.AssessmentType
@@ -1221,8 +1467,9 @@ export type AssessmentUncheckedUpdateWithoutCourseInput = {
   attempts?: Prisma.AssessmentAttemptUncheckedUpdateManyWithoutAssessmentNestedInput
 }
 
-export type AssessmentUncheckedUpdateManyWithoutCourseInput = {
+export type AssessmentUncheckedUpdateManyWithoutAfterLessonInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumAssessmentTypeFieldUpdateOperationsInput | $Enums.AssessmentType
@@ -1298,11 +1545,13 @@ export type AssessmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   availableUntil?: boolean
   reviewTiming?: boolean
   reviewContent?: boolean
+  afterLessonId?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+  afterLesson?: boolean | Prisma.Assessment$afterLessonArgs<ExtArgs>
   questions?: boolean | Prisma.Assessment$questionsArgs<ExtArgs>
   attempts?: boolean | Prisma.Assessment$attemptsArgs<ExtArgs>
   _count?: boolean | Prisma.AssessmentCountOutputTypeDefaultArgs<ExtArgs>
@@ -1326,15 +1575,17 @@ export type AssessmentSelectScalar = {
   availableUntil?: boolean
   reviewTiming?: boolean
   reviewContent?: boolean
+  afterLessonId?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type AssessmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "title" | "description" | "type" | "status" | "order" | "totalPoints" | "passingScore" | "maxAttempts" | "timeLimitMinutes" | "availableFrom" | "availableUntil" | "reviewTiming" | "reviewContent" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["assessment"]>
+export type AssessmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "title" | "description" | "type" | "status" | "order" | "totalPoints" | "passingScore" | "maxAttempts" | "timeLimitMinutes" | "availableFrom" | "availableUntil" | "reviewTiming" | "reviewContent" | "afterLessonId" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["assessment"]>
 export type AssessmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
+  afterLesson?: boolean | Prisma.Assessment$afterLessonArgs<ExtArgs>
   questions?: boolean | Prisma.Assessment$questionsArgs<ExtArgs>
   attempts?: boolean | Prisma.Assessment$attemptsArgs<ExtArgs>
   _count?: boolean | Prisma.AssessmentCountOutputTypeDefaultArgs<ExtArgs>
@@ -1344,6 +1595,7 @@ export type $AssessmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "Assessment"
   objects: {
     course: Prisma.$CoursePayload<ExtArgs>
+    afterLesson: Prisma.$LessonPayload<ExtArgs> | null
     questions: Prisma.$AssessmentQuestionPayload<ExtArgs>[]
     attempts: Prisma.$AssessmentAttemptPayload<ExtArgs>[]
   }
@@ -1363,6 +1615,7 @@ export type $AssessmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     availableUntil: Date | null
     reviewTiming: $Enums.AssessmentReviewTiming
     reviewContent: $Enums.AssessmentReviewContent
+    afterLessonId: string | null
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -1708,6 +1961,7 @@ readonly fields: AssessmentFieldRefs;
 export interface Prisma__AssessmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   course<T extends Prisma.CourseDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CourseDefaultArgs<ExtArgs>>): Prisma.Prisma__CourseClient<runtime.Types.Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  afterLesson<T extends Prisma.Assessment$afterLessonArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assessment$afterLessonArgs<ExtArgs>>): Prisma.Prisma__LessonClient<runtime.Types.Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   questions<T extends Prisma.Assessment$questionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assessment$questionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentQuestionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   attempts<T extends Prisma.Assessment$attemptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Assessment$attemptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AssessmentAttemptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1754,6 +2008,7 @@ export interface AssessmentFieldRefs {
   readonly availableUntil: Prisma.FieldRef<"Assessment", 'DateTime'>
   readonly reviewTiming: Prisma.FieldRef<"Assessment", 'AssessmentReviewTiming'>
   readonly reviewContent: Prisma.FieldRef<"Assessment", 'AssessmentReviewContent'>
+  readonly afterLessonId: Prisma.FieldRef<"Assessment", 'String'>
   readonly isActive: Prisma.FieldRef<"Assessment", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Assessment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Assessment", 'DateTime'>
@@ -2103,6 +2358,25 @@ export type AssessmentDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many Assessments to delete.
    */
   limit?: number
+}
+
+/**
+ * Assessment.afterLesson
+ */
+export type Assessment$afterLessonArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Lesson
+   */
+  select?: Prisma.LessonSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Lesson
+   */
+  omit?: Prisma.LessonOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LessonInclude<ExtArgs> | null
+  where?: Prisma.LessonWhereInput
 }
 
 /**

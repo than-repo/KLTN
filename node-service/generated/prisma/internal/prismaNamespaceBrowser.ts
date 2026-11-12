@@ -107,6 +107,7 @@ export const AssessmentScalarFieldEnum = {
   availableUntil: 'availableUntil',
   reviewTiming: 'reviewTiming',
   reviewContent: 'reviewContent',
+  afterLessonId: 'afterLessonId',
   isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -485,7 +486,8 @@ export const AssessmentOrderByRelevanceFieldEnum = {
   id: 'id',
   courseId: 'courseId',
   title: 'title',
-  description: 'description'
+  description: 'description',
+  afterLessonId: 'afterLessonId'
 } as const
 
 export type AssessmentOrderByRelevanceFieldEnum = (typeof AssessmentOrderByRelevanceFieldEnum)[keyof typeof AssessmentOrderByRelevanceFieldEnum]
