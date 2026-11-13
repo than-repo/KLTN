@@ -39,7 +39,7 @@ export class AttemptRepository implements IAttemptRepository {
   async findPublishedAssessmentsForLearnerCourse(
     courseId: string,
   ): Promise<LearnerCourseAssessmentListRecord[]> {
-    return this.prisma.assessment.findMany({
+    const assessments = await this.prisma.assessment.findMany({
       where: {
         courseId,
         status: 'PUBLISHED',
@@ -57,6 +57,16 @@ export class AttemptRepository implements IAttemptRepository {
       select: {
         id: true,
         courseId: true,
+        afterLessonId: true,
+        afterLesson: {
+          select: {
+            isActive: true,
+            deletedAt: true,
+            section: {
+              select: { courseId: true, isActive: true, deletedAt: true },
+            },
+          },
+        },
 
         title: true,
         description: true,
@@ -73,6 +83,12 @@ export class AttemptRepository implements IAttemptRepository {
         availableUntil: true,
       },
     });
+
+    return assessments.map(({ afterLessonId, afterLesson, ...assessment }) => ({
+      ...assessment,
+      afterLesson: afterLessonId,
+      afterLessonContext: afterLesson,
+    }));
   }
 
   /**

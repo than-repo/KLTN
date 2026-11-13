@@ -32,6 +32,7 @@ export class AssessmentMapper {
       assessmentReviewContent: assessmentPrisma.reviewContent,
 
       isActive: assessmentPrisma.isActive,
+      afterLesson: assessmentPrisma.afterLessonId,
 
       createdAt: assessmentPrisma.createdAt,
       updatedAt: assessmentPrisma.updatedAt,

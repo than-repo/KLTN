@@ -61,6 +61,8 @@ export interface CreateAssessmentQuestionInput {
   points?: number;
   order?: number;
 
+  skillIds: string[];
+
   isActive?: boolean;
 }
 
@@ -72,6 +74,7 @@ export interface UpdateAssessmentQuestionInput {
 
   points?: number;
   order?: number;
+  skillIds?: string[];
 
   isActive?: boolean;
 }

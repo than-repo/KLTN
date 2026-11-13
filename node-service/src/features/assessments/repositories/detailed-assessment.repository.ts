@@ -14,6 +14,7 @@ export const detailedAssessmentInclude = {
   questions: {
     include: {
       answers: true,
+      skills: true,
     },
     orderBy: {
       order: 'asc',
@@ -50,6 +51,7 @@ export class DetailedAssessmentRepository implements IDetailedAssessmentReposito
     return {
       id: assessmentPrisma.id,
       courseId: assessmentPrisma.courseId,
+      afterLesson: assessmentPrisma.afterLessonId,
 
       title: assessmentPrisma.title,
       description: assessmentPrisma.description ?? null,
@@ -91,6 +93,7 @@ export class DetailedAssessmentRepository implements IDetailedAssessmentReposito
 
           points: question.points,
           order: question.order,
+          skills: question.skills,
 
           isActive: question.isActive,
 
@@ -136,7 +139,7 @@ export class DetailedAssessmentRepository implements IDetailedAssessmentReposito
       default: {
         const exhaustiveCheck: never = type;
         throw new Error(
-          `Unsupported assessment question type: ${exhaustiveCheck}`,
+          `Unsupported assessment question type: ${String(exhaustiveCheck)}`,
         );
       }
     }
@@ -157,9 +160,7 @@ export class DetailedAssessmentRepository implements IDetailedAssessmentReposito
     }
 
     if (Array.isArray(value)) {
-      return value.map((item) =>
-        this.toDomainJsonValue(item),
-      ) as DomainJsonValue[];
+      return value.map((item) => this.toDomainJsonValue(item));
     }
 
     return Object.fromEntries(

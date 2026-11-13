@@ -1,10 +1,7 @@
 // src/features/assessments/repositories/assessment-questions.repository.ts
 
 import { Injectable } from '@nestjs/common';
-import {
-  AssessmentQuestion as PrismaAssessmentQuestion,
-  Prisma,
-} from 'generated/prisma/client';
+import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/database/prisma.service';
 import {
   AssessmentQuestion,
@@ -55,7 +52,11 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
           points: input.points ?? 1,
           order: input.order ?? 0,
           isActive: input.isActive ?? true,
+          skills: {
+            connect: input.skillIds.map((skillId) => ({ id: skillId })),
+          },
         },
+        include: { skills: true },
       });
 
       await this.syncAssessmentTotalPointsTx(tx, input.assessmentId);
@@ -128,7 +129,21 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
     input: UpdateAssessmentQuestionInput,
   ): Promise<AssessmentQuestion | null> {
     return this.prisma.$transaction(async (tx) => {
-      const result = await tx.assessmentQuestion.updateMany({
+      const existing = await tx.assessmentQuestion.findFirst({
+        where: {
+          id: questionId,
+          assessmentId,
+          deletedAt: null,
+          isActive: true,
+        },
+        select: { id: true },
+      });
+
+      if (!existing) {
+        return null;
+      }
+
+      const question = await tx.assessmentQuestion.update({
         where: {
           id: questionId,
           assessmentId,
@@ -142,19 +157,14 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
           points: input.points,
           order: input.order,
           isActive: input.isActive,
+          skills:
+            input.skillIds !== undefined
+              ? {
+                  set: input.skillIds.map((skillId) => ({ id: skillId })),
+                }
+              : undefined,
         },
-      });
-
-      if (result.count === 0) {
-        return null;
-      }
-
-      const question = await tx.assessmentQuestion.findFirstOrThrow({
-        where: {
-          id: questionId,
-          assessmentId,
-          deletedAt: null,
-        },
+        include: { skills: true },
       });
 
       await this.syncAssessmentTotalPointsTx(tx, assessmentId);

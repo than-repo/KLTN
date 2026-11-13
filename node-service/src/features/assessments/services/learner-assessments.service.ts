@@ -89,6 +89,15 @@ export class LearnerAssessmentsService {
     return {
       assessments: assessments.map((assessment) => ({
         id: assessment.id,
+        // A hidden lesson must not make its assessment disappear from the path.
+        afterLesson:
+          assessment.afterLessonContext?.isActive &&
+          assessment.afterLessonContext.deletedAt === null &&
+          assessment.afterLessonContext.section.courseId === courseId &&
+          assessment.afterLessonContext.section.isActive &&
+          assessment.afterLessonContext.section.deletedAt === null
+            ? assessment.afterLesson
+            : null,
         title: assessment.title,
         description: assessment.description,
         type: assessment.type,

@@ -3,6 +3,7 @@ import {
   Assessment,
   CreateAssessmentInput,
   IAssessmentRepository,
+  InvalidAfterLessonError,
   OrderAssessmentInput,
   UpdateAssessmentInput,
   UpdatePublishedAssessmentInput,
@@ -10,7 +11,7 @@ import {
 } from '../interfaces/assessment.repository.interface';
 import { AssessmentMapper } from '../mappers/assessment.mapper';
 import { Prisma } from 'generated/prisma/client';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AssessmentRepository implements IAssessmentRepository {
@@ -19,28 +20,34 @@ export class AssessmentRepository implements IAssessmentRepository {
   async createDraftAssessment(
     input: CreateAssessmentInput,
   ): Promise<Assessment> {
-    const assessment = await this.prisma.assessment.create({
-      data: {
-        courseId: input.courseId,
+    const assessment = await this.withValidAfterLesson(
+      input.afterLesson,
+      input.courseId,
+      (tx) =>
+        tx.assessment.create({
+          data: {
+            courseId: input.courseId,
 
-        title: input.title,
-        description: input.description,
-        type: input.type,
-        status: input.status,
-        order: input.order,
+            title: input.title,
+            description: input.description,
+            type: input.type,
+            status: input.status,
+            order: input.order,
 
-        totalPoints: input.totalPoints,
-        passingScore: input.passingScore,
+            totalPoints: input.totalPoints,
+            passingScore: input.passingScore,
 
-        maxAttempts: input.maxAttempts,
-        timeLimitMinutes: input.timeLimitMinutes,
+            maxAttempts: input.maxAttempts,
+            timeLimitMinutes: input.timeLimitMinutes,
 
-        availableFrom: input.availableFrom,
-        availableUntil: input.availableUntil,
+            availableFrom: input.availableFrom,
+            availableUntil: input.availableUntil,
 
-        isActive: input.isActive,
-      },
-    });
+            isActive: input.isActive,
+            afterLessonId: input.afterLesson,
+          },
+        }),
+    );
 
     return AssessmentMapper.toAssessment(assessment);
   }
@@ -69,11 +76,18 @@ export class AssessmentRepository implements IAssessmentRepository {
   async updateDraftAssessment(
     assessmentId: string,
     input: UpdateAssessmentInput,
+    courseId?: string,
   ): Promise<Assessment> {
-    const assessment = await this.prisma.assessment.update({
-      where: { id: assessmentId },
-      data: { ...input },
-    });
+    const { afterLesson, ...fields } = input;
+    const assessment = await this.withValidAfterLesson(
+      afterLesson,
+      courseId,
+      (tx) =>
+        tx.assessment.update({
+          where: { id: assessmentId, courseId },
+          data: { ...fields, afterLessonId: afterLesson },
+        }),
+    );
 
     return AssessmentMapper.toAssessment(assessment);
   }
@@ -81,24 +95,65 @@ export class AssessmentRepository implements IAssessmentRepository {
   async updatePublishAssessment(
     assessmentId: string,
     input: UpdatePublishedAssessmentInput,
+    courseId?: string,
   ): Promise<Assessment> {
-    const assessment = await this.prisma.assessment.update({
-      where: { id: assessmentId },
-      data: {
-        maxAttempts: input.maxAttempts,
-        timeLimitMinutes: input.timeLimitMinutes,
+    const assessment = await this.withValidAfterLesson(
+      input.afterLesson,
+      courseId,
+      (tx) =>
+        tx.assessment.update({
+          where: { id: assessmentId, courseId },
+          data: {
+            afterLessonId: input.afterLesson,
+            maxAttempts: input.maxAttempts,
+            timeLimitMinutes: input.timeLimitMinutes,
 
-        availableFrom: input.availableFrom,
-        availableUntil: input.availableUntil,
+            availableFrom: input.availableFrom,
+            availableUntil: input.availableUntil,
 
-        reviewTiming: input.assessmentReviewTiming,
-        reviewContent: input.assessmentReviewContent,
+            reviewTiming: input.assessmentReviewTiming,
+            reviewContent: input.assessmentReviewContent,
 
-        isActive: input.isActive,
-      },
-    });
+            isActive: input.isActive,
+          },
+        }),
+    );
 
     return AssessmentMapper.toAssessment(assessment);
+  }
+
+  private async withValidAfterLesson<T>(
+    lessonId: string | null | undefined,
+    courseId: string | undefined,
+    write: (tx: Prisma.TransactionClient) => Promise<T>,
+  ): Promise<T> {
+    return this.prisma.$transaction(async (tx) => {
+      if (lessonId !== undefined && lessonId !== null) {
+        if (courseId === undefined) {
+          throw new InvalidAfterLessonError();
+        }
+
+        // Lock both records so neither can be hidden or deleted during the write.
+        const lessons = await tx.$queryRaw<{ id: string }[]>`
+          SELECT lesson.id
+          FROM lessons AS lesson
+          INNER JOIN course_sections AS section ON section.id = lesson.sectionId
+          WHERE lesson.id = ${lessonId}
+            AND lesson.isActive = true
+            AND lesson.deletedAt IS NULL
+            AND section.courseId = ${courseId}
+            AND section.isActive = true
+            AND section.deletedAt IS NULL
+          FOR UPDATE
+        `;
+
+        if (lessons.length === 0) {
+          throw new InvalidAfterLessonError();
+        }
+      }
+
+      return write(tx);
+    });
   }
 
   async softDeleteAssessment(assessmentId: string): Promise<boolean> {
@@ -122,7 +177,9 @@ export class AssessmentRepository implements IAssessmentRepository {
       take,
       skip,
     });
-    return assessments.map(AssessmentMapper.toAssessment);
+    return assessments.map((assessment) =>
+      AssessmentMapper.toAssessment(assessment),
+    );
   }
   async count(where: WhereAssessmentInput): Promise<number> {
     return this.prisma.assessment.count({

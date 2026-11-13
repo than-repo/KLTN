@@ -77,44 +77,58 @@ export class AssessmentQuestionResponseDto {
 }
 
 export class SkillDto {
+  @ApiProperty()
   @Expose()
   id!: string;
 
+  @ApiProperty()
   @Expose()
   canonicalName!: string;
 
+  @ApiProperty({ type: String, nullable: true })
   @Expose()
   description!: string | null;
 
+  @ApiProperty({ type: [String], nullable: true })
   @Expose()
   aliases!: string[] | null;
 
+  @ApiProperty({ type: String, nullable: true })
   @Expose()
   parentId!: string | null;
 
+  @ApiProperty()
   @Expose()
   level!: number;
 
+  @ApiProperty({ enum: Difficulty })
   @Expose()
   difficulty!: Difficulty;
 
+  @ApiProperty()
   @Expose()
   isActive!: boolean;
 
+  @ApiProperty({ type: String, format: 'date-time' })
   @Expose()
-  @Transform(({ value }) =>
+  @Type(() => Date)
+  @Transform(({ value }: { value: unknown }) =>
     value instanceof Date ? value.toISOString() : value,
   )
   createdAt!: string;
 
+  @ApiProperty({ type: String, format: 'date-time' })
   @Expose()
-  @Transform(({ value }) =>
+  @Type(() => Date)
+  @Transform(({ value }: { value: unknown }) =>
     value instanceof Date ? value.toISOString() : value,
   )
   updatedAt!: string;
 
+  @ApiProperty({ type: String, format: 'date-time', nullable: true })
   @Expose()
-  @Transform(({ value }) =>
+  @Type(() => Date)
+  @Transform(({ value }: { value: unknown }) =>
     value instanceof Date ? value.toISOString() : value,
   )
   deletedAt!: string | null;

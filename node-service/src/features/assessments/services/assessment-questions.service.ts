@@ -28,6 +28,7 @@ import { AssessmentQuestionResponseDto } from '../dtos/questions/assessment-ques
 import { ASSESSMENT_VIEW_GROUPS } from '../dtos/assessment/assessment-response';
 import { ASSESSMENT_REPOSITORY } from '../repositories/assessment.repository.token';
 import { ASSESSMENT_QUESTIONS_REPOSITORY } from '../repositories/assessment-questions.interface.token';
+import { SkillRepository } from 'src/features/skill/repositories/skill.repository';
 
 const QUIZ_ALLOWED_QUESTION_TYPES: readonly AssessmentQuestionType[] = [
   AssessmentQuestionType.MULTIPLE_CHOICE,
@@ -43,6 +44,7 @@ export class AssessmentQuestionsService {
     @Inject(ASSESSMENT_QUESTIONS_REPOSITORY)
     private readonly iAssessmentQuestionRepository: IAssessmentQuestionRepository,
     private readonly assessmentAccessService: AssessmentAccessService,
+    private readonly skillRepository: SkillRepository,
   ) {}
 
   async createQuestion(
@@ -56,9 +58,17 @@ export class AssessmentQuestionsService {
       courseId,
       assessmentId,
     );
-    const assessment =
-      await this.iAssessmentRepository.findAssessmentById(assessmentId);
 
+    const [assessment, validSkills] = await Promise.all([
+      this.iAssessmentRepository.findAssessmentById(assessmentId),
+      this.skillRepository.getSkillsByCourseId(courseId),
+    ]);
+
+    const validIds = validSkills.map((skill) => skill.id);
+    const areValidSkills = dto.skillIds.every((id) => validIds.includes(id));
+    if (!areValidSkills) {
+      throw new BadRequestException('Invalid skill ids');
+    }
     if (!assessment) {
       throw new NotFoundException('Assessment not found');
     }
@@ -94,6 +104,7 @@ export class AssessmentQuestionsService {
           points: dto.points ?? 1,
           order,
           isActive: true,
+          skillIds: dto.skillIds,
         },
       );
 
@@ -114,8 +125,19 @@ export class AssessmentQuestionsService {
       questionId,
     );
 
-    const question =
-      await this.iAssessmentQuestionRepository.findQuestionById(questionId);
+    const [question, skills] = await Promise.all([
+      this.iAssessmentQuestionRepository.findQuestionById(questionId),
+      this.skillRepository.getSkillsByCourseId(courseId),
+    ]);
+
+    if (dto.skillIds !== undefined && dto.skillIds !== null) {
+      const validIds = skills.map((skill) => skill.id);
+      const areValidSkills = dto.skillIds.every((id) => validIds.includes(id));
+
+      if (!areValidSkills) {
+        throw new BadRequestException('Invalid skill ids');
+      }
+    }
 
     if (!question) {
       throw new NotFoundException('Question not found');
@@ -150,6 +172,7 @@ export class AssessmentQuestionsService {
               ? (dto.explanation ?? null)
               : undefined,
           points: dto.points,
+          skillIds: dto.skillIds ?? undefined,
         } satisfies UpdateAssessmentQuestionInput,
       );
 

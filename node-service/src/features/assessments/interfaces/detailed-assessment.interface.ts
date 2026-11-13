@@ -1,4 +1,7 @@
-import { AssessmentQuestionType } from './assessment-questions.repository.interface';
+import {
+  AssessmentQuestionType,
+  Skill,
+} from './assessment-questions.repository.interface';
 import {
   AssessmentReviewContent,
   AssessmentReviewTiming,
@@ -15,9 +18,7 @@ export interface IDetailedAssessmentRepository {
 export type DomainJsonPrimitive = string | number | boolean | null;
 
 export type DomainJsonValue =
-  | DomainJsonPrimitive
-  | DomainJsonObject
-  | DomainJsonArray;
+  DomainJsonPrimitive | DomainJsonObject | DomainJsonArray;
 
 export interface DomainJsonObject {
   [key: string]: DomainJsonValue;
@@ -27,6 +28,7 @@ export type DomainJsonArray = DomainJsonValue[];
 export interface DetailedAssessment {
   id: string;
   courseId: string;
+  afterLesson: string | null;
 
   title: string;
   description: string | null;
@@ -76,6 +78,7 @@ export interface DetailedAssessmentQuestion {
   deletedAt: Date | null;
 
   answer: DetailedAssessmentAnswer | null;
+  skills: Skill[];
 }
 
 export interface DetailedAssessmentAnswer {

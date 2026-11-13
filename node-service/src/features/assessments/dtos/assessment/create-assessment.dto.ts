@@ -9,6 +9,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   Max,
   MaxLength,
   Min,
@@ -185,4 +186,15 @@ export class CreateAssessmentDto {
   @IsISO8601({ strict: true })
   @IsAfterDate('availableFrom')
   availableUntil?: string;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description:
+      'Lesson after which this assessment appears. Omit or use null for no linked lesson.',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  afterLesson?: string | null;
 }

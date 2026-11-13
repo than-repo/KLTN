@@ -6,6 +6,27 @@ import { IAssessmentAccessRepository } from '../interfaces/assessment-access.rep
 export class AssessmentAccessRepository implements IAssessmentAccessRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async existsActiveLessonInCourse(
+    lessonId: string,
+    courseId: string,
+  ): Promise<boolean> {
+    const lesson = await this.prisma.lesson.findFirst({
+      where: {
+        id: lessonId,
+        isActive: true,
+        deletedAt: null,
+        section: {
+          courseId,
+          isActive: true,
+          deletedAt: null,
+        },
+      },
+      select: { id: true },
+    });
+
+    return lesson !== null;
+  }
+
   async existsCourseByInstructor(
     courseId: string,
     instructorId: string,

@@ -1,4 +1,4 @@
-import { Controller, Module } from '@nestjs/common';
+import { Controller, forwardRef, Module } from '@nestjs/common';
 import { AssessmentsService } from './services/assessments.service';
 import { ASSESSMENT_REPOSITORY } from './repositories/assessment.repository.token';
 import { AssessmentRepository } from './repositories/assessment.repository';
@@ -23,6 +23,7 @@ import { ATTEMPT_REPOSITORY } from './repositories/attempt.repository.token';
 import { AttemptRepository } from './repositories/attempt.repository';
 import { LearnerAssessmentsController } from './controllers/learner-assessments.controller';
 import { PrismaModule } from 'src/core/database/prisma.module';
+import { SkillModule } from '../skill/skill.module';
 
 @Module({
   providers: [
@@ -56,7 +57,7 @@ import { PrismaModule } from 'src/core/database/prisma.module';
       useClass: AttemptRepository,
     },
   ],
-  imports: [PrismaModule],
+  imports: [PrismaModule, forwardRef(() => SkillModule)],
   controllers: [InstructorAssessmentsController, LearnerAssessmentsController],
   exports: [AssessmentQuestionsService, AssessmentAccessService],
 })

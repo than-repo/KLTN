@@ -74,6 +74,15 @@ export class AssessmentResponseDto {
   @Expose({ groups: ALL_ASSESSMENT_GROUPS })
   availableUntil?: Date | null;
 
+  @ApiPropertyOptional({
+    nullable: true,
+    type: String,
+    format: 'uuid',
+    description: 'Lesson after which this assessment appears.',
+  })
+  @Expose({ groups: ALL_ASSESSMENT_GROUPS })
+  afterLesson?: string | null;
+
   @ApiProperty({ enum: AssessmentStatus })
   @Expose({ groups: INSTRUCTOR_ASSESSMENT_GROUPS })
   status!: AssessmentStatus;

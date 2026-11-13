@@ -8,11 +8,13 @@ import {
 import {
   AssessmentStatus,
   AssessmentType,
+  InvalidAfterLessonError,
   OrderAssessmentInput,
   UpdateAssessmentInput,
   UpdatePublishedAssessmentInput,
   WhereAssessmentInput,
   type CreateAssessmentInput,
+  type Assessment,
   type IAssessmentRepository,
 } from '../interfaces/assessment.repository.interface';
 import { CreateAssessmentDto } from '../dtos/assessment/create-assessment.dto';
@@ -63,6 +65,7 @@ export class AssessmentsService {
       instructorId,
       courseId,
     );
+    await this.validateAfterLesson(dto.afterLesson, courseId);
     const order = await this.iAssessmentRepository.getNextOrder(courseId);
     const availableFrom = dto.availableFrom
       ? new Date(dto.availableFrom)
@@ -75,6 +78,7 @@ export class AssessmentsService {
     this.validateAvailabilityWindow(availableFrom, availableUntil);
     const input = {
       courseId,
+      afterLesson: dto.afterLesson ?? null,
       title: dto.title,
       description: dto.description,
       type: dto.type,
@@ -90,8 +94,9 @@ export class AssessmentsService {
       isActive: true,
     } satisfies CreateAssessmentInput;
 
-    const assessment =
-      await this.iAssessmentRepository.createDraftAssessment(input);
+    const assessment = await this.persistAssessment(() =>
+      this.iAssessmentRepository.createDraftAssessment(input),
+    );
 
     return plainToInstance(AssessmentResponseDto, assessment, {
       excludeExtraneousValues: true,
@@ -118,6 +123,7 @@ export class AssessmentsService {
       throw new NotFoundException('Assessment not found');
     }
     this.ensureAssessmentIsDraft(assessment.status);
+    await this.validateAfterLesson(dto.afterLesson, courseId);
     if (dto.type && dto.type !== assessment.type) {
       const questionCount =
         await this.iAssessmentQuestionRepository.countActiveQuestions(
@@ -144,6 +150,7 @@ export class AssessmentsService {
 
     const input = {
       title: dto.title,
+      afterLesson: dto.afterLesson,
       description: dto.description,
       type: dto.type,
 
@@ -164,11 +171,13 @@ export class AssessmentsService {
       isActive: dto.isActive,
     } satisfies UpdateAssessmentInput;
 
-    const updatedAssessment =
-      await this.iAssessmentRepository.updateDraftAssessment(
+    const updatedAssessment = await this.persistAssessment(() =>
+      this.iAssessmentRepository.updateDraftAssessment(
         assessmentId,
         input,
-      );
+        courseId,
+      ),
+    );
 
     if (!updatedAssessment) {
       throw new BadRequestException('Can not create assessment. Try again');
@@ -208,6 +217,8 @@ export class AssessmentsService {
       );
     }
 
+    await this.validateAfterLesson(dto.afterLesson, courseId);
+
     if (
       assessment.type !== AssessmentType.QUIZ &&
       dto.timeLimitMinutes !== undefined
@@ -237,6 +248,7 @@ export class AssessmentsService {
     );
 
     const input = {
+      afterLesson: dto.afterLesson,
       maxAttempts: dto.maxAttempts,
 
       timeLimitMinutes:
@@ -264,11 +276,13 @@ export class AssessmentsService {
       isActive: dto.isActive,
     } satisfies UpdatePublishedAssessmentInput;
 
-    const updatedAssessment =
-      await this.iAssessmentRepository.updatePublishAssessment(
+    const updatedAssessment = await this.persistAssessment(() =>
+      this.iAssessmentRepository.updatePublishAssessment(
         assessmentId,
         input,
-      );
+        courseId,
+      ),
+    );
 
     if (!updatedAssessment) {
       throw new BadRequestException('Cannot update assessment. Try again');
@@ -305,10 +319,17 @@ export class AssessmentsService {
     if (assessment.status !== AssessmentStatus.DRAFT) {
       throw new ConflictException('Assessment is already published');
     }
-    const updatedAssessment =
-      await this.iAssessmentRepository.updateDraftAssessment(assessmentId, {
-        status: AssessmentStatus.PUBLISHED,
-      } satisfies UpdateAssessmentInput);
+    await this.validateAfterLesson(assessment.afterLesson, courseId);
+    const updatedAssessment = await this.persistAssessment(() =>
+      this.iAssessmentRepository.updateDraftAssessment(
+        assessmentId,
+        {
+          status: AssessmentStatus.PUBLISHED,
+          afterLesson: assessment.afterLesson,
+        } satisfies UpdateAssessmentInput,
+        courseId,
+      ),
+    );
 
     if (!updatedAssessment) {
       throw new BadRequestException('Cannot update assessment. Try again');
@@ -413,6 +434,34 @@ export class AssessmentsService {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });
+  }
+
+  private async validateAfterLesson(
+    lessonId: string | null | undefined,
+    courseId: string,
+  ): Promise<void> {
+    if (lessonId !== undefined && lessonId !== null) {
+      await this.assessmentAccessService.ensureActiveLessonInCourse(
+        lessonId,
+        courseId,
+      );
+    }
+  }
+
+  private async persistAssessment(
+    write: () => Promise<Assessment>,
+  ): Promise<Assessment> {
+    try {
+      return await write();
+    } catch (error: unknown) {
+      if (error instanceof InvalidAfterLessonError) {
+        throw new BadRequestException(
+          'afterLesson must reference an active lesson in an active section of this course.',
+        );
+      }
+
+      throw error;
+    }
   }
 
   private buildWhereInput(query: AssessmentQueryDto): WhereAssessmentInput {

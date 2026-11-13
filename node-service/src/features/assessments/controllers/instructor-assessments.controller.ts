@@ -137,7 +137,7 @@ export class InstructorAssessmentsController {
   }
 
   @ApiOperation({ summary: 'Update Publish Assessment' })
-  @ApiOkResponse({ type: AssessmentResponseDto })
+  @ApiOkResponse({ type: UpdatedPublishedAssessmentResponseDto })
   @ApiBadRequestResponse()
   @ApiUnauthorizedResponse()
   @ApiForbiddenResponse()

@@ -1,4 +1,9 @@
-import { IsOptional } from 'class-validator';
+import {
+  ArrayMinSize,
+  ArrayUnique,
+  IsArray,
+  IsOptional,
+} from 'class-validator';
 // src/features/assessments/dtos/questions/assessment-question.dto.ts
 
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
@@ -18,7 +23,6 @@ import { AssessmentQuestionType } from 'generated/prisma/enums';
 const QUESTION_TEXT_MAX_LENGTH = 10_000;
 const EXPLANATION_MAX_LENGTH = 10_000;
 const MAX_QUESTION_POINTS = 100;
-const MAX_ORDER_VALUE = 10_000;
 
 function trim(value: unknown): unknown {
   return typeof value === 'string' ? value.trim() : value;
@@ -75,6 +79,22 @@ export class CreateAssessmentQuestionDto {
   @Min(1)
   @Max(MAX_QUESTION_POINTS)
   points?: number;
+
+  @ApiProperty({
+    description:
+      'Existing active skill IDs from this course to assign to the question.',
+    type: [String],
+    minItems: 1,
+    uniqueItems: true,
+    example: ['cmv6st8y0000fk4voncpprhsd'],
+  })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayUnique()
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  @MaxLength(50, { each: true })
+  skillIds!: string[];
 }
 
 export class UpdateAssessmentQuestionDto extends PartialType(

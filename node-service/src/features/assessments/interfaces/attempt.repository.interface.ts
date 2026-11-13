@@ -10,6 +10,16 @@ import { AssessmentQuestionType } from './assessment-questions.repository.interf
 export interface LearnerCourseAssessmentListRecord {
   id: string;
   courseId: string;
+  afterLesson: string | null;
+  afterLessonContext: {
+    isActive: boolean;
+    deletedAt: Date | null;
+    section: {
+      courseId: string;
+      isActive: boolean;
+      deletedAt: Date | null;
+    };
+  } | null;
 
   title: string;
   description: string | null;

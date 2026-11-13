@@ -1,6 +1,11 @@
 //src\features\assessments\interfaces\assessment-access.repository.interface.ts
 
 export interface IAssessmentAccessRepository {
+  existsActiveLessonInCourse(
+    lessonId: string,
+    courseId: string,
+  ): Promise<boolean>;
+
   existsCourseByInstructor(
     courseId: string,
     instructorId: string,

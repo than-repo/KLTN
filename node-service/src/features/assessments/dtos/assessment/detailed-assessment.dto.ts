@@ -10,7 +10,7 @@ import {
   AssessmentReviewContent,
   AssessmentReviewTiming,
 } from 'generated/prisma/enums';
-import { IsEnum } from 'class-validator';
+import { SkillDto } from '../questions/assessment-question-response.dto';
 
 export class DetailedAssessmentAnswerDto {
   @ApiProperty()
@@ -86,6 +86,11 @@ export class DetailedAssessmentQuestionDto {
   @Type(() => DetailedAssessmentAnswerDto)
   answer!: DetailedAssessmentAnswerDto | null;
 
+  @ApiProperty({ type: () => SkillDto, isArray: true })
+  @Expose()
+  @Type(() => SkillDto)
+  skills!: SkillDto[];
+
   @ApiProperty()
   @Expose()
   createdAt!: Date;
@@ -100,6 +105,10 @@ export class DetailedAssessmentQuestionDto {
 }
 
 export class DetailedAssessmentDto {
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  @Expose()
+  afterLesson!: string | null;
+
   @ApiProperty()
   @Expose()
   id!: string;

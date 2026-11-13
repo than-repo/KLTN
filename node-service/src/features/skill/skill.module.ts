@@ -16,7 +16,10 @@ import { AssessmentsModule } from '../assessments/assessments.module';
     SkillSuggestionService,
   ],
 
-  imports: [forwardRef(() => CoursesModule), AssessmentsModule],
-  exports: [SkillService],
+  imports: [
+    forwardRef(() => CoursesModule),
+    forwardRef(() => AssessmentsModule),
+  ],
+  exports: [SkillService, SkillRepository],
 })
 export class SkillModule {}

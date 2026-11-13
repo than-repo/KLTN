@@ -1,3 +1,10 @@
+export class InvalidAfterLessonError extends Error {
+  constructor() {
+    super('Invalid assessment lesson reference.');
+    this.name = 'InvalidAfterLessonError';
+  }
+}
+
 export interface IAssessmentRepository {
   createDraftAssessment(input: CreateAssessmentInput): Promise<Assessment>;
 
@@ -8,11 +15,13 @@ export interface IAssessmentRepository {
   updateDraftAssessment(
     assessmentId: string,
     input: UpdateAssessmentInput,
+    courseId?: string,
   ): Promise<Assessment>;
 
   updatePublishAssessment(
     assessmentId: string,
     input: UpdatePublishedAssessmentInput,
+    courseId?: string,
   ): Promise<Assessment>;
 
   softDeleteAssessment(assessmentId: string): Promise<boolean>;
@@ -25,7 +34,6 @@ export interface IAssessmentRepository {
   ): Promise<Assessment[]>;
 
   count(where: WhereAssessmentInput): Promise<number>;
-
 }
 export interface CreateAssessmentInput {
   courseId: string;
@@ -48,9 +56,11 @@ export interface CreateAssessmentInput {
   availableUntil?: Date | null;
 
   isActive?: boolean;
+  afterLesson?: string | null;
 }
 
 export interface UpdateAssessmentInput {
+  afterLesson?: string | null;
   title?: string;
   description?: string | null;
   type?: AssessmentType;
@@ -71,6 +81,7 @@ export interface UpdateAssessmentInput {
 }
 
 export type UpdatePublishedAssessmentInput = {
+  afterLesson?: string | null;
   maxAttempts?: number | null;
   timeLimitMinutes?: number | null;
 
@@ -124,6 +135,7 @@ export interface Assessment {
   assessmentReviewContent: AssessmentReviewContent;
 
   isActive: boolean;
+  afterLesson: string | null;
 
   createdAt: Date;
   updatedAt: Date;

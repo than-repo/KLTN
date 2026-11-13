@@ -9,11 +9,12 @@ import {
   IsInt,
   IsNotEmpty,
   IsString,
+  IsUUID,
   MaxLength,
   Min,
   ValidateIf,
 } from 'class-validator';
-import { AssessmentStatus, AssessmentType } from 'generated/prisma/enums';
+import { AssessmentType } from 'generated/prisma/enums';
 
 const trimString = ({ value }: { value: unknown }): unknown => {
   if (typeof value !== 'string') {
@@ -30,6 +31,17 @@ const isProvidedAndNotNull = (_object: unknown, value: unknown): boolean =>
   value !== undefined && value !== null;
 
 export class UpdateAssessmentDto {
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description:
+      'Lesson after which this assessment appears. Omit to keep the current link; use null to clear it.',
+  })
+  @ValidateIf(isProvidedAndNotNull)
+  @IsUUID('4')
+  afterLesson?: string | null;
+
   @ApiPropertyOptional({
     example: 'Final JavaScript Quiz',
     maxLength: 255,

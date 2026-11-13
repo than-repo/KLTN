@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import type { IAssessmentAccessRepository } from '../interfaces/assessment-access.repository.interface';
 
 export const ASSESSMENT_ACCESS_REPOSITORY = 'ASSESSMENT_ACCESS_REPOSITORY';
@@ -9,6 +14,23 @@ export class AssessmentAccessService {
     @Inject(ASSESSMENT_ACCESS_REPOSITORY)
     private readonly assessmentAccessRepository: IAssessmentAccessRepository,
   ) {}
+
+  async ensureActiveLessonInCourse(
+    lessonId: string,
+    courseId: string,
+  ): Promise<void> {
+    const exists =
+      await this.assessmentAccessRepository.existsActiveLessonInCourse(
+        lessonId,
+        courseId,
+      );
+
+    if (!exists) {
+      throw new BadRequestException(
+        'afterLesson must reference an active lesson in an active section of this course.',
+      );
+    }
+  }
 
   async ensureInstructorCanManageCourse(
     instructorId: string,

@@ -8,6 +8,7 @@ import {
   IsDateString,
   IsInt,
   IsOptional,
+  IsUUID,
   Max,
   Min,
   Validate,
@@ -66,6 +67,17 @@ class IsAfterDateConstraint implements ValidatorConstraintInterface {
 }
 
 export class UpdatePublishedAssessmentDto {
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description:
+      'Lesson after which this assessment appears. Omit to keep the current link; use null to clear it.',
+  })
+  @IsOptional()
+  @IsUUID('4')
+  afterLesson?: string | null;
+
   @ApiPropertyOptional({
     example: '2026-07-01T00:00:00.000Z',
     nullable: true,
