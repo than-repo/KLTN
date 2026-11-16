@@ -43,6 +43,16 @@ export function createInstructorSkill(
   );
 }
 
+export function getInstructorCourseSkills(
+  courseId: string,
+  accessToken: string,
+) {
+  return apiRequest<Skill[]>(
+    `/skill/course/${courseId}`,
+    { accessToken, method: "GET" },
+  );
+}
+
 export function attachInstructorSkillToLesson(
   courseId: string,
   sectionId: string,

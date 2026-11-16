@@ -769,7 +769,7 @@ function CourseAssessmentList({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-pill border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
-                    {assessment.type === "PROJECT" ? "Project" : "Quiz"}
+                    Quiz
                   </span>
 
                   <span className="rounded-pill border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">

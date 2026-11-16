@@ -52,18 +52,6 @@ function formatDateTime(value?: string | null) {
   }).format(date);
 }
 
-function formatAssessmentType(type: string) {
-  if (type === "QUIZ") {
-    return "Quiz";
-  }
-
-  if (type === "PROJECT") {
-    return "Project";
-  }
-
-  return type;
-}
-
 function formatAttemptStatus(status?: AssessmentAttemptStatus | string | null) {
   if (!status) {
     return "No attempt";
@@ -100,7 +88,7 @@ function getPrimaryButtonLabel(assessment: LearnerAssessment) {
     return "Continue attempt";
   }
 
-  return assessment.type === "PROJECT" ? "Start project" : "Start quiz";
+  return "Start quiz";
 }
 
 function getStateBadgeClasses(assessment: LearnerAssessment) {
@@ -126,6 +114,7 @@ function getAttemptStatusClasses(status: AssessmentAttemptStatus | string) {
     case "GRADED":
       return "border-success/20 bg-success/5 text-success";
     case "FAILED":
+    case "SUBMITED":
     case "SUBMITTED":
       return "border-border bg-muted text-muted-foreground";
     case "IN_PROGRESS":
@@ -377,7 +366,7 @@ export function LearnerAssessmentEntry({
               </span>
 
               <span className="rounded-pill border border-border bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
-                {formatAssessmentType(assessment.type)}
+                Quiz
               </span>
             </div>
 

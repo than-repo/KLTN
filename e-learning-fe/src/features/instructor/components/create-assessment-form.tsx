@@ -1,15 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
 
 import { createInstructorAssessmentDraft } from "../api/instructor-assessment-api";
+import { getInstructorCourseSections } from "../api/instructor-course-api";
+import { getInstructorCourseLessons } from "../api/instructor-lesson-api";
 import type {
   AssessmentType,
   CreateAssessmentPayload,
 } from "../types/instructor-assessment";
+import type { Section } from "../types/instructor-course";
 import {
   addDays,
   getNextMondayAtEight,
@@ -26,6 +29,7 @@ const fieldClasses =
 type FormState = {
   availableFrom: string;
   availableUntil: string;
+  afterLessonId: string;
   description: string;
   maxAttempts: number | "";
   passingScore: number | "";
@@ -37,6 +41,7 @@ type FormState = {
 const initialForm: FormState = {
   availableFrom: "",
   availableUntil: "",
+  afterLessonId: "",
   description: "",
   maxAttempts: 1,
   passingScore: 70,
@@ -63,6 +68,10 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
     message: string;
     redirectTo: string;
   } | null>(null);
+
+  // Lesson selection state
+  const [sections, setSections] = useState<Section[]>([]);
+  const [loadingLessons, setLoadingLessons] = useState(false);
 
   const isDirty = useMemo(
     () => JSON.stringify(form) !== JSON.stringify(initialForm),
@@ -93,13 +102,6 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleTypeChange(nextType: AssessmentType) {
-    setForm((prev) => ({
-      ...prev,
-      timeLimitMinutes: nextType === "QUIZ" ? prev.timeLimitMinutes || 30 : "",
-      type: nextType,
-    }));
-  }
   function setAvailabilityPreset(preset: "now" | "tomorrow" | "nextMonday") {
     const now = new Date();
 
@@ -168,7 +170,6 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
     }
 
     if (
-      form.type === "QUIZ" &&
       form.timeLimitMinutes !== "" &&
       (Number(form.timeLimitMinutes) < 1 || Number(form.timeLimitMinutes) > 60)
     ) {
@@ -201,6 +202,69 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
     router.back();
   }
 
+  async function loadLessons() {
+    if (!accessToken) return;
+
+    try {
+      setLoadingLessons(true);
+      const sectionList = await getInstructorCourseSections(
+        courseId,
+        { includeDeleted: false, isActive: true, limit: 100 },
+        accessToken,
+      );
+
+      // Fetch lessons for each section in parallel
+      const sectionsWithLessons = await Promise.all(
+        sectionList.map(async (section) => {
+          try {
+            const lessons = await getInstructorCourseLessons(
+              courseId,
+              section.id,
+              { limit: 100, sortDirection: "asc", sortField: "lessonIndex" },
+              accessToken,
+            );
+            return { ...section, lessons };
+          } catch {
+            return { ...section, lessons: section.lessons ?? [] };
+          }
+        }),
+      );
+
+      setSections(sectionsWithLessons);
+    } catch (loadError) {
+      // Silently fail - lesson selector is optional
+      console.warn("Could not load lessons:", loadError);
+    } finally {
+      setLoadingLessons(false);
+    }
+  }
+
+  useEffect(() => {
+    loadLessons();
+  }, [courseId, accessToken]);
+
+  function getLessonOptions() {
+    const lessonOptions: { value: string; label: string; sectionTitle?: string }[] = [
+      { value: "", label: "No lesson (assessment appears at course start)" },
+    ];
+
+    for (const section of sections) {
+      if (section.lessons && section.lessons.length > 0) {
+        for (const lesson of section.lessons) {
+          if (lesson.isActive) {
+            lessonOptions.push({
+              value: lesson.id,
+              label: `${lesson.title} (Lesson ${lesson.lessonIndex})`,
+              sectionTitle: section.title,
+            });
+          }
+        }
+      }
+    }
+
+    return lessonOptions;
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -222,13 +286,14 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
       const payload: CreateAssessmentPayload = {
         availableFrom: toIsoOrUndefined(form.availableFrom),
         availableUntil: toIsoOrUndefined(form.availableUntil),
+        afterLesson: form.afterLessonId || undefined,
         description: form.description.trim() || undefined,
         maxAttempts:
           form.maxAttempts === "" ? undefined : Number(form.maxAttempts),
         passingScore:
           form.passingScore === "" ? undefined : Number(form.passingScore),
         timeLimitMinutes:
-          form.type === "QUIZ" && form.timeLimitMinutes !== ""
+          form.timeLimitMinutes !== ""
             ? Number(form.timeLimitMinutes)
             : undefined,
         title: form.title.trim(),
@@ -241,17 +306,9 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
         accessToken,
       );
 
-      if (created.type === "QUIZ") {
-        showSuccess(
-          "Assessment created successfully. You can now add questions.",
-          `/instructor/courses/${courseId}/assessments/${created.id}/questions`,
-        );
-        return;
-      }
-
       showSuccess(
-        "Project assessment created successfully.",
-        `/instructor/courses/${courseId}/assessments`,
+        "Assessment created successfully. You can now add questions.",
+        `/instructor/courses/${courseId}/assessments/${created.id}/questions`,
       );
     } catch (createError) {
       showError(getErrorMessage(createError, "Could not create assessment."));
@@ -295,20 +352,42 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium" htmlFor="assessment-type">
-              Type
+            <label className="text-sm font-medium" htmlFor="assessment-after-lesson">
+              Position after lesson (optional)
             </label>
             <select
               className={fieldClasses}
-              id="assessment-type"
-              onChange={(event) =>
-                handleTypeChange(event.target.value as AssessmentType)
-              }
-              value={form.type}
+              id="assessment-after-lesson"
+              onChange={(event) => update("afterLessonId", event.target.value)}
+              value={form.afterLessonId}
+              disabled={loadingLessons}
             >
-              <option value="QUIZ">Quiz</option>
-              <option value="PROJECT">Project</option>
+              <option value="">No lesson (assessment appears at course start)</option>
+              {(() => {
+                const lessonOptions = getLessonOptions();
+                const sectionsMap = new Map<string, typeof lessonOptions>();
+                for (const opt of lessonOptions) {
+                  const sectionTitle = opt.sectionTitle ?? "Other";
+                  if (!sectionsMap.has(sectionTitle)) {
+                    sectionsMap.set(sectionTitle, []);
+                  }
+                  sectionsMap.get(sectionTitle)!.push(opt);
+                }
+                return Array.from(sectionsMap.entries()).map(([sectionTitle, lessons]) => (
+                  <optgroup key={sectionTitle} label={sectionTitle}>
+                    {lessons.map((lesson) => (
+                      <option key={lesson.value} value={lesson.value}>
+                        {lesson.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ));
+              })()}
             </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              The assessment will appear after the selected lesson in the course
+              curriculum. Leave empty to place at the start of the course.
+            </p>
           </div>
 
           <div>
@@ -356,28 +435,26 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
             />
           </div>
 
-          {form.type === "QUIZ" ? (
-            <div>
-              <label className="text-sm font-medium" htmlFor="assessment-time">
-                Time limit minutes
-              </label>
-              <input
-                className={fieldClasses}
-                id="assessment-time"
-                max={60}
-                min={1}
-                onChange={(event) =>
-                  update(
-                    "timeLimitMinutes",
-                    event.target.value === "" ? "" : Number(event.target.value),
-                  )
-                }
-                placeholder="Example: 30"
-                type="number"
-                value={form.timeLimitMinutes}
-              />
-            </div>
-          ) : null}
+          <div>
+            <label className="text-sm font-medium" htmlFor="assessment-time">
+              Time limit minutes
+            </label>
+            <input
+              className={fieldClasses}
+              id="assessment-time"
+              max={60}
+              min={1}
+              onChange={(event) =>
+                update(
+                  "timeLimitMinutes",
+                  event.target.value === "" ? "" : Number(event.target.value),
+                )
+              }
+              placeholder="Example: 30"
+              type="number"
+              value={form.timeLimitMinutes}
+            />
+          </div>
         </div>
         <div className="rounded-md border border-border bg-surface-pearl p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">

@@ -13,11 +13,13 @@ import {
   upsertInstructorAssessmentAnswer,
 } from "../api/instructor-assessment-question-api";
 import { getInstructorAssessmentDetail } from "../api/instructor-assessment-api";
+import { getInstructorCourseSkills } from "../api/instructor-skill-api";
 import type {
   AssessmentQuestion,
   AssessmentQuestionType,
   DetailedAssessment,
 } from "../types/instructor-assessment";
+import type { Skill } from "../types/instructor-skill";
 import { getErrorMessage } from "../utils/instructor-format";
 import { InstructorModal } from "./instructor-modal";
 
@@ -33,6 +35,7 @@ type QuestionFormState = {
   questionText: string;
   trueFalseCorrectAnswer: "true" | "false";
   type: AssessmentQuestionType;
+  skillIds: string[];
 };
 
 const emptyForm: QuestionFormState = {
@@ -44,6 +47,7 @@ const emptyForm: QuestionFormState = {
   questionText: "",
   trueFalseCorrectAnswer: "true",
   type: "MULTIPLE_CHOICE",
+  skillIds: [],
 };
 
 function questionTypeLabel(type: AssessmentQuestionType) {
@@ -112,6 +116,10 @@ export function AssessmentQuestionsManager({
     null,
   );
 
+  // Skills state
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loadingSkills, setLoadingSkills] = useState(false);
+
   function showError(message: string) {
     setSuccessModalMessage(null);
     setErrorModalMessage(message);
@@ -145,6 +153,20 @@ export function AssessmentQuestionsManager({
     }
   }
 
+  async function loadSkills() {
+    if (!accessToken) return;
+
+    try {
+      setLoadingSkills(true);
+      const data = await getInstructorCourseSkills(courseId, accessToken);
+      setSkills(data);
+    } catch (loadError) {
+      console.warn("Could not load skills:", loadError);
+    } finally {
+      setLoadingSkills(false);
+    }
+  }
+
   useEffect(() => {
     if (status !== "authenticated" || !accessToken) {
       return;
@@ -152,6 +174,7 @@ export function AssessmentQuestionsManager({
 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- loader manages its own async loading state
     void loadAssessment();
+    void loadSkills();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, assessmentId, courseId, status]);
 
@@ -196,6 +219,7 @@ export function AssessmentQuestionsManager({
         points: question.points || 1,
         questionText: question.questionText,
         type: question.type,
+        skillIds: question.skillIds || [],
       };
 
       if (question.type === "MULTIPLE_CHOICE") {
@@ -314,6 +338,7 @@ export function AssessmentQuestionsManager({
             points: form.points,
             questionText: form.questionText.trim(),
             type: form.type,
+            skillIds: form.skillIds,
           },
           accessToken,
         );
@@ -328,6 +353,7 @@ export function AssessmentQuestionsManager({
             points: form.points,
             questionText: form.questionText.trim(),
             type: form.type,
+            skillIds: form.skillIds,
           },
           accessToken,
         );
@@ -396,6 +422,12 @@ export function AssessmentQuestionsManager({
     (question) => !question.answer,
   ).length;
 
+  function getSkillLabels(skillIds: string[] = []) {
+    return skillIds
+      .map((id) => skills.find((s) => s.id === id)?.canonicalName)
+      .filter(Boolean);
+  }
+
   return (
     <div className="grid gap-5">
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
@@ -407,15 +439,15 @@ export function AssessmentQuestionsManager({
               </h2>
               <Badge
                 variant={
-                  assessment?.status === "PUBLISHED" ? "action" : "warning"
+                  assessment?.status === "PUBLISHED" ? "action" : "neutral"
                 }
               >
                 {assessment?.status || "DRAFT"}
               </Badge>
             </div>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Create questions, set the correct answers, and review the answer
-              summary before publishing.
+              Create questions, set the correct answers, assign skills, and
+              review the answer summary before publishing.
             </p>
           </div>
 
@@ -469,7 +501,19 @@ export function AssessmentQuestionsManager({
                       {(question.points || 0) === 1 ? "" : "s"}
                     </Badge>
                     {!question.answer ? (
-                      <Badge variant="danger">Missing answer</Badge>
+                      <Badge variant="dark">Missing answer</Badge>
+                    ) : null}
+                    {question.skillIds && question.skillIds.length > 0 ? (
+                      <>
+                        {question.skillIds.map((skillId) => {
+                          const skill = skills.find((s) => s.id === skillId);
+                          return skill ? (
+                            <Badge key={skillId} variant="neutral">
+                              {skill.canonicalName}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </>
                     ) : null}
                   </div>
 
@@ -584,6 +628,34 @@ export function AssessmentQuestionsManager({
               rows={2}
               value={form.explanation}
             />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium" htmlFor="question-skills">
+              Skills (optional)
+            </label>
+            <select
+              className={fieldClasses}
+              id="question-skills"
+              multiple
+              onChange={(event) => {
+                const selectedOptions = Array.from(
+                  event.target.selectedOptions,
+                ).map((option) => option.value);
+                updateForm({ skillIds: selectedOptions });
+              }}
+              value={form.skillIds}
+            >
+              {skills.map((skill) => (
+                <option key={skill.id} value={skill.id}>
+                  {skill.canonicalName}
+                  {skill.difficulty && ` (${skill.difficulty})`}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Hold Ctrl/Cmd to select multiple skills.
+            </p>
           </div>
 
           {form.type === "MULTIPLE_CHOICE" ? (

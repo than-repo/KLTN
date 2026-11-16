@@ -572,10 +572,10 @@ function CategoryRow({
       <td className="px-4 py-3">{category.order ?? 0}</td>
       <td className="px-4 py-3">
         <div className="flex flex-wrap gap-2">
-          <Badge variant={category.isActive ? "action" : "danger"}>
+          <Badge variant={category.isActive ? "action" : "dark"}>
             {category.isActive ? "Active" : "Inactive"}
           </Badge>
-          {deleted ? <Badge variant="danger">Deleted</Badge> : null}
+          {deleted ? <Badge variant="dark">Deleted</Badge> : null}
         </div>
       </td>
       <td className="px-4 py-3">

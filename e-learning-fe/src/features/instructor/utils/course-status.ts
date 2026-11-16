@@ -150,11 +150,7 @@ export function formatCourseStatusLabel(status?: string | null) {
     .join(" ");
 }
 
-export type CourseStatusBadgeVariant =
-  | "action"
-  | "danger"
-  | "warning"
-  | "neutral";
+export type CourseStatusBadgeVariant = "action" | "dark" | "neutral";
 
 export function getCourseStatusBadgeVariant(
   status?: string | null,
@@ -169,7 +165,7 @@ export function getCourseStatusBadgeVariant(
     normalizedStatus === "REJECTED" ||
     normalizedStatus === "CHANGES_REQUESTED"
   ) {
-    return "danger";
+    return "dark";
   }
 
   if (
@@ -178,7 +174,7 @@ export function getCourseStatusBadgeVariant(
     normalizedStatus === "IN_REVIEW" ||
     normalizedStatus === "UNDER_REVIEW"
   ) {
-    return "warning";
+    return "neutral";
   }
 
   return "neutral";

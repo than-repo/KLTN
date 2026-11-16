@@ -1,6 +1,6 @@
 export type ISODateString = string;
 
-export type AssessmentType = "QUIZ" | "PROJECT";
+export type AssessmentType = "QUIZ";
 
 export type AssessmentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -14,8 +14,7 @@ export type AssessmentAttemptStatus =
 export type AssessmentQuestionType =
   | "MULTIPLE_CHOICE"
   | "TRUE_FALSE"
-  | "FILL_IN_THE_BLANK"
-  | "PROJECT";
+  | "FILL_IN_THE_BLANK";
 
 export type AssessmentReviewTiming =
   | "NEVER"
@@ -44,13 +43,6 @@ export type LearnerAssessmentAction =
   | "NONE";
 
 export type CreateAttemptAction = "CREATED" | "RESUMED";
-
-export type ProjectSubmissionStatus =
-  | "SUBMITTED"
-  | "REVIEWED"
-  | "NEEDS_CHANGES"
-  | "ACCEPTED"
-  | "REJECTED";
 
 export type AssessmentOrderField =
   | "createdAt"
@@ -85,6 +77,8 @@ export type InstructorAssessment = {
 
   availableFrom?: ISODateString | null;
   availableUntil?: ISODateString | null;
+
+  afterLessonId?: string | null;
 
   isActive: boolean;
 
@@ -147,6 +141,8 @@ export type CreateAssessmentInput = {
 
   availableFrom?: ISODateString;
   availableUntil?: ISODateString;
+
+  afterLessonId?: string;
 };
 
 export type UpdateAssessmentInput = {
@@ -162,6 +158,8 @@ export type UpdateAssessmentInput = {
 
   availableFrom?: ISODateString | null;
   availableUntil?: ISODateString | null;
+
+  afterLessonId?: string | null;
 
   isActive?: boolean;
 };
@@ -199,6 +197,8 @@ export type AssessmentQuestion = {
   points: number;
   order: number;
 
+  skillIds?: string[];
+
   isActive?: boolean;
 
   createdAt?: ISODateString;
@@ -211,6 +211,7 @@ export type CreateAssessmentQuestionInput = {
   type: AssessmentQuestionType;
   explanation?: string;
   points?: number;
+  skillIds?: string[];
 };
 
 export type UpdateAssessmentQuestionInput =
@@ -268,6 +269,8 @@ export type LearnerCourseAssessmentItem = {
 
   availableFrom?: ISODateString | null;
   availableUntil?: ISODateString | null;
+
+  afterLessonId?: string | null;
 };
 
 export type LearnerCourseAssessments = {
@@ -357,14 +360,6 @@ export type ActiveAttemptSavedAnswer = {
   savedAt: ISODateString;
 };
 
-export type ActiveProjectRequirement = {
-  title: string;
-  description?: string | null;
-  requirement: string;
-  totalPoints: number;
-  note?: string | null;
-};
-
 export type ActiveAttempt = {
   attemptId: string;
   assessmentId: string;
@@ -388,8 +383,6 @@ export type ActiveAttempt = {
 
   questions: ActiveAttemptQuestion[];
   savedAnswers: ActiveAttemptSavedAnswer[];
-
-  projectRequirement?: ActiveProjectRequirement | null;
 };
 
 export type SaveAttemptAnswerInput = {
@@ -460,23 +453,6 @@ export type AssessmentAttemptResultAnswer = {
   explanation?: string | null;
 };
 
-export type AssessmentAttemptResultProjectSubmission = {
-  submissionId: string;
-
-  status: ProjectSubmissionStatus;
-
-  githubUrl?: string | null;
-  deployUrl?: string | null;
-  documentUrl?: string | null;
-  note?: string | null;
-
-  score?: number | null;
-  feedback?: string | null;
-
-  submittedAt: ISODateString;
-  gradedAt?: ISODateString | null;
-};
-
 export type AssessmentAttemptResult = {
   attemptId: string;
   assessmentId: string;
@@ -498,39 +474,6 @@ export type AssessmentAttemptResult = {
   canReview: boolean;
 
   answers?: AssessmentAttemptResultAnswer[];
-
-  projectSubmission?: AssessmentAttemptResultProjectSubmission | null;
-
-  serverNow: ISODateString;
-};
-
-// -----------------------------------------------------------------------------
-// Project submission types
-// -----------------------------------------------------------------------------
-
-export type SubmitProjectInput = {
-  githubUrl?: string;
-  deployUrl?: string;
-  documentUrl?: string;
-  note?: string;
-};
-
-export type SubmitProjectResponse = {
-  submissionId: string;
-  attemptId: string;
-
-  status: ProjectSubmissionStatus;
-
-  githubUrl?: string | null;
-  deployUrl?: string | null;
-  documentUrl?: string | null;
-  note?: string | null;
-
-  submittedAt: ISODateString;
-
-  score?: number | null;
-  feedback?: string | null;
-  gradedAt?: ISODateString | null;
 
   serverNow: ISODateString;
 };

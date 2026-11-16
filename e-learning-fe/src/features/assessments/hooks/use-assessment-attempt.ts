@@ -7,7 +7,6 @@ import {
   getActiveAttempt,
   saveAttemptAnswer,
   submitAttempt,
-  submitProjectAssessment,
 } from "../api/assessment-api";
 
 import type {
@@ -15,8 +14,6 @@ import type {
   AssessmentAttemptResult,
   CreateAttemptResponse,
   SaveAttemptAnswerResponse,
-  SubmitProjectInput,
-  SubmitProjectResponse,
 } from "../types/assessment";
 
 type UseAssessmentAttemptArgs = {
@@ -64,7 +61,6 @@ export function useAssessmentAttempt({
   const [isLoading, setIsLoading] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmittingProject, setIsSubmittingProject] = useState(false);
 
   const canUseApi = Boolean(enabled && accessToken && courseId && assessmentId);
 
@@ -266,44 +262,6 @@ export function useAssessmentAttempt({
     }
   }, [accessToken, activeAttempt, assessmentId, canUseApi, courseId]);
 
-  const submitProject = useCallback(
-    async (input: SubmitProjectInput): Promise<SubmitProjectResponse> => {
-      if (
-        !canUseApi ||
-        !accessToken ||
-        !courseId ||
-        !assessmentId ||
-        !activeAttempt
-      ) {
-        throw new Error("Missing active project attempt.");
-      }
-
-      setIsSubmittingProject(true);
-      setError(null);
-
-      try {
-        const response = await submitProjectAssessment(
-          accessToken,
-          courseId,
-          assessmentId,
-          activeAttempt.attemptId,
-          input,
-        );
-
-        setActiveAttempt(null);
-
-        return response;
-      } catch (error) {
-        const message = getErrorMessage(error, "Unable to submit project.");
-        setError(message);
-        throw new Error(message);
-      } finally {
-        setIsSubmittingProject(false);
-      }
-    },
-    [accessToken, activeAttempt, assessmentId, canUseApi, courseId],
-  );
-
   const reset = useCallback(() => {
     setActiveAttempt(null);
     setResult(null);
@@ -314,7 +272,6 @@ export function useAssessmentAttempt({
     setIsLoading(false);
     setIsStarting(false);
     setIsSubmitting(false);
-    setIsSubmittingProject(false);
   }, []);
 
   useEffect(() => {
@@ -335,7 +292,6 @@ export function useAssessmentAttempt({
     isSaving,
     isStarting,
     isSubmitting,
-    isSubmittingProject,
     loadAttempt,
     reset,
     result,
@@ -345,7 +301,6 @@ export function useAssessmentAttempt({
     setAnswer,
     startOrResume,
     submit,
-    submitProject,
     totalQuestions,
   };
 }

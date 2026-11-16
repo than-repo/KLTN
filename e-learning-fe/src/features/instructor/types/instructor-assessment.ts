@@ -1,4 +1,4 @@
-export type AssessmentType = "QUIZ" | "PROJECT";
+export type AssessmentType = "QUIZ";
 
 export type AssessmentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -38,6 +38,7 @@ export type Assessment = {
   assessmentReviewTiming?: AssessmentReviewTiming | null;
   availableFrom?: string | null;
   availableUntil?: string | null;
+  afterLessonId?: string | null;
   courseId: string;
   createdAt?: string;
   description?: string | null;
@@ -59,6 +60,7 @@ export type Assessment = {
 export type CreateAssessmentPayload = {
   availableFrom?: string;
   availableUntil?: string;
+  afterLesson?: string;
   description?: string;
   maxAttempts?: number;
   passingScore?: number;
@@ -71,6 +73,7 @@ export type UpdateAssessmentPayload = {
   active?: boolean;
   availableFrom?: string | null;
   availableUntil?: string | null;
+  afterLesson?: string | null;
   description?: string | null;
   isActive?: boolean;
   maxAttempts?: number | null;
@@ -120,6 +123,7 @@ export type AssessmentQuestion = {
   points: number;
   questionText: string;
   type: AssessmentQuestionType;
+  skillIds?: string[];
   updatedAt?: string;
 };
 
@@ -128,6 +132,7 @@ export type CreateAssessmentQuestionPayload = {
   points?: number;
   questionText: string;
   type: AssessmentQuestionType;
+  skillIds?: string[];
 };
 
 export type UpdateAssessmentQuestionPayload =

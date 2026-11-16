@@ -570,11 +570,11 @@ function UsersTable({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant={user.isActive ? "action" : "danger"}>
+                      <Badge variant={user.isActive ? "action" : "dark"}>
                         {user.isActive ? "Active" : "Inactive"}
                       </Badge>
                       <Badge
-                        variant={user.emailVerified ? "action" : "warning"}
+                        variant={user.emailVerified ? "action" : "neutral"}
                       >
                         {user.emailVerified ? "Verified" : "Not verified"}
                       </Badge>

@@ -6,10 +6,8 @@ import { useAttemptResult } from "../hooks/use-attempt-result";
 
 import type {
   AssessmentAttemptResultAnswer,
-  AssessmentAttemptResultProjectSubmission,
   AssessmentAttemptStatus,
   AssessmentQuestionType,
-  ProjectSubmissionStatus,
 } from "../types/assessment";
 
 type AttemptResultProps = {
@@ -62,7 +60,7 @@ function formatDateTime(value?: string | null) {
 }
 
 function formatStatus(
-  status: AssessmentAttemptStatus | ProjectSubmissionStatus,
+  status: AssessmentAttemptStatus,
 ) {
   return status
     .toLowerCase()
@@ -79,8 +77,6 @@ function formatQuestionType(type: AssessmentQuestionType) {
       return "True / False";
     case "FILL_IN_THE_BLANK":
       return "Fill in the blank";
-    case "PROJECT":
-      return "Project";
     default:
       return type;
   }
@@ -103,20 +99,6 @@ function getAttemptStatusClasses(
   }
 
   return "border-border bg-muted text-muted-foreground";
-}
-
-function getProjectStatusClasses(status: ProjectSubmissionStatus) {
-  switch (status) {
-    case "ACCEPTED":
-    case "REVIEWED":
-      return "border-success/20 bg-success/5 text-success";
-    case "REJECTED":
-    case "NEEDS_CHANGES":
-      return "border-danger/20 bg-danger/5 text-danger";
-    case "SUBMITTED":
-    default:
-      return "border-primary/20 bg-primary/5 text-primary";
-  }
 }
 
 function getAnswerStatusClasses(answer: AssessmentAttemptResultAnswer) {
@@ -211,29 +193,6 @@ function ResultMetaCard({
   );
 }
 
-function ExternalResultLink({
-  href,
-  label,
-}: {
-  href?: string | null;
-  label: string;
-}) {
-  if (!href) {
-    return null;
-  }
-
-  return (
-    <a
-      className="inline-flex min-h-10 items-center justify-center rounded-pill border border-border bg-background px-4 text-sm font-semibold transition hover:border-primary hover:text-primary"
-      href={href}
-      rel="noreferrer"
-      target="_blank"
-    >
-      {label}
-    </a>
-  );
-}
-
 function ResultAnswerCard({
   answer,
   index,
@@ -308,80 +267,6 @@ function ResultAnswerCard({
             {answer.explanation}
           </TextContent>
         </div>
-      ) : null}
-    </article>
-  );
-}
-
-function ProjectSubmissionResult({
-  submission,
-}: {
-  submission: AssessmentAttemptResultProjectSubmission;
-}) {
-  return (
-    <article className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <span
-            className={cn(
-              "rounded-pill border px-3 py-1 text-xs font-semibold",
-              getProjectStatusClasses(submission.status),
-            )}
-          >
-            {formatStatus(submission.status)}
-          </span>
-
-          <h3 className="mt-4 text-xl font-semibold text-foreground">
-            Project submission
-          </h3>
-
-          <p className="mt-2 text-sm text-muted-foreground">
-            Submitted {formatDateTime(submission.submittedAt)}
-          </p>
-        </div>
-
-        <span className="shrink-0 rounded-pill border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
-          {getScoreLabel(submission.score)}
-        </span>
-      </div>
-
-      <div className="mt-5 flex flex-wrap gap-3">
-        <ExternalResultLink href={submission.githubUrl} label="Open GitHub" />
-        <ExternalResultLink href={submission.deployUrl} label="Open deploy" />
-        <ExternalResultLink
-          href={submission.documentUrl}
-          label="Open document"
-        />
-      </div>
-
-      {submission.note ? (
-        <div className="mt-5 rounded-xl border border-border bg-background p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Your note
-          </p>
-
-          <TextContent className="mt-2 text-sm leading-6 text-foreground">
-            {submission.note}
-          </TextContent>
-        </div>
-      ) : null}
-
-      {submission.feedback ? (
-        <div className="mt-5 rounded-xl border border-border bg-muted p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Instructor feedback
-          </p>
-
-          <TextContent className="mt-2 text-sm leading-6 text-foreground">
-            {submission.feedback}
-          </TextContent>
-        </div>
-      ) : null}
-
-      {submission.gradedAt ? (
-        <p className="mt-4 text-xs text-muted-foreground">
-          Graded {formatDateTime(submission.gradedAt)}
-        </p>
       ) : null}
     </article>
   );
@@ -494,7 +379,7 @@ export function AttemptResult({
               </span>
 
               <span className="rounded-pill border border-border bg-background px-3 py-1 text-xs font-semibold text-muted-foreground">
-                {result.assessmentType === "PROJECT" ? "Project" : "Quiz"}
+                Quiz
               </span>
             </div>
 
@@ -564,10 +449,6 @@ export function AttemptResult({
             available for this assessment yet.
           </p>
         </div>
-      ) : null}
-
-      {result.projectSubmission ? (
-        <ProjectSubmissionResult submission={result.projectSubmission} />
       ) : null}
 
       {result.canReview && hasAnswers ? (

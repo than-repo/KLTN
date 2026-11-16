@@ -33,25 +33,11 @@ function getOrderedAssessments(assessments: LearningAssessment[]) {
 }
 
 function getAssessmentTypeLabel(type: LearningAssessment["type"]) {
-  switch (type) {
-    case "QUIZ":
-      return "Quiz";
-    case "PROJECT":
-      return "Project";
-    default:
-      return type;
-  }
+  return "Quiz";
 }
 
 function getAssessmentTypeMark(type: LearningAssessment["type"]) {
-  switch (type) {
-    case "QUIZ":
-      return "Q";
-    case "PROJECT":
-      return "P";
-    default:
-      return "A";
-  }
+  return "Q";
 }
 
 function getAssessmentMeta(assessment: LearningAssessment) {
@@ -301,7 +287,7 @@ export function CourseCurriculumSidebar({
 
                     <span className="min-w-0">
                       <span className="block text-xs font-semibold text-ink-muted">
-                        {getAssessmentTypeLabel(assessment.type)}{" "}
+                        {getAssessmentTypeLabel(assessment.type)} {" "}
                         {assessmentIndex + 1}
                       </span>
 

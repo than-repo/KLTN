@@ -13,12 +13,15 @@ import {
   updateInstructorAssessment,
   updatePublishedInstructorAssessment,
 } from "../api/instructor-assessment-api";
+import { getInstructorCourseSections } from "../api/instructor-course-api";
+import { getInstructorCourseLessons } from "../api/instructor-lesson-api";
 import type {
   AssessmentReviewContent,
   AssessmentReviewTiming,
   AssessmentType,
   DetailedAssessment,
 } from "../types/instructor-assessment";
+import type { Section } from "../types/instructor-course";
 import {
   toDatetimeLocalValue,
   toIsoOrNull,
@@ -32,6 +35,7 @@ const fieldClasses =
 type AssessmentFormPayload = {
   availableFrom?: string;
   availableUntil?: string;
+  afterLessonId?: string;
   description?: string;
   isActive?: boolean;
   maxAttempts?: number | null;
@@ -89,6 +93,10 @@ export function EditAssessmentForm({
     redirectTo?: string;
   } | null>(null);
 
+  // Lesson selection state
+  const [sections, setSections] = useState<Section[]>([]);
+  const [loadingLessons, setLoadingLessons] = useState(false);
+
   const isPublished = assessment?.status === "PUBLISHED";
 
   const isDirty = useMemo(
@@ -131,6 +139,7 @@ export function EditAssessmentForm({
       const nextForm: AssessmentFormPayload = {
         availableFrom: toDatetimeLocalValue(data.availableFrom),
         availableUntil: toDatetimeLocalValue(data.availableUntil),
+        afterLessonId: data.afterLessonId || "",
         description: data.description || "",
         isActive: data.isActive,
         maxAttempts: data.maxAttempts ?? undefined,
@@ -159,6 +168,42 @@ export function EditAssessmentForm({
     }
   }
 
+  async function loadLessons() {
+    if (!accessToken) return;
+
+    try {
+      setLoadingLessons(true);
+      const sectionList = await getInstructorCourseSections(
+        courseId,
+        { includeDeleted: false, isActive: true, limit: 100 },
+        accessToken,
+      );
+
+      // Fetch lessons for each section in parallel
+      const sectionsWithLessons = await Promise.all(
+        sectionList.map(async (section) => {
+          try {
+            const lessons = await getInstructorCourseLessons(
+              courseId,
+              section.id,
+              { limit: 100, sortDirection: "asc", sortField: "lessonIndex" },
+              accessToken,
+            );
+            return { ...section, lessons };
+          } catch {
+            return { ...section, lessons: section.lessons ?? [] };
+          }
+        }),
+      );
+
+      setSections(sectionsWithLessons);
+    } catch (loadError) {
+      console.warn("Could not load lessons:", loadError);
+    } finally {
+      setLoadingLessons(false);
+    }
+  }
+
   useEffect(() => {
     if (status !== "authenticated" || !accessToken) {
       return;
@@ -166,8 +211,10 @@ export function EditAssessmentForm({
 
     // eslint-disable-next-line react-hooks/set-state-in-effect -- loader manages its own async loading state
     void loadAssessment(accessToken);
+    void loadLessons();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, assessmentId, courseId, status]);
+
   function update<K extends keyof AssessmentFormPayload>(
     key: K,
     value: AssessmentFormPayload[K],
@@ -206,6 +253,28 @@ export function EditAssessmentForm({
     } finally {
       setPublishing(false);
     }
+  }
+
+  function getLessonOptions() {
+    const lessonOptions: { value: string; label: string; sectionTitle?: string }[] = [
+      { value: "", label: "No lesson (assessment appears at course start)" },
+    ];
+
+    for (const section of sections) {
+      if (section.lessons && section.lessons.length > 0) {
+        for (const lesson of section.lessons) {
+          if (lesson.isActive) {
+            lessonOptions.push({
+              value: lesson.id,
+              label: `${lesson.title} (Lesson ${lesson.lessonIndex})`,
+              sectionTitle: section.title,
+            });
+          }
+        }
+      }
+    }
+
+    return lessonOptions;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -249,6 +318,7 @@ export function EditAssessmentForm({
         const draftPayload = {
           availableFrom: toIsoOrNull(form.availableFrom),
           availableUntil: toIsoOrNull(form.availableUntil),
+          afterLesson: form.afterLessonId || null,
           description: form.description ?? "",
           isActive: form.isActive,
           maxAttempts:
@@ -314,10 +384,10 @@ export function EditAssessmentForm({
   return (
     <div className="grid gap-5">
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm sm:p-8">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-xl font-semibold">Edit assessment</h2>
-            <Badge variant={isPublished ? "action" : "warning"}>
+            <Badge variant={isPublished ? "action" : "neutral"}>
               {assessment.status || "DRAFT"}
             </Badge>
           </div>
@@ -371,21 +441,42 @@ export function EditAssessmentForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-sm font-medium" htmlFor="edit-a-type">
-                Type
+              <label className="text-sm font-medium" htmlFor="edit-a-after-lesson">
+                Position after lesson (optional)
               </label>
               <select
                 className={fieldClasses}
-                disabled={isPublished}
-                id="edit-a-type"
-                onChange={(event) =>
-                  update("type", event.target.value as AssessmentType)
-                }
-                value={form.type ?? "QUIZ"}
+                disabled={isPublished || loadingLessons}
+                id="edit-a-after-lesson"
+                onChange={(event) => update("afterLessonId", event.target.value)}
+                value={form.afterLessonId ?? ""}
               >
-                <option value="QUIZ">Quiz</option>
-                <option value="PROJECT">Project</option>
+                <option value="">No lesson (assessment appears at course start)</option>
+                {(() => {
+                  const lessonOptions = getLessonOptions();
+                  const sectionsMap = new Map<string, typeof lessonOptions>();
+                  for (const opt of lessonOptions) {
+                    const sectionTitle = opt.sectionTitle ?? "Other";
+                    if (!sectionsMap.has(sectionTitle)) {
+                      sectionsMap.set(sectionTitle, []);
+                    }
+                    sectionsMap.get(sectionTitle)!.push(opt);
+                  }
+                  return Array.from(sectionsMap.entries()).map(([sectionTitle, lessons]) => (
+                    <optgroup key={sectionTitle} label={sectionTitle}>
+                      {lessons.map((lesson) => (
+                        <option key={lesson.value} value={lesson.value}>
+                          {lesson.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ));
+                })()}
               </select>
+              <p className="mt-1 text-xs text-muted-foreground">
+                The assessment will appear after the selected lesson in the course
+                curriculum. Leave empty to place at the start of the course.
+              </p>
             </div>
 
             <div>
@@ -433,29 +524,27 @@ export function EditAssessmentForm({
               />
             </div>
 
-            {form.type === "QUIZ" ? (
-              <div>
-                <label className="text-sm font-medium" htmlFor="edit-a-time">
-                  Time limit minutes
-                </label>
-                <input
-                  className={fieldClasses}
-                  id="edit-a-time"
-                  max={60}
-                  min={1}
-                  onChange={(event) =>
-                    update(
-                      "timeLimitMinutes",
-                      event.target.value === ""
-                        ? null
-                        : Number(event.target.value),
-                    )
-                  }
-                  type="number"
-                  value={form.timeLimitMinutes ?? ""}
-                />
-              </div>
-            ) : null}
+            <div>
+              <label className="text-sm font-medium" htmlFor="edit-a-time">
+                Time limit minutes
+              </label>
+              <input
+                className={fieldClasses}
+                id="edit-a-time"
+                max={60}
+                min={1}
+                onChange={(event) =>
+                  update(
+                    "timeLimitMinutes",
+                    event.target.value === ""
+                      ? null
+                      : Number(event.target.value),
+                  )
+                }
+                type="number"
+                value={form.timeLimitMinutes ?? ""}
+              />
+            </div>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div>

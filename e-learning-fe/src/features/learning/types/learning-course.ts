@@ -91,7 +91,7 @@ export type LearningSectionLessonsResponse = {
   meta: LearningPaginationMeta;
 };
 
-export type LearningAssessmentType = "QUIZ" | "PROJECT";
+export type LearningAssessmentType = "QUIZ";
 
 export type LearningAssessmentStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 

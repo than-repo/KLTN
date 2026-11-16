@@ -170,7 +170,6 @@ export function InstructorAssessmentsContent({
             >
               <option value="">All types</option>
               <option value="QUIZ">Quiz</option>
-              <option value="PROJECT">Project</option>
             </select>
             <select
               className="min-h-10 rounded-md border border-border bg-background px-3 text-sm outline-none focus:border-primary disabled:opacity-50"
@@ -224,7 +223,7 @@ export function InstructorAssessmentsContent({
         <div className="rounded-lg border border-dashed border-border px-5 py-14 text-center">
           <p className="text-lg font-semibold">No assessments found</p>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
-            Create a quiz or project assessment for this course.
+            Create a quiz assessment for this course.
           </p>
         </div>
       ) : (
@@ -251,13 +250,16 @@ export function InstructorAssessmentsContent({
                             ? "action"
                             : assessment.status === "ARCHIVED"
                               ? "neutral"
-                              : "warning"
+                              : "neutral"
                         }
                       >
                         {assessment.status || "DRAFT"}
                       </Badge>
                       {!assessment.isActive ? (
-                        <Badge variant="danger">Inactive</Badge>
+                        <Badge variant="dark">Inactive</Badge>
+                      ) : null}
+                      {assessment.afterLessonId ? (
+                        <Badge variant="neutral">After lesson</Badge>
                       ) : null}
                     </div>
 

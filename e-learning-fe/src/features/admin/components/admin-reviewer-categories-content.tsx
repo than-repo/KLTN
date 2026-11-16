@@ -429,7 +429,7 @@ export function AdminReviewerCategoriesContent() {
                               {category.name}
                             </p>
                             {inactive ? (
-                              <Badge variant="warning">Inactive</Badge>
+                              <Badge variant="dark">Inactive</Badge>
                             ) : null}
                           </div>
                           <p className="truncate text-xs text-muted-foreground">

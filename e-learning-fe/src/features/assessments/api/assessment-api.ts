@@ -14,8 +14,6 @@ import type {
   PaginatedAssessments,
   SaveAttemptAnswerInput,
   SaveAttemptAnswerResponse,
-  SubmitProjectInput,
-  SubmitProjectResponse,
   UpdateAssessmentInput,
   UpdatePublishedAssessmentInput,
   UpsertAssessmentAnswerInput,
@@ -200,23 +198,6 @@ export function getAttemptResult(
     {
       accessToken,
       method: "GET",
-    },
-  );
-}
-
-export function submitProjectAssessment(
-  accessToken: string,
-  courseId: string,
-  assessmentId: string,
-  attemptId: string,
-  input: SubmitProjectInput,
-) {
-  return apiRequest<SubmitProjectResponse>(
-    `${learnerAssessmentsPath(courseId)}/${assessmentId}/attempts/${attemptId}/project-submission`,
-    {
-      accessToken,
-      body: input,
-      method: "POST",
     },
   );
 }

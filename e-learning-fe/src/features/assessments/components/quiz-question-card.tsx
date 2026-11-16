@@ -45,8 +45,6 @@ function formatQuestionType(type: AssessmentQuestionType) {
       return "True / False";
     case "FILL_IN_THE_BLANK":
       return "Fill in the blank";
-    case "PROJECT":
-      return "Project";
     default:
       return type;
   }
@@ -178,12 +176,6 @@ export function QuizQuestionCard({
             placeholder="Type your answer..."
             value={answer}
           />
-        ) : null}
-
-        {question.type === "PROJECT" ? (
-          <p className="rounded-xl border border-border bg-muted p-4 text-sm text-muted-foreground">
-            Project questions are submitted through the project submission form.
-          </p>
         ) : null}
       </div>
 
