@@ -20,7 +20,6 @@ import { SkillResponseDto } from '../dtos/skill-response.dto';
 import { UpdateSkillDto } from '../dtos/update-skill.dto';
 import { EmbeddingBatchItem } from '../interfaces/embedding.interfaces';
 import { CourseAccessService } from 'src/features/courses/services/course-access.service';
-import { CourseRepository } from 'src/features/courses/repositories/course.repository';
 import { AssessmentAccessService } from 'src/features/assessments/services/assessment-access.service';
 import { AssessmentQuestionsService } from 'src/features/assessments/services/assessment-questions.service';
 import { GetSkillsQueryDto } from '../dtos/get-skills-query.dto';
@@ -329,7 +328,7 @@ export class SkillService {
       );
     }
 
-    return value as string[];
+    return value;
   }
   async softDeleteSkill(
     skillId: string,

@@ -82,6 +82,5 @@ function setValidVnpayEnv(): void {
   process.env.VNPAY_HASH_SECRET = 'TEST_HASH_SECRET';
   process.env.VNPAY_PAYMENT_URL =
     'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-  process.env.VNPAY_RETURN_URL =
-    'https://example.com/payments/vnpay/return';
+  process.env.VNPAY_RETURN_URL = 'https://example.com/payments/vnpay/return';
 }

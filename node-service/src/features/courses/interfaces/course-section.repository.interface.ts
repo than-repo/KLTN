@@ -58,10 +58,7 @@ export interface CourseSectionWhereInput {
 }
 
 export type CourseSectionSortField =
-  | 'title'
-  | 'sectionIndex'
-  | 'createdAt'
-  | 'updatedAt';
+  'title' | 'sectionIndex' | 'createdAt' | 'updatedAt';
 
 export type SortDirection = 'asc' | 'desc';
 

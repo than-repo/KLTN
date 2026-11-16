@@ -17,7 +17,6 @@ import type {
   CookieOptions,
 } from 'express';
 import { Throttle } from '@nestjs/throttler';
-import { UnauthorizedException } from '@nestjs/common';
 
 import {
   ApiBadRequestResponse,

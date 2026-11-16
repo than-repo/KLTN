@@ -47,10 +47,7 @@ export class LearnerCoursesV2Controller {
     @CurrentUser('sub') learnerId: string,
     @Param('courseId', ParseUUIDPipe) courseId: string,
   ): Promise<LearningCourseOverviewResponseDto> {
-    return this.learningCoursesV2Service.getCourseOverview(
-      learnerId,
-      courseId,
-    );
+    return this.learningCoursesV2Service.getCourseOverview(learnerId, courseId);
   }
 
   @Get(':courseId/sections')

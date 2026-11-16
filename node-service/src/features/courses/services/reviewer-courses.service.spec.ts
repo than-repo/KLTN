@@ -508,7 +508,7 @@ function makeReviewWorkspace(
                   lessonId: '77777777-7777-4777-8777-777777777777',
                   cloudinaryPublicId: 'courses/welcome',
                   url: 'https://example.com/welcome.mp4',
-                  type: 'VIDEO' as never,
+                  type: 'VIDEO',
                   filename: 'welcome.mp4',
                   mimeType: 'video/mp4',
                   sizeInBytes: 1024,

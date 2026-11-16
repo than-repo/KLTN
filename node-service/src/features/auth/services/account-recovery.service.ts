@@ -3,7 +3,6 @@ import {
   BadRequestException,
   Injectable,
   Logger,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthRepository } from '../repositories/auth.repository';
@@ -12,9 +11,6 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from 'src/core/mailer/mailer.service';
 import { AuthProviderEnum } from 'generated/prisma/enums';
-import { ChangePasswordDto } from '../dtos/change-password.dto';
-import { NotFoundError } from 'rxjs';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { CreateRefreshToken } from '../interfaces/create-refresh-token.interface';
 
 type UserWithIdentities = Awaited<

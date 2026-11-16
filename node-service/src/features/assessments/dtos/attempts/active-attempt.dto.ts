@@ -1,6 +1,7 @@
 // src/features/assessments/dtos/attempts/active-attempt.dto.ts
 
 import { AssessmentAttemptStatus } from 'generated/prisma/enums';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { AssessmentQuestionType } from '../../interfaces/assessment-questions.repository.interface';
 import { AssessmentType } from '../../interfaces/assessment.repository.interface';
 
@@ -99,11 +100,16 @@ export class ActiveAttemptDto {
   readonly startedAt!: Date;
 
   /**
-   * If you add expiresAt to AssessmentAttempt, return it directly.
-   * If not, service can calculate:
-   *
-   * startedAt + assessment.timeLimitMinutes
+   * Earliest configured deadline: the attempt's timer or assessment closing.
+   * Null when neither deadline is configured.
    */
+  @ApiPropertyOptional({
+    type: String,
+    format: 'date-time',
+    nullable: true,
+    description:
+      'Earliest configured timer or assessment closing deadline; null if neither is configured.',
+  })
   readonly expiresAt?: Date | null;
 
   /**

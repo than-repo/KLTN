@@ -1,6 +1,9 @@
 // src/features/assessments/dtos/attempts/learner-assessment.dto.ts
 
+import { ApiProperty } from '@nestjs/swagger';
+
 export enum LearnerAssessmentState {
+  FINALIZING = 'FINALIZING',
   CAN_START = 'CAN_START',
   CAN_CONTINUE = 'CAN_CONTINUE',
   COMPLETED = 'COMPLETED',
@@ -29,8 +32,8 @@ export class LearnerLatestAttemptDto {
   readonly submittedAt?: Date | null;
 
   /**
-   * If the assessment has a time limit, backend should calculate this.
-   * FE should not calculate trust-sensitive time by itself.
+   * Earliest configured deadline: the attempt's timer or assessment closing.
+   * Calculated by the backend; null when neither is configured.
    */
   readonly expiresAt?: Date | null;
   readonly remainingSeconds?: number | null;
@@ -61,6 +64,7 @@ export class LearnerAssessmentDto {
   /**
    * Main state for FE.
    */
+  @ApiProperty({ enum: LearnerAssessmentState })
   readonly state!: LearnerAssessmentState;
 
   /**

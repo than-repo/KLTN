@@ -30,6 +30,7 @@ export type AssessmentReviewContent =
   | "FULL_REVIEW";
 
 export type LearnerAssessmentState =
+  | "FINALIZING"
   | "CAN_START"
   | "CAN_CONTINUE"
   | "COMPLETED"

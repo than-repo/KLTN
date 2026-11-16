@@ -1,10 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/core/database/prisma.service';
-import { IAssessmentAccessRepository } from '../interfaces/assessment-access.repository.interface';
+import type {
+  IAssessmentAccessRepository,
+  LearnerAssessmentAccessRecord,
+  LearnerCourseAccessRecord,
+} from '../interfaces/assessment-access.repository.interface';
 
 @Injectable()
 export class AssessmentAccessRepository implements IAssessmentAccessRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findLearnerCourseAccess(
+    learnerId: string,
+    courseId: string,
+  ): Promise<LearnerCourseAccessRecord | null> {
+    return this.prisma.enrollment.findUnique({
+      where: { userId_courseId: { userId: learnerId, courseId } },
+      select: {
+        isActive: true,
+        deletedAt: true,
+        status: true,
+        course: {
+          select: { isActive: true, deletedAt: true, status: true },
+        },
+      },
+    });
+  }
+
+  async findLearnerAssessmentAccess(
+    assessmentId: string,
+    courseId: string,
+  ): Promise<LearnerAssessmentAccessRecord | null> {
+    return this.prisma.assessment.findFirst({
+      where: { id: assessmentId, courseId },
+      select: { isActive: true, deletedAt: true, status: true },
+    });
+  }
 
   async existsActiveLessonInCourse(
     lessonId: string,

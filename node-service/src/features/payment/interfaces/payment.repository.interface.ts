@@ -1,4 +1,3 @@
-import { CourseInstructor } from './../../../../generated/prisma/browser';
 // ======================== Course ====================
 export const CourseStatus = {
   DRAFT: 'DRAFT',
@@ -50,9 +49,7 @@ export interface MarkPendingPaymentFailedInput {
 }
 
 export type PaidPaymentSettlementStatus =
-  | 'paid'
-  | 'already_paid'
-  | 'already_settled';
+  'paid' | 'already_paid' | 'already_settled';
 
 export interface PaidPaymentSettlementResult {
   status: PaidPaymentSettlementStatus;

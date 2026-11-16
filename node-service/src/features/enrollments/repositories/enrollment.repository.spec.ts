@@ -66,7 +66,9 @@ describe('EnrollmentRepository', () => {
     };
 
     repository = new EnrollmentRepository(
-      prisma as unknown as ConstructorParameters<typeof EnrollmentRepository>[0],
+      prisma as unknown as ConstructorParameters<
+        typeof EnrollmentRepository
+      >[0],
     );
   });
 

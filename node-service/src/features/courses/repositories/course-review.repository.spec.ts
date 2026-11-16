@@ -103,7 +103,9 @@ describe('CourseReviewRepository', () => {
     };
 
     repository = new CourseReviewRepository(
-      prisma as unknown as ConstructorParameters<typeof CourseReviewRepository>[0],
+      prisma as unknown as ConstructorParameters<
+        typeof CourseReviewRepository
+      >[0],
     );
   });
 

@@ -1,4 +1,4 @@
-import { Controller, forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AssessmentsService } from './services/assessments.service';
 import { ASSESSMENT_REPOSITORY } from './repositories/assessment.repository.token';
 import { AssessmentRepository } from './repositories/assessment.repository';
@@ -16,7 +16,6 @@ import { AssessmentQuestionsRepository } from './repositories/assessment-questio
 import { ASSESSMENT_ANSWERS_REPOSITORY } from './repositories/assessment-answers.repository.token';
 import { DETAILED_ASSESSMENT_REPOSITORY } from './repositories/detailed-assessment.repository.token';
 import { DetailedAssessmentRepository } from './repositories/detailed-assessment.repository';
-import { PrismaService } from 'src/core/database/prisma.service';
 import { InstructorAssessmentsController } from './controllers/instructor-assessments.controller';
 import { LearnerAssessmentsService } from './services/learner-assessments.service';
 import { ATTEMPT_REPOSITORY } from './repositories/attempt.repository.token';
@@ -24,6 +23,9 @@ import { AttemptRepository } from './repositories/attempt.repository';
 import { LearnerAssessmentsController } from './controllers/learner-assessments.controller';
 import { PrismaModule } from 'src/core/database/prisma.module';
 import { SkillModule } from '../skill/skill.module';
+import { QuizGradingService } from './services/quiz-grading.service';
+import { AttemptFinalizationService } from './services/attempt-finalization.service';
+import { AssessmentExpiryService } from './services/assessment-expiry.service';
 
 @Module({
   providers: [
@@ -32,6 +34,9 @@ import { SkillModule } from '../skill/skill.module';
     AssessmentAnswersService,
     AssessmentQuestionsService,
     LearnerAssessmentsService,
+    QuizGradingService,
+    AttemptFinalizationService,
+    AssessmentExpiryService,
     {
       provide: ASSESSMENT_REPOSITORY,
       useClass: AssessmentRepository,

@@ -1,12 +1,17 @@
 // src/features/assessments/dtos/attempts/save-attempt-answer.dto.ts
 
 import { Transform } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDefined,
+  IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
   MaxLength,
+  Matches,
+  ValidateIf,
 } from 'class-validator';
 
 /**
@@ -14,13 +19,17 @@ import {
  * PATCH /attempts/:attemptId/answers/:questionId
  */
 export class SaveAttemptAnswerParamsDto {
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString({ message: 'attemptId must be a string.' })
   @IsNotEmpty({ message: 'attemptId is required.' })
   @IsUUID('4', { message: 'attemptId must be a valid UUID.' })
   readonly attemptId!: string;
 
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString({ message: 'questionId must be a string.' })
   @IsNotEmpty({ message: 'questionId is required.' })
   @IsUUID('4', { message: 'questionId must be a valid UUID.' })
@@ -42,11 +51,42 @@ export class SaveAttemptAnswerParamsDto {
  * - score
  */
 export class SaveAttemptAnswerDto {
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @ApiProperty({
+    description: 'A non-empty answer. Clearing an answer is not supported.',
+    maxLength: 5000,
+  })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.trim() : value,
+  )
   @IsString({ message: 'answer must be a string.' })
   @IsNotEmpty({ message: 'answer is required.' })
   @MaxLength(5000, { message: 'answer is too long.' })
   readonly answer!: string;
+
+  @ApiProperty({
+    type: String,
+    nullable: true,
+    required: true,
+    description:
+      'The exact server-issued savedAt timestamp from the previous save or active-attempt response. Use null for the first save. Stale versions return 409 ANSWER_VERSION_CONFLICT.',
+    example: null,
+  })
+  @ValidateIf((_object: unknown, value: unknown) => value !== null)
+  @IsDefined({
+    message: 'expectedSavedAt is required; use null for the first save.',
+  })
+  @IsISO8601(
+    { strict: true, strictSeparator: true },
+    {
+      message:
+        'expectedSavedAt must be a valid timestamp returned by the server.',
+    },
+  )
+  @Matches(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/, {
+    message:
+      'expectedSavedAt must use the server timestamp format YYYY-MM-DDTHH:mm:ss.sssZ.',
+  })
+  readonly expectedSavedAt!: string | null;
 
   /**
    * Optional client-side snapshot.
@@ -70,6 +110,12 @@ export class SaveAttemptAnswerResponseDto {
   readonly questionId!: string;
 
   readonly saved!: boolean;
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    description:
+      'Server-issued version for this answer. Send it as expectedSavedAt with the next save.',
+  })
   readonly savedAt!: Date;
 
   /**

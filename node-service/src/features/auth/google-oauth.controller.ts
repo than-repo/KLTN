@@ -32,10 +32,7 @@ export class GoogleOAuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Google OAuth2 callback' })
-  async googleAuthCallback(
-    @Req() req: RequestWithUser,
-    @Res() res: Response,
-  ) {
+  async googleAuthCallback(@Req() req: RequestWithUser, @Res() res: Response) {
     const result = await this.authService.googleLogin(req.user);
 
     this.setRefreshTokenCookie(res, result.refreshToken);

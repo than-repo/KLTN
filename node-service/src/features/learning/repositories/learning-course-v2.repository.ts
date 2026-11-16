@@ -321,6 +321,6 @@ export class LearningCourseV2Repository implements ILearningCourseV2Repository {
       throw new Error('Stored skill aliases are invalid');
     }
 
-    return value as string[];
+    return value;
   }
 }

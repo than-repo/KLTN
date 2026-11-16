@@ -1,7 +1,6 @@
 //src\features\auth\auth.service.ts
 
 import {
-  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,

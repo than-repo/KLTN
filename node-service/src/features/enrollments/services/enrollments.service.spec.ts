@@ -272,12 +272,12 @@ describe('EnrollmentsService', () => {
           }),
         );
 
-      await expect(
-        service.hasActiveEnrollment(userId, courseId),
-      ).resolves.toBe(true);
-      await expect(
-        service.hasActiveEnrollment(userId, courseId),
-      ).resolves.toBe(true);
+      await expect(service.hasActiveEnrollment(userId, courseId)).resolves.toBe(
+        true,
+      );
+      await expect(service.hasActiveEnrollment(userId, courseId)).resolves.toBe(
+        true,
+      );
     });
 
     it('denies inactive, soft-deleted, and cancelled enrollments', async () => {
@@ -298,15 +298,15 @@ describe('EnrollmentsService', () => {
           }),
         );
 
-      await expect(
-        service.hasActiveEnrollment(userId, courseId),
-      ).resolves.toBe(false);
-      await expect(
-        service.hasActiveEnrollment(userId, courseId),
-      ).resolves.toBe(false);
-      await expect(
-        service.hasActiveEnrollment(userId, courseId),
-      ).resolves.toBe(false);
+      await expect(service.hasActiveEnrollment(userId, courseId)).resolves.toBe(
+        false,
+      );
+      await expect(service.hasActiveEnrollment(userId, courseId)).resolves.toBe(
+        false,
+      );
+      await expect(service.hasActiveEnrollment(userId, courseId)).resolves.toBe(
+        false,
+      );
     });
   });
 });

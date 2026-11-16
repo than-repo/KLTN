@@ -78,6 +78,8 @@ function formatAttemptStatus(status?: AssessmentAttemptStatus | string | null) {
 
 function getStateLabel(assessment: LearnerAssessment) {
   switch (assessment.state) {
+    case "FINALIZING":
+      return assessment.type === "QUIZ" ? "Grading" : "Finalizing";
     case "CAN_START":
       return "Ready";
     case "CAN_CONTINUE":
@@ -96,6 +98,11 @@ function getStateLabel(assessment: LearnerAssessment) {
 }
 
 function getPrimaryButtonLabel(assessment: LearnerAssessment) {
+  if (assessment.state === "FINALIZING") {
+    return assessment.type === "QUIZ"
+      ? "Grading saved answers..."
+      : "Finalizing attempt...";
+  }
   if (assessment.primaryAction === "CONTINUE") {
     return "Continue attempt";
   }
@@ -111,6 +118,7 @@ function getStateBadgeClasses(assessment: LearnerAssessment) {
       return "border-primary/20 bg-primary/10 text-primary";
     case "COMPLETED":
       return "border-success/20 bg-success/5 text-success";
+    case "FINALIZING":
     case "MAX_ATTEMPTS_REACHED":
     case "NOT_AVAILABLE":
     case "LOCKED":

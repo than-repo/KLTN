@@ -60,7 +60,7 @@ export class ReviewerCoursesService {
 
     const sortDirection = dto.sortDirection ?? SortDirection.DESC;
 
-    let [courses, total] = await Promise.all([
+    const [courses, total] = await Promise.all([
       this.courseReviewRepository.findAvailableCourses({
         reviewerId,
         search,

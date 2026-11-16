@@ -14,7 +14,6 @@ import {
   LearnerAssessmentEntryRecord,
   LearnerAttemptSummaryRecord,
   LearnerCourseAssessmentListRecord,
-  LearnerEnrollmentRecord,
   SaveAnswerAttemptContextRecord,
   SavedAttemptAnswerRecord,
   SubmitProjectAttemptRecord,
@@ -22,8 +21,9 @@ import {
   SubmitQuizAttemptAnswerRecord,
   SubmitQuizAttemptQuestionRecord,
   SubmitQuizAttemptRecord,
-  SubmitQuizAttemptWriteData,
-  SubmittedAttemptRecord,
+  AttemptFinalizationCallback,
+  FinalizedAttemptRecord,
+  AttemptWriteContext,
   SubmittedProjectRecord,
 } from '../interfaces/attempt.repository.interface';
 import { PrismaService } from 'src/core/database/prisma.service';
@@ -130,36 +130,6 @@ export class AttemptRepository implements IAttemptRepository {
         availableFrom: true,
         availableUntil: true,
 
-        isActive: true,
-        deletedAt: true,
-      },
-    });
-  }
-
-  /**
-   *
-   * Used to verify learner is enrolled in the course.
-   *
-   * Your schema has:
-   * @@unique([userId, courseId])
-   */
-  async findLearnerEnrollment(
-    courseId: string,
-    learnerId: string,
-  ): Promise<LearnerEnrollmentRecord | null> {
-    return this.prisma.enrollment.findUnique({
-      where: {
-        userId_courseId: {
-          userId: learnerId,
-          courseId,
-        },
-      },
-      select: {
-        id: true,
-        userId: true,
-        courseId: true,
-
-        status: true,
         isActive: true,
         deletedAt: true,
       },
@@ -672,26 +642,58 @@ export class AttemptRepository implements IAttemptRepository {
     };
   }
 
-  async markAttemptFailedDueToExpiry(attemptId: string): Promise<void> {
-    await this.prisma.assessmentAttempt.updateMany({
-      where: {
-        id: attemptId,
-        status: AssessmentAttemptStatus.IN_PROGRESS,
-      },
-      data: {
-        status: AssessmentAttemptStatus.FAILED,
-        score: 0,
-        passed: false,
-        submittedAt: new Date(),
+  async findExpiredAttemptIds(
+    now: Date,
+    afterId: string | null,
+    limit: number,
+  ): Promise<{ id: string }[]> {
+    return this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT attempt.id FROM assessment_attempts AS attempt
+      JOIN assessments AS assessment ON assessment.id = attempt.assessmentId
+      WHERE attempt.status = ${AssessmentAttemptStatus.IN_PROGRESS}
+        AND (
+          (assessment.timeLimitMinutes IS NOT NULL
+            AND TIMESTAMPADD(MINUTE, assessment.timeLimitMinutes, attempt.startedAt) <= ${now})
+          OR assessment.availableUntil <= ${now}
+        )
+        AND (${afterId} IS NULL OR attempt.id > ${afterId})
+      ORDER BY attempt.id ASC LIMIT ${limit}
+    `;
+  }
+
+  private async loadWriteContext(
+    tx: Prisma.TransactionClient,
+    attemptId: string,
+  ): Promise<AttemptWriteContext> {
+    return tx.assessmentAttempt.findUniqueOrThrow({
+      where: { id: attemptId },
+      select: {
+        startedAt: true,
+        assessment: {
+          select: {
+            timeLimitMinutes: true,
+            availableFrom: true,
+            availableUntil: true,
+            status: true,
+            isActive: true,
+            deletedAt: true,
+          },
+        },
       },
     });
   }
 
-  async upsertAttemptAnswer(params: {
-    attemptId: string;
-    questionId: string;
-    textAnswer: string;
-  }): Promise<SavedAttemptAnswerRecord | null> {
+  async upsertAttemptAnswer(
+    params: {
+      attemptId: string;
+      questionId: string;
+      textAnswer: string;
+    },
+    assertAllowed: (
+      context: AttemptWriteContext,
+      currentSavedAt: Date | null,
+    ) => void,
+  ): Promise<SavedAttemptAnswerRecord | null> {
     return this.prisma.$transaction(async (tx) => {
       const lockedAttempt = await tx.$queryRaw<{ id: string }[]>`
         SELECT id
@@ -705,6 +707,24 @@ export class AttemptRepository implements IAttemptRepository {
         return null;
       }
 
+      const context = await this.loadWriteContext(tx, params.attemptId);
+      const currentAnswer = await tx.assessmentAttemptAnswer.findUnique({
+        where: {
+          attemptId_questionId: {
+            attemptId: params.attemptId,
+            questionId: params.questionId,
+          },
+        },
+        select: { updatedAt: true },
+      });
+      assertAllowed(context, currentAnswer?.updatedAt ?? null);
+
+      // DATETIME(3) versions must advance even for saves within one millisecond
+      // or when another application instance has a slightly faster clock.
+      const savedAt = new Date(
+        Math.max(Date.now(), (currentAnswer?.updatedAt.getTime() ?? -1) + 1),
+      );
+
       return tx.assessmentAttemptAnswer.upsert({
         where: {
           attemptId_questionId: {
@@ -716,6 +736,7 @@ export class AttemptRepository implements IAttemptRepository {
           attemptId: params.attemptId,
           questionId: params.questionId,
           textAnswer: params.textAnswer,
+          updatedAt: savedAt,
 
           answerSnapshot: null,
 
@@ -724,6 +745,7 @@ export class AttemptRepository implements IAttemptRepository {
         },
         update: {
           textAnswer: params.textAnswer,
+          updatedAt: savedAt,
 
           isCorrect: null,
           pointsEarned: null,
@@ -739,21 +761,12 @@ export class AttemptRepository implements IAttemptRepository {
     });
   }
 
-  async findQuizAttemptForSubmit(
-    courseId: string,
-    assessmentId: string,
+  private async loadFinalizationSnapshot(
+    tx: Prisma.TransactionClient,
     attemptId: string,
-    learnerId: string,
   ): Promise<SubmitQuizAttemptRecord | null> {
-    const attempt = await this.prisma.assessmentAttempt.findFirst({
-      where: {
-        id: attemptId,
-        assessmentId,
-        learnerId,
-        assessment: {
-          courseId,
-        },
-      },
+    const attempt = await tx.assessmentAttempt.findFirst({
+      where: { id: attemptId },
       select: {
         id: true,
         assessmentId: true,
@@ -822,6 +835,7 @@ export class AttemptRepository implements IAttemptRepository {
           },
         },
 
+        projectSubmission: { select: { id: true } },
         answers: {
           select: {
             id: true,
@@ -907,67 +921,63 @@ export class AttemptRepository implements IAttemptRepository {
 
       questions,
       savedAnswers,
+      projectSubmission: attempt.projectSubmission,
     };
   }
 
-  async submitQuizAttemptTransaction(
-    data: SubmitQuizAttemptWriteData,
-  ): Promise<SubmittedAttemptRecord | null> {
-    return this.prisma.$transaction(async (tx) => {
-      const lockedAttempt = await tx.$queryRaw<{ id: string }[]>`
-        SELECT id
-        FROM assessment_attempts
-        WHERE id = ${data.attemptId}
-          AND status = ${AssessmentAttemptStatus.IN_PROGRESS}
+  async finalizeAttemptTransaction(
+    attemptId: string,
+    decide: AttemptFinalizationCallback,
+  ): Promise<FinalizedAttemptRecord | null> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const locked = await tx.$queryRaw<{ id: string }[]>`
+        SELECT id FROM assessment_attempts
+        WHERE id = ${attemptId} AND status = ${AssessmentAttemptStatus.IN_PROGRESS}
         FOR UPDATE
       `;
-
-      if (lockedAttempt.length === 0) {
-        return null;
-      }
-
-      await Promise.all(
-        data.gradedAnswers.map((answer) =>
-          tx.assessmentAttemptAnswer.update({
-            where: {
-              id: answer.attemptAnswerId,
-            },
+        if (locked.length === 0) return null;
+        const snapshot = await this.loadFinalizationSnapshot(tx, attemptId);
+        if (!snapshot) return null;
+        const write = decide(snapshot);
+        if (!write) return null;
+        for (const answer of write.gradedAnswers) {
+          const updated = await tx.assessmentAttemptAnswer.updateMany({
+            where: { id: answer.attemptAnswerId, attemptId },
             data: {
               isCorrect: answer.isCorrect,
               pointsEarned: answer.pointsEarned,
             },
-          }),
-        ),
-      );
-
-      return tx.assessmentAttempt.update({
-        where: {
-          id: data.attemptId,
-        },
-        data: {
-          status: data.status,
-          score: data.score,
-          maxScore: data.maxScore,
-          passed: data.passed,
-          submittedAt: data.submittedAt,
-        },
-        select: {
-          id: true,
-          assessmentId: true,
-          learnerId: true,
-
-          attemptNumber: true,
-          status: true,
-
-          score: true,
-          maxScore: true,
-          passed: true,
-
-          startedAt: true,
-          submittedAt: true,
-        },
-      });
-    });
+          });
+          if (updated.count !== 1)
+            throw new Error('Attempt answer changed during finalization.');
+        }
+        const attempt = await tx.assessmentAttempt.update({
+          where: { id: attemptId },
+          data: {
+            status: write.status,
+            score: write.score,
+            maxScore: write.maxScore,
+            passed: write.passed,
+            submittedAt: write.submittedAt,
+          },
+          select: {
+            id: true,
+            assessmentId: true,
+            learnerId: true,
+            attemptNumber: true,
+            status: true,
+            score: true,
+            maxScore: true,
+            passed: true,
+            startedAt: true,
+            submittedAt: true,
+          },
+        });
+        return { snapshot, attempt, gradedAnswers: write.gradedAnswers };
+      },
+      { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
+    );
   }
 
   async countLearnerAttempts(
@@ -1232,6 +1242,7 @@ export class AttemptRepository implements IAttemptRepository {
 
   async submitProjectTransaction(
     data: SubmitProjectWriteData,
+    assertAllowed: (context: AttemptWriteContext) => void,
   ): Promise<SubmittedProjectRecord | null> {
     return this.prisma.$transaction(async (tx) => {
       const lockedAttempt = await tx.$queryRaw<{ id: string }[]>`
@@ -1245,6 +1256,8 @@ export class AttemptRepository implements IAttemptRepository {
       if (lockedAttempt.length === 0) {
         return null;
       }
+
+      assertAllowed(await this.loadWriteContext(tx, data.attemptId));
 
       const existingSubmission = await tx.projectSubmission.findUnique({
         where: {
