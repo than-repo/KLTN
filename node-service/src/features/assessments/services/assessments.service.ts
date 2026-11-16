@@ -37,7 +37,6 @@ import { ASSESSMENT_REPOSITORY } from '../repositories/assessment.repository.tok
 
 import { DETAILED_ASSESSMENT_REPOSITORY } from '../repositories/detailed-assessment.repository.token';
 import type { IDetailedAssessmentRepository } from '../interfaces/detailed-assessment.interface';
-import { promises } from 'dns';
 import { DetailedAssessmentDto } from '../dtos/assessment/detailed-assessment.dto';
 import { UpdatePublishedAssessmentDto } from '../dtos/assessment/update-published-assessment.dto';
 import { UpdatedPublishedAssessmentResponseDto } from '../dtos/assessment/updated-published-assessment-response.dto';

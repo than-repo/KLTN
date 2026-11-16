@@ -2,7 +2,6 @@ import {
   AssessmentAttemptStatus,
   AssessmentStatus,
   AssessmentType,
-  EnrollmentStatus,
   ProjectSubmissionStatus,
 } from 'generated/prisma/enums';
 import { AssessmentQuestionType } from './assessment-questions.repository.interface';
@@ -54,15 +53,6 @@ export interface LearnerAssessmentEntryRecord {
   availableFrom: Date | null;
   availableUntil: Date | null;
 
-  isActive: boolean;
-  deletedAt: Date | null;
-}
-
-export interface LearnerEnrollmentRecord {
-  id: string;
-  userId: string;
-  courseId: string;
-  status: EnrollmentStatus;
   isActive: boolean;
   deletedAt: Date | null;
 }
@@ -310,6 +300,7 @@ export interface SubmitQuizAttemptRecord {
 
   questions: SubmitQuizAttemptQuestionRecord[];
   savedAnswers: SubmitQuizAttemptAnswerRecord[];
+  projectSubmission: { id: string } | null;
 }
 
 export interface GradedAttemptAnswerWrite {
@@ -318,14 +309,35 @@ export interface GradedAttemptAnswerWrite {
   pointsEarned: number;
 }
 
-export interface SubmitQuizAttemptWriteData {
-  attemptId: string;
+export interface AttemptFinalizationWrite {
   status: AssessmentAttemptStatus;
   score: number;
-  maxScore: number;
+  maxScore: number | null;
   passed: boolean;
   submittedAt: Date;
   gradedAnswers: GradedAttemptAnswerWrite[];
+}
+
+export interface FinalizedAttemptRecord {
+  snapshot: SubmitQuizAttemptRecord;
+  attempt: SubmittedAttemptRecord;
+  gradedAnswers: GradedAttemptAnswerWrite[];
+}
+
+export type AttemptFinalizationCallback = (
+  snapshot: SubmitQuizAttemptRecord,
+) => AttemptFinalizationWrite | null;
+
+export interface AttemptWriteContext {
+  startedAt: Date;
+  assessment: {
+    timeLimitMinutes: number | null;
+    availableFrom: Date | null;
+    availableUntil: Date | null;
+    status: AssessmentStatus;
+    isActive: boolean;
+    deletedAt: Date | null;
+  };
 }
 
 export interface SubmittedAttemptRecord {
@@ -484,11 +496,6 @@ export interface IAttemptRepository {
     assessmentId: string,
   ): Promise<LearnerAssessmentEntryRecord | null>;
 
-  findLearnerEnrollment(
-    courseId: string,
-    learnerId: string,
-  ): Promise<LearnerEnrollmentRecord | null>;
-
   findLearnerAttempts(
     assessmentId: string,
     learnerId: string,
@@ -524,30 +531,28 @@ export interface IAttemptRepository {
     learnerId: string,
   ): Promise<SaveAnswerAttemptContextRecord | null>;
 
-  /**
-   * If it do not have EXPIRED status yet,
-   * mark expired unfinished attempt as FAILED.
-   *
-   * This prevents multiple IN_PROGRESS attempts.
-   */
-  markAttemptFailedDueToExpiry(attemptId: string): Promise<void>;
+  findExpiredAttemptIds(
+    now: Date,
+    afterId: string | null,
+    limit: number,
+  ): Promise<{ id: string }[]>;
 
-  upsertAttemptAnswer(params: {
-    attemptId: string;
-    questionId: string;
-    textAnswer: string;
-  }): Promise<SavedAttemptAnswerRecord | null>;
-
-  findQuizAttemptForSubmit(
-    courseId: string,
-    assessmentId: string,
+  finalizeAttemptTransaction(
     attemptId: string,
-    learnerId: string,
-  ): Promise<SubmitQuizAttemptRecord | null>;
+    decide: AttemptFinalizationCallback,
+  ): Promise<FinalizedAttemptRecord | null>;
 
-  submitQuizAttemptTransaction(
-    data: SubmitQuizAttemptWriteData,
-  ): Promise<SubmittedAttemptRecord | null>;
+  upsertAttemptAnswer(
+    params: {
+      attemptId: string;
+      questionId: string;
+      textAnswer: string;
+    },
+    assertAllowed: (
+      context: AttemptWriteContext,
+      currentSavedAt: Date | null,
+    ) => void,
+  ): Promise<SavedAttemptAnswerRecord | null>;
 
   countLearnerAttempts(
     assessmentId: string,
@@ -580,5 +585,6 @@ export interface IAttemptRepository {
 
   submitProjectTransaction(
     data: SubmitProjectWriteData,
+    assertAllowed: (context: AttemptWriteContext) => void,
   ): Promise<SubmittedProjectRecord | null>;
 }

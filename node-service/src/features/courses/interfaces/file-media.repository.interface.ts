@@ -51,11 +51,7 @@ export interface FileMediaWhereInput {
 
 /** Ordering options */
 export type FileMediaSortField =
-  | 'filename'
-  | 'type'
-  | 'sizeInBytes'
-  | 'createdAt'
-  | 'updatedAt';
+  'filename' | 'type' | 'sizeInBytes' | 'createdAt' | 'updatedAt';
 
 export type SortDirection = 'asc' | 'desc';
 

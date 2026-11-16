@@ -30,7 +30,9 @@ const courseId = '22222222-2222-4222-8222-222222222222';
 describe('LearningCoursesService', () => {
   let service: LearningCoursesService;
   let learningCourseRepository: LearningCourseRepositoryMock;
-  let enrollmentsService: jest.Mocked<Pick<EnrollmentsService, 'hasActiveEnrollment'>>;
+  let enrollmentsService: jest.Mocked<
+    Pick<EnrollmentsService, 'hasActiveEnrollment'>
+  >;
 
   beforeEach(async () => {
     learningCourseRepository = {
@@ -67,7 +69,9 @@ describe('LearningCoursesService', () => {
     await expect(
       service.getCourseForLearning(learnerId, courseId),
     ).rejects.toThrow(ForbiddenException);
-    expect(learningCourseRepository.findCourseForLearning).not.toHaveBeenCalled();
+    expect(
+      learningCourseRepository.findCourseForLearning,
+    ).not.toHaveBeenCalled();
   });
 
   it('throws not found when the learner can access but course content is missing', async () => {

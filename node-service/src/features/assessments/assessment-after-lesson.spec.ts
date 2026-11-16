@@ -29,6 +29,7 @@ import type { Prisma } from 'generated/prisma/client';
 import {
   AssessmentReviewContent,
   AssessmentReviewTiming,
+  CourseStatus,
   EnrollmentStatus,
 } from 'generated/prisma/enums';
 import { CreateAssessmentDto } from './dtos/assessment/create-assessment.dto';
@@ -52,6 +53,8 @@ import { DetailedAssessmentRepository } from './repositories/detailed-assessment
 import { AssessmentAccessService } from './services/assessment-access.service';
 import { AssessmentsService } from './services/assessments.service';
 import { LearnerAssessmentsService } from './services/learner-assessments.service';
+import { AttemptFinalizationService } from './services/attempt-finalization.service';
+import { QuizGradingService } from './services/quiz-grading.service';
 
 const lessonId = '33cecf62-021f-4277-a2ea-86b0d7a00e30';
 const otherLessonId = '657978f1-5c14-414f-8baf-7445057740d2';
@@ -139,6 +142,21 @@ function createServiceRepositories(assessment: Assessment) {
       count: jest.fn().mockResolvedValue(1),
     } satisfies jest.Mocked<IAssessmentRepository>,
     accessRepository: {
+      findLearnerCourseAccess: jest.fn().mockResolvedValue({
+        isActive: true,
+        deletedAt: null,
+        status: EnrollmentStatus.ACTIVE,
+        course: {
+          isActive: true,
+          deletedAt: null,
+          status: CourseStatus.PUBLISHED,
+        },
+      }),
+      findLearnerAssessmentAccess: jest.fn().mockResolvedValue({
+        isActive: true,
+        deletedAt: null,
+        status: AssessmentStatus.PUBLISHED,
+      }),
       existsCourseByInstructor: jest.fn().mockResolvedValue(true),
       existsAssessmentInCourse: jest.fn().mockResolvedValue(true),
       existsQuestionInAssessment: jest.fn(),
@@ -602,11 +620,6 @@ describe('Learner assessment placement', () => {
     },
   ])('returns safe placement for $context', async ({ context, expected }) => {
     const repository = {
-      findLearnerEnrollment: jest.fn().mockResolvedValue({
-        isActive: true,
-        deletedAt: null,
-        status: EnrollmentStatus.ACTIVE,
-      }),
       findPublishedAssessmentsForLearnerCourse: jest
         .fn()
         .mockResolvedValue([{ ...record, afterLessonContext: context }]),
@@ -615,6 +628,17 @@ describe('Learner assessment placement', () => {
       repository as unknown as ConstructorParameters<
         typeof LearnerAssessmentsService
       >[0],
+      new AssessmentAccessService(
+        createServiceRepositories(
+          AssessmentMapper.toAssessment(storedAssessment),
+        ).accessRepository,
+      ),
+      new AttemptFinalizationService(
+        repository as unknown as ConstructorParameters<
+          typeof AttemptFinalizationService
+        >[0],
+        new QuizGradingService(),
+      ),
     );
     const response = await service.getLearnerCourseAssessments({
       courseId,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   getAssessmentHistory,
@@ -32,53 +32,76 @@ export function useLearnerAssessment({
   const [history, setHistory] = useState<AssessmentHistory | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const loadRef = useRef<() => Promise<void>>(async () => {});
 
   const canFetch = Boolean(enabled && accessToken && courseId && assessmentId);
 
-  const load = useCallback(async () => {
-    if (!canFetch || !accessToken || !courseId || !assessmentId) {
-      setAssessment(null);
-      setHistory(null);
-      setError(null);
-      setIsLoading(false);
-      return;
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let pending: Promise<void> | null = null;
+
+    function load(background = false): Promise<void> {
+      if (pending) return pending;
+      clearTimeout(timer);
+      pending = (async () => {
+        let shouldPoll = false;
+        if (!canFetch || !accessToken || !courseId || !assessmentId) {
+          setAssessment(null);
+          setHistory(null);
+          setError(null);
+          setIsLoading(false);
+          return;
+        }
+        if (!background) setIsLoading(true);
+        setError(null);
+        try {
+          const nextAssessment = await getLearnerAssessment(
+            accessToken,
+            courseId,
+            assessmentId,
+          );
+          if (cancelled) return;
+          setAssessment(nextAssessment);
+          shouldPoll = nextAssessment.state === "FINALIZING";
+          if (includeHistory && (!background || !shouldPoll)) {
+            const nextHistory = await getAssessmentHistory(
+              accessToken,
+              courseId,
+              assessmentId,
+            );
+            if (cancelled) return;
+            setHistory(nextHistory);
+          } else if (!includeHistory) {
+            setHistory(null);
+          }
+        } catch (error) {
+          shouldPoll = false;
+          if (cancelled) return;
+          setError(getErrorMessage(error, "Unable to load assessment."));
+          setAssessment(null);
+          setHistory(null);
+        } finally {
+          pending = null;
+          if (!cancelled) {
+            setIsLoading(false);
+            if (shouldPoll) timer = setTimeout(() => void load(true), 2000);
+          }
+        }
+      })();
+      return pending;
     }
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const nextAssessment = await getLearnerAssessment(
-        accessToken,
-        courseId,
-        assessmentId,
-      );
-
-      setAssessment(nextAssessment);
-
-      if (includeHistory) {
-        const nextHistory = await getAssessmentHistory(
-          accessToken,
-          courseId,
-          assessmentId,
-        );
-
-        setHistory(nextHistory);
-      } else {
-        setHistory(null);
-      }
-    } catch (error) {
-      setError(getErrorMessage(error, "Unable to load assessment."));
-      setAssessment(null);
-      setHistory(null);
-    } finally {
-      setIsLoading(false);
-    }
+    loadRef.current = () => load();
+    void load();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      loadRef.current = async () => {};
+    };
   }, [accessToken, assessmentId, canFetch, courseId, includeHistory]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const refetch = useCallback(() => loadRef.current(), []);
 
   return {
     assessment,
@@ -86,6 +109,6 @@ export function useLearnerAssessment({
     error,
     history,
     isLoading,
-    refetch: load,
+    refetch,
   };
 }

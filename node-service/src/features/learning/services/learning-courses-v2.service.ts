@@ -10,8 +10,6 @@ import { EnrollmentResponseDto } from '../../enrollments/dtos/enrollment-respons
 import {
   LearningCourseOverviewResponseDto,
   LearningLessonDetailResponseDto,
-  LearningLessonSummaryDto,
-  LearningSectionSummaryDto,
   PaginatedLearningLessonsResponseDto,
   PaginatedLearningSectionsResponseDto,
 } from '../dtos/v2/learning-course-v2-response.dto';
@@ -40,9 +38,8 @@ export class LearningCoursesV2Service {
     courseId: string,
   ): Promise<LearningCourseOverviewResponseDto> {
     const enrollment = await this.assertCanLearn(learnerId, courseId);
-    const course = await this.learningCourseRepository.findCourseOverview(
-      courseId,
-    );
+    const course =
+      await this.learningCourseRepository.findCourseOverview(courseId);
 
     if (!course) {
       throw new NotFoundException('Course not found');

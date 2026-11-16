@@ -1,17 +1,10 @@
 // src/features/learning/interfaces/learning-course.repository.interface.ts
 
 export type CourseLevelModel =
-  | 'BEGINNER'
-  | 'INTERMEDIATE'
-  | 'ADVANCE'
-  | 'ALL_LEVELS';
+  'BEGINNER' | 'INTERMEDIATE' | 'ADVANCE' | 'ALL_LEVELS';
 
 export type CourseStatusModel =
-  | 'DRAFT'
-  | 'PUBLISHED'
-  | 'ARCHIVED'
-  | 'IN_REVIEW'
-  | 'CHANGES_REQUESTED';
+  'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'IN_REVIEW' | 'CHANGES_REQUESTED';
 
 export type MediaTypeModel = 'VIDEO' | 'DOCUMENT' | 'IMAGE' | 'AUDIO' | 'OTHER';
 

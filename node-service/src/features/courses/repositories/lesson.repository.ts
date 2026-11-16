@@ -1,5 +1,5 @@
 import { PrismaService } from 'src/core/database/prisma.service';
-import { Prisma, Lesson as PrismaLesson } from 'generated/prisma/client';
+import { Prisma } from 'generated/prisma/client';
 import {
   CreateLessonAtEndInput,
   CreateLessonInput,
@@ -72,7 +72,7 @@ export class LessonRepository implements ILessonRepository {
       throw new Error('Stored skill aliases are invalid');
     }
 
-    return value as string[];
+    return value;
   }
   private readonly DEFAULT_LIMIT = 10;
   private readonly MAX_LIMIT = 100;

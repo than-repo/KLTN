@@ -54,7 +54,9 @@ type AuthRepositoryMock = jest.Mocked<
 >;
 
 type ConfigServiceMock = jest.Mocked<Pick<ConfigService, 'get' | 'getOrThrow'>>;
-type MailerServiceMock = jest.Mocked<Pick<MailerService, 'sendPasswordResetEmail'>>;
+type MailerServiceMock = jest.Mocked<
+  Pick<MailerService, 'sendPasswordResetEmail'>
+>;
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const email = 'user@example.com';
@@ -74,7 +76,9 @@ describe('AccountRecoveryService', () => {
 
     authRepository = {
       findUserByEmailWithIdentities: jest.fn(),
-      invalidateUnusedPasswordResetTokens: jest.fn().mockResolvedValue(undefined),
+      invalidateUnusedPasswordResetTokens: jest
+        .fn()
+        .mockResolvedValue(undefined),
       createPasswordResetToken: jest.fn().mockResolvedValue({}),
       resetPassword: jest.fn(),
     };
@@ -147,9 +151,9 @@ describe('AccountRecoveryService', () => {
 
     await service.forgotPassword(email);
 
-    expect(authRepository.invalidateUnusedPasswordResetTokens).toHaveBeenCalledWith(
-      userId,
-    );
+    expect(
+      authRepository.invalidateUnusedPasswordResetTokens,
+    ).toHaveBeenCalledWith(userId);
     expect(authRepository.createPasswordResetToken).toHaveBeenCalledWith({
       userId,
       tokenHash: expect.stringMatching(/^[a-f0-9]{64}$/),
@@ -162,7 +166,8 @@ describe('AccountRecoveryService', () => {
       ),
     );
     expect(
-      authRepository.invalidateUnusedPasswordResetTokens.mock.invocationCallOrder[0],
+      authRepository.invalidateUnusedPasswordResetTokens.mock
+        .invocationCallOrder[0],
     ).toBeLessThan(
       authRepository.createPasswordResetToken.mock.invocationCallOrder[0],
     );
@@ -182,9 +187,9 @@ describe('AccountRecoveryService', () => {
   it('throws unauthorized when reset token consumption fails', async () => {
     authRepository.resetPassword.mockResolvedValue(false);
 
-    await expect(service.resetPassword('reset-token', '@Abcd123')).rejects.toBeInstanceOf(
-      UnauthorizedException,
-    );
+    await expect(
+      service.resetPassword('reset-token', '@Abcd123'),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
   it('hashes the new password and atomically resets by token hash', async () => {

@@ -29,7 +29,7 @@ describe('VnpayService', () => {
         hashSecret: 'TEST_HASH_SECRET',
         paymentUrl: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
         returnUrl: 'https://example.com/payments/vnpay/return',
-      } as ConstructorParameters<typeof VnpayService>[0]);
+      });
 
       const paymentUrl = service.createPaymentUrl({
         txnRef: 'ORDER123',

@@ -3,7 +3,13 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
+import {
+  AssessmentStatus,
+  CourseStatus,
+  EnrollmentStatus,
+} from 'generated/prisma/enums';
 import type { IAssessmentAccessRepository } from '../interfaces/assessment-access.repository.interface';
 
 export const ASSESSMENT_ACCESS_REPOSITORY = 'ASSESSMENT_ACCESS_REPOSITORY';
@@ -14,6 +20,63 @@ export class AssessmentAccessService {
     @Inject(ASSESSMENT_ACCESS_REPOSITORY)
     private readonly assessmentAccessRepository: IAssessmentAccessRepository,
   ) {}
+
+  async ensureLearnerCanAccessCourse(
+    learnerId: string,
+    courseId: string,
+  ): Promise<void> {
+    const enrollment =
+      await this.assessmentAccessRepository.findLearnerCourseAccess(
+        learnerId,
+        courseId,
+      );
+
+    if (
+      !enrollment ||
+      !enrollment.isActive ||
+      enrollment.deletedAt ||
+      enrollment.status !== EnrollmentStatus.ACTIVE
+    ) {
+      throw new ForbiddenException(
+        'You are not allowed to access assessments for this course.',
+      );
+    }
+
+    const { course } = enrollment;
+    if (
+      !course.isActive ||
+      course.deletedAt ||
+      course.status !== CourseStatus.PUBLISHED
+    ) {
+      throw new ForbiddenException('Course is not available for learning.');
+    }
+  }
+
+  async ensureLearnerCanAccessAssessment(
+    learnerId: string,
+    courseId: string,
+    assessmentId: string,
+    options: { requirePublished?: boolean } = {},
+  ): Promise<void> {
+    await this.ensureLearnerCanAccessCourse(learnerId, courseId);
+
+    const assessment =
+      await this.assessmentAccessRepository.findLearnerAssessmentAccess(
+        assessmentId,
+        courseId,
+      );
+
+    if (!assessment || !assessment.isActive || assessment.deletedAt) {
+      throw new NotFoundException('Assessment not found.');
+    }
+
+    if (
+      options.requirePublished !== false &&
+      assessment.status !== AssessmentStatus.PUBLISHED
+    ) {
+      throw new ForbiddenException('Assessment is not published.');
+    }
+  }
 
   async ensureActiveLessonInCourse(
     lessonId: string,

@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 
 jest.mock('./vnpay.service', () => ({

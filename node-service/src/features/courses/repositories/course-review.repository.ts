@@ -1,4 +1,3 @@
-import { CourseReview } from './../../../../generated/prisma/client';
 // src/features/courses/repositories/prisma-course-review.repository.ts
 
 import { Injectable } from '@nestjs/common';
@@ -29,7 +28,6 @@ import {
   ReviewerCourseSortField,
   SortDirection,
 } from '../dtos/course/reviewer-course-query.dto';
-import { InstructorCourseLatestReviewResponseDto } from '../dtos/course/instructor-course-review.dto';
 import { lessonSkillsInclude } from './lesson.repository';
 
 const availableReviewCourseInclude = {
@@ -886,7 +884,7 @@ export class CourseReviewRepository implements ICourseReviewRepository {
       throw new Error('Stored skill aliases are invalid');
     }
 
-    return value as string[];
+    return value;
   }
   private parseStringArrayJson(
     value: Prisma.JsonValue | null,

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -8,11 +9,13 @@ import {
 import {
   AssessmentAttemptStatus,
   AssessmentStatus,
-  EnrollmentStatus,
   ProjectSubmissionStatus,
 } from 'generated/prisma/enums';
 
-import type { IAttemptRepository } from '../interfaces/attempt.repository.interface';
+import type {
+  AttemptWriteContext,
+  IAttemptRepository,
+} from '../interfaces/attempt.repository.interface';
 import { ATTEMPT_REPOSITORY } from '../repositories/attempt.repository.token';
 
 import {
@@ -55,6 +58,13 @@ import {
 } from '../dtos/attempts/attempt-history.dto';
 import { SubmitProjectResponseDto } from '../dtos/attempts/submit-project.dto';
 import { LearnerCourseAssessmentsDto } from '../dtos/attempts/learner-course-assessments.dto';
+import { AssessmentAccessService } from './assessment-access.service';
+import { AttemptFinalizationService } from './attempt-finalization.service';
+import {
+  getAttemptDeadline,
+  getRemainingSeconds,
+  isAttemptExpired,
+} from '../utils/attempt-timing';
 
 interface GetLearnerAssessmentInput {
   courseId: string;
@@ -67,24 +77,26 @@ export class LearnerAssessmentsService {
   constructor(
     @Inject(ATTEMPT_REPOSITORY)
     private readonly iAttemptRepository: IAttemptRepository,
+    private readonly assessmentAccessService: AssessmentAccessService,
+    private readonly finalization: AttemptFinalizationService,
   ) {}
 
   async getLearnerCourseAssessments(
     input: GetLearnerCourseAssessmentsInput,
   ): Promise<LearnerCourseAssessmentsDto> {
     const { courseId, learnerId } = input;
-    const now = new Date();
 
-    await this.ensureActiveLearnerEnrollment(
-      courseId,
+    await this.assessmentAccessService.ensureLearnerCanAccessCourse(
       learnerId,
-      'You are not allowed to access assessments for this course.',
+      courseId,
     );
 
     const assessments =
       await this.iAttemptRepository.findPublishedAssessmentsForLearnerCourse(
         courseId,
       );
+
+    const now = new Date();
 
     return {
       assessments: assessments.map((assessment) => ({
@@ -116,31 +128,17 @@ export class LearnerAssessmentsService {
     };
   }
 
-  private async ensureActiveLearnerEnrollment(
-    courseId: string,
-    learnerId: string,
-    message: string,
-  ): Promise<void> {
-    const enrollment = await this.iAttemptRepository.findLearnerEnrollment(
-      courseId,
-      learnerId,
-    );
-
-    if (
-      !enrollment ||
-      !enrollment.isActive ||
-      enrollment.deletedAt ||
-      enrollment.status !== EnrollmentStatus.ACTIVE
-    ) {
-      throw new ForbiddenException(message);
-    }
-  }
-
   async getLearnerAssessment(
     input: GetLearnerAssessmentInput,
   ): Promise<LearnerAssessmentDto> {
     const { courseId, assessmentId, learnerId } = input;
-    const now = new Date();
+
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
+      learnerId,
+      courseId,
+      assessmentId,
+      { requirePublished: false },
+    );
 
     const assessment =
       await this.iAttemptRepository.findAssessmentForLearnerEntry(
@@ -152,27 +150,12 @@ export class LearnerAssessmentsService {
       throw new NotFoundException('Assessment not found.');
     }
 
-    const enrollment = await this.iAttemptRepository.findLearnerEnrollment(
-      courseId,
-      learnerId,
-    );
-
-    if (
-      !enrollment ||
-      !enrollment.isActive ||
-      enrollment.deletedAt ||
-      enrollment.status !== EnrollmentStatus.ACTIVE
-    ) {
-      throw new ForbiddenException(
-        'You are not allowed to access this assessment.',
-      );
-    }
-
     const attempts = await this.iAttemptRepository.findLearnerAttempts(
       assessmentId,
       learnerId,
     );
 
+    const now = new Date();
     const sortedAttempts = [...attempts].sort(
       (a, b) => b.attemptNumber - a.attemptNumber,
     );
@@ -200,16 +183,22 @@ export class LearnerAssessmentsService {
     );
 
     const activeAttemptRemainingSeconds = activeAttempt
-      ? this.computeRemainingSeconds({
+      ? getRemainingSeconds({
           now,
           startedAt: activeAttempt.startedAt,
           timeLimitMinutes: assessment.timeLimitMinutes,
+          availableUntil: assessment.availableUntil,
         })
       : null;
 
     const activeAttemptExpired =
-      activeAttemptRemainingSeconds !== null &&
-      activeAttemptRemainingSeconds <= 0;
+      activeAttempt !== null &&
+      isAttemptExpired({
+        now,
+        startedAt: activeAttempt.startedAt,
+        timeLimitMinutes: assessment.timeLimitMinutes,
+        availableUntil: assessment.availableUntil,
+      });
 
     const { state, primaryAction, message } = this.computeEntryState({
       isPublished,
@@ -250,7 +239,7 @@ export class LearnerAssessmentsService {
                 ? activeAttemptRemainingSeconds
                 : null,
             timeLimitMinutes: assessment.timeLimitMinutes,
-            now,
+            availableUntil: assessment.availableUntil,
           })
         : null,
 
@@ -279,40 +268,11 @@ export class LearnerAssessmentsService {
       return false;
     }
 
-    if (availableUntil && now > availableUntil) {
+    if (availableUntil && now >= availableUntil) {
       return false;
     }
 
     return true;
-  }
-
-  private computeRemainingSeconds(params: {
-    now: Date;
-    startedAt: Date;
-    timeLimitMinutes: number | null;
-  }): number | null {
-    const { now, startedAt, timeLimitMinutes } = params;
-
-    if (timeLimitMinutes === null) {
-      return null;
-    }
-
-    const expiresAtMs = startedAt.getTime() + timeLimitMinutes * 60 * 1000;
-
-    const remainingMs = expiresAtMs - now.getTime();
-
-    return Math.max(Math.floor(remainingMs / 1000), 0);
-  }
-
-  private computeExpiresAt(
-    startedAt: Date,
-    timeLimitMinutes: number | null,
-  ): Date | null {
-    if (timeLimitMinutes === null) {
-      return null;
-    }
-
-    return new Date(startedAt.getTime() + timeLimitMinutes * 60 * 1000);
   }
 
   private computeEntryState(params: {
@@ -335,6 +295,14 @@ export class LearnerAssessmentsService {
       activeAttempt,
       activeAttemptExpired,
     } = params;
+
+    if (activeAttempt && activeAttemptExpired) {
+      return {
+        state: LearnerAssessmentState.FINALIZING,
+        primaryAction: LearnerAssessmentAction.NONE,
+        message: 'Attempt has expired. Its result is being finalized.',
+      };
+    }
 
     if (!isPublished) {
       return {
@@ -396,9 +364,10 @@ export class LearnerAssessmentsService {
     };
     remainingSeconds: number | null;
     timeLimitMinutes: number | null;
-    now: Date;
+    availableUntil: Date | null;
   }): LearnerLatestAttemptDto {
-    const { attempt, remainingSeconds, timeLimitMinutes } = params;
+    const { attempt, remainingSeconds, timeLimitMinutes, availableUntil } =
+      params;
 
     return {
       attemptId: attempt.id,
@@ -412,7 +381,11 @@ export class LearnerAssessmentsService {
       startedAt: attempt.startedAt,
       submittedAt: attempt.submittedAt,
 
-      expiresAt: this.computeExpiresAt(attempt.startedAt, timeLimitMinutes),
+      expiresAt: getAttemptDeadline(
+        attempt.startedAt,
+        timeLimitMinutes,
+        availableUntil,
+      ),
       remainingSeconds,
     };
   }
@@ -429,7 +402,12 @@ export class LearnerAssessmentsService {
     input: CreateOrResumeAttemptInput,
   ): Promise<CreateAttemptResponseDto> {
     const { courseId, assessmentId, learnerId } = input;
-    const now = new Date();
+
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
+      learnerId,
+      courseId,
+      assessmentId,
+    );
 
     const assessment =
       await this.iAttemptRepository.findAssessmentForLearnerEntry(
@@ -437,24 +415,10 @@ export class LearnerAssessmentsService {
         assessmentId,
       );
 
+    let now = new Date();
+
     if (!assessment || assessment.deletedAt || !assessment.isActive) {
       throw new NotFoundException('Assessment not found.');
-    }
-
-    const enrollment = await this.iAttemptRepository.findLearnerEnrollment(
-      courseId,
-      learnerId,
-    );
-
-    if (
-      !enrollment ||
-      !enrollment.isActive ||
-      enrollment.deletedAt ||
-      enrollment.status !== EnrollmentStatus.ACTIVE
-    ) {
-      throw new ForbiddenException(
-        'You are not allowed to start this assessment.',
-      );
     }
 
     if (assessment.status !== AssessmentStatus.PUBLISHED) {
@@ -473,7 +437,7 @@ export class LearnerAssessmentsService {
       );
     }
 
-    let attemptResult =
+    const attemptResult =
       await this.iAttemptRepository.createOrResumeAttemptTransaction({
         assessmentId,
         learnerId,
@@ -484,19 +448,27 @@ export class LearnerAssessmentsService {
         passed: false,
       });
 
+    now = new Date();
+
     if (attemptResult.kind === 'MAX_ATTEMPTS_REACHED') {
       throw new ForbiddenException('Maximum attempt limit reached.');
     }
 
     if (attemptResult.kind === 'RESUMED') {
       const resumedAttempt = attemptResult.attempt;
-      const remainingSeconds = this.computeRemainingSeconds({
+      const remainingSeconds = getRemainingSeconds({
         now,
         startedAt: resumedAttempt.startedAt,
         timeLimitMinutes: assessment.timeLimitMinutes,
+        availableUntil: assessment.availableUntil,
       });
 
-      const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
+      const isExpired = isAttemptExpired({
+        now,
+        startedAt: resumedAttempt.startedAt,
+        timeLimitMinutes: assessment.timeLimitMinutes,
+        availableUntil: assessment.availableUntil,
+      });
 
       if (!isExpired) {
         return {
@@ -509,9 +481,10 @@ export class LearnerAssessmentsService {
           status: resumedAttempt.status,
 
           startedAt: resumedAttempt.startedAt,
-          expiresAt: this.computeExpiresAt(
+          expiresAt: getAttemptDeadline(
             resumedAttempt.startedAt,
             assessment.timeLimitMinutes,
+            assessment.availableUntil,
           ),
           remainingSeconds,
 
@@ -519,32 +492,18 @@ export class LearnerAssessmentsService {
         };
       }
 
-      await this.iAttemptRepository.markAttemptFailedDueToExpiry(
-        resumedAttempt.id,
+      throw new ForbiddenException(
+        'Attempt has expired. Finalization is pending.',
       );
-
-      attemptResult =
-        await this.iAttemptRepository.createOrResumeAttemptTransaction({
-          assessmentId,
-          learnerId,
-          maxAttempts: assessment.maxAttempts,
-          status: AssessmentAttemptStatus.IN_PROGRESS,
-          score: null,
-          maxScore: null,
-          passed: false,
-        });
-
-      if (attemptResult.kind === 'MAX_ATTEMPTS_REACHED') {
-        throw new ForbiddenException('Maximum attempt limit reached.');
-      }
     }
 
     const attempt = attemptResult.attempt;
 
-    const remainingSeconds = this.computeRemainingSeconds({
+    const remainingSeconds = getRemainingSeconds({
       now,
       startedAt: attempt.startedAt,
       timeLimitMinutes: assessment.timeLimitMinutes,
+      availableUntil: assessment.availableUntil,
     });
 
     return {
@@ -560,9 +519,10 @@ export class LearnerAssessmentsService {
       status: attempt.status,
 
       startedAt: attempt.startedAt,
-      expiresAt: this.computeExpiresAt(
+      expiresAt: getAttemptDeadline(
         attempt.startedAt,
         assessment.timeLimitMinutes,
+        assessment.availableUntil,
       ),
       remainingSeconds,
 
@@ -574,12 +534,11 @@ export class LearnerAssessmentsService {
     input: GetActiveAttemptInput,
   ): Promise<ActiveAttemptDto> {
     const { courseId, assessmentId, attemptId, learnerId } = input;
-    const now = new Date();
 
-    await this.ensureActiveLearnerEnrollment(
-      courseId,
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
       learnerId,
-      'You are not allowed to access this attempt.',
+      courseId,
+      assessmentId,
     );
 
     const attempt = await this.iAttemptRepository.findActiveAttemptDetail(
@@ -588,6 +547,8 @@ export class LearnerAssessmentsService {
       attemptId,
       learnerId,
     );
+
+    const now = new Date();
 
     if (!attempt) {
       throw new NotFoundException('Attempt not found.');
@@ -621,6 +582,25 @@ export class LearnerAssessmentsService {
       throw new ForbiddenException('Assessment is not available.');
     }
 
+    if (attempt.status !== AssessmentAttemptStatus.IN_PROGRESS) {
+      throw new ConflictException({
+        error: 'ATTEMPT_NOT_ACTIVE',
+        message: 'Attempt is no longer active.',
+      });
+    }
+
+    const timing = {
+      now,
+      startedAt: attempt.startedAt,
+      timeLimitMinutes: assessment.timeLimitMinutes,
+      availableUntil: assessment.availableUntil,
+    };
+    if (isAttemptExpired(timing)) {
+      throw new ConflictException({
+        error: 'ATTEMPT_FINALIZING',
+        message: 'Attempt has ended. Finalization is pending.',
+      });
+    }
     if (
       !this.isInsideAvailabilityWindow(
         now,
@@ -632,32 +612,7 @@ export class LearnerAssessmentsService {
         'Assessment is outside the available time window.',
       );
     }
-
-    if (attempt.status !== AssessmentAttemptStatus.IN_PROGRESS) {
-      throw new BadRequestException('Attempt is not in progress.');
-    }
-
-    await this.assertAttemptOperationAllowedByAvailability({
-      attemptId: attempt.id,
-      attemptStatus: attempt.status,
-      now,
-      availableFrom: assessment.availableFrom,
-      availableUntil: assessment.availableUntil,
-    });
-
-    const remainingSeconds = this.computeRemainingSeconds({
-      now,
-      startedAt: attempt.startedAt,
-      timeLimitMinutes: assessment.timeLimitMinutes,
-    });
-
-    const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
-
-    if (isExpired) {
-      await this.iAttemptRepository.markAttemptFailedDueToExpiry(attempt.id);
-
-      throw new ForbiddenException('Attempt has expired.');
-    }
+    const remainingSeconds = getRemainingSeconds(timing);
 
     const questions =
       assessment.type === AssessmentType.QUIZ
@@ -696,9 +651,10 @@ export class LearnerAssessmentsService {
 
       startedAt: attempt.startedAt,
 
-      expiresAt: this.computeExpiresAt(
+      expiresAt: getAttemptDeadline(
         attempt.startedAt,
         assessment.timeLimitMinutes,
+        assessment.availableUntil,
       ),
 
       remainingSeconds,
@@ -848,12 +804,10 @@ export class LearnerAssessmentsService {
     const { courseId, assessmentId, attemptId, questionId, learnerId, dto } =
       input;
 
-    const now = new Date();
-
-    await this.ensureActiveLearnerEnrollment(
-      courseId,
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
       learnerId,
-      'You are not allowed to update this attempt.',
+      courseId,
+      assessmentId,
     );
 
     const context = await this.iAttemptRepository.findSaveAnswerContext(
@@ -863,6 +817,8 @@ export class LearnerAssessmentsService {
       questionId,
       learnerId,
     );
+
+    const now = new Date();
 
     if (!context) {
       throw new NotFoundException('Attempt or question not found.');
@@ -918,25 +874,21 @@ export class LearnerAssessmentsService {
       throw new BadRequestException('Attempt is not in progress.');
     }
 
-    await this.assertAttemptOperationAllowedByAvailability({
-      attemptId: context.id,
-      attemptStatus: context.status,
-      now,
-      availableFrom: assessment.availableFrom,
-      availableUntil: assessment.availableUntil,
-    });
-
-    const remainingSeconds = this.computeRemainingSeconds({
+    const remainingSeconds = getRemainingSeconds({
       now,
       startedAt: context.startedAt,
       timeLimitMinutes: assessment.timeLimitMinutes,
+      availableUntil: assessment.availableUntil,
     });
 
-    const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
+    const isExpired = isAttemptExpired({
+      now,
+      startedAt: context.startedAt,
+      timeLimitMinutes: assessment.timeLimitMinutes,
+      availableUntil: assessment.availableUntil,
+    });
 
     if (isExpired) {
-      await this.iAttemptRepository.markAttemptFailedDueToExpiry(context.id);
-
       throw new ForbiddenException('Attempt has expired.');
     }
 
@@ -957,11 +909,27 @@ export class LearnerAssessmentsService {
       question,
     });
 
-    const savedAnswer = await this.iAttemptRepository.upsertAttemptAnswer({
-      attemptId,
-      questionId,
-      textAnswer: normalizedAnswer,
-    });
+    const savedAnswer = await this.iAttemptRepository.upsertAttemptAnswer(
+      {
+        attemptId,
+        questionId,
+        textAnswer: normalizedAnswer,
+      },
+      (context, currentSavedAt) => {
+        this.assertAttemptWriteAllowed(context);
+        const expectedSavedAt =
+          dto.expectedSavedAt === null
+            ? null
+            : new Date(dto.expectedSavedAt).getTime();
+        if (expectedSavedAt !== (currentSavedAt?.getTime() ?? null)) {
+          throw new ConflictException({
+            error: 'ANSWER_VERSION_CONFLICT',
+            message:
+              'Answer has changed. Reload the saved answer before saving again.',
+          });
+        }
+      },
+    );
 
     if (!savedAnswer) {
       throw new BadRequestException('Attempt is not in progress.');
@@ -1062,135 +1030,50 @@ export class LearnerAssessmentsService {
     }
   }
   async submitAttempt(input: SubmitAttemptInput): Promise<AttemptResultDto> {
-    const { courseId, assessmentId, attemptId, learnerId } = input;
-    const now = new Date();
+    const { courseId, assessmentId, learnerId } = input;
 
-    await this.ensureActiveLearnerEnrollment(
-      courseId,
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
       learnerId,
-      'You are not allowed to submit this attempt.',
-    );
-
-    const attempt = await this.iAttemptRepository.findQuizAttemptForSubmit(
       courseId,
       assessmentId,
-      attemptId,
-      learnerId,
     );
 
-    if (!attempt) {
-      throw new NotFoundException('Attempt not found.');
+    const finalized = await this.finalization.submitQuiz(input);
+
+    // Recover a result that was already committed by a previous request.
+    if (!finalized) {
+      const existingResult = await this.getAttemptResult(input);
+
+      const isFinishedQuiz =
+        existingResult.assessmentType === AssessmentType.QUIZ &&
+        (existingResult.status === AssessmentAttemptStatus.PASSED ||
+          existingResult.status === AssessmentAttemptStatus.FAILED);
+
+      if (!isFinishedQuiz) {
+        throw new BadRequestException('Attempt is not in progress.');
+      }
+
+      return existingResult;
     }
 
-    if (attempt.learnerId !== learnerId) {
-      throw new ForbiddenException(
-        'You are not allowed to submit this attempt.',
-      );
-    }
-
-    if (attempt.assessmentId !== assessmentId) {
-      throw new BadRequestException(
-        'Attempt does not belong to this assessment.',
-      );
-    }
+    const {
+      snapshot: attempt,
+      attempt: submittedAttempt,
+      gradedAnswers,
+    } = finalized;
 
     const assessment = attempt.assessment;
 
-    if (assessment.courseId !== courseId) {
-      throw new BadRequestException(
-        'Assessment does not belong to this course.',
-      );
-    }
-
-    if (
-      assessment.status !== AssessmentStatus.PUBLISHED ||
-      !assessment.isActive ||
-      assessment.deletedAt
-    ) {
-      throw new ForbiddenException('Assessment is not available.');
-    }
-
-    if (
-      !this.isInsideAvailabilityWindow(
-        now,
-        assessment.availableFrom,
-        assessment.availableUntil,
-      )
-    ) {
-      throw new ForbiddenException(
-        'Assessment is outside the available time window.',
-      );
-    }
-
-    if (assessment.type !== AssessmentType.QUIZ) {
-      throw new BadRequestException(
-        'Only quiz attempts can be submitted here.',
-      );
-    }
-
-    if (attempt.status !== AssessmentAttemptStatus.IN_PROGRESS) {
-      throw new BadRequestException('Attempt is not in progress.');
-    }
-
-    await this.assertAttemptOperationAllowedByAvailability({
-      attemptId: attempt.id,
-      attemptStatus: attempt.status,
-      now,
-      availableFrom: assessment.availableFrom,
-      availableUntil: assessment.availableUntil,
-    });
-
-    const remainingSeconds = this.computeRemainingSeconds({
-      now,
-      startedAt: attempt.startedAt,
-      timeLimitMinutes: assessment.timeLimitMinutes,
-    });
-
-    const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
-
-    if (isExpired) {
-      await this.iAttemptRepository.markAttemptFailedDueToExpiry(attempt.id);
-
-      throw new ForbiddenException('Attempt has expired.');
-    }
-
-    const activeQuestions = attempt.questions
-      .filter((question) => question.isActive && !question.deletedAt)
-      .sort((a, b) => a.order - b.order);
-
-    if (activeQuestions.length === 0) {
-      throw new BadRequestException('Assessment has no active questions.');
-    }
-
-    const gradingResult = this.gradeQuizAttempt({
-      questions: activeQuestions,
-      savedAnswers: attempt.savedAnswers,
-      passingScore: assessment.passingScore,
-    });
-
-    const finalStatus = gradingResult.passed
-      ? AssessmentAttemptStatus.PASSED
-      : AssessmentAttemptStatus.FAILED;
-
-    const submittedAttempt =
-      await this.iAttemptRepository.submitQuizAttemptTransaction({
-        attemptId: attempt.id,
-        status: finalStatus,
-        score: gradingResult.score,
-        maxScore: gradingResult.maxScore,
-        passed: gradingResult.passed,
-        submittedAt: now,
-        gradedAnswers: gradingResult.gradedAnswers,
-      });
-
-    if (!submittedAttempt) {
-      throw new BadRequestException('Attempt is not in progress.');
-    }
-
-    const attemptsUsed = await this.iAttemptRepository.countLearnerAttempts(
-      assessmentId,
-      learnerId,
+    const activeQuestions = attempt.questions.filter(
+      (question) => question.isActive && !question.deletedAt,
     );
+
+    const [attemptsUsed, activeAttempt] = await Promise.all([
+      this.iAttemptRepository.countLearnerAttempts(assessmentId, learnerId),
+      this.iAttemptRepository.findActiveAttempt(assessmentId, learnerId),
+    ]);
+
+    const now = new Date();
 
     const canRetake = this.computeCanRetake({
       assessmentStatus: assessment.status,
@@ -1201,7 +1084,7 @@ export class LearnerAssessmentsService {
       now,
       availableFrom: assessment.availableFrom,
       availableUntil: assessment.availableUntil,
-      hasActiveAttempt: false,
+      hasActiveAttempt: activeAttempt !== null,
     });
 
     const canReview = this.computeCanReview({
@@ -1212,10 +1095,7 @@ export class LearnerAssessmentsService {
     });
 
     const gradedAnswerByAttemptAnswerId = new Map(
-      gradingResult.gradedAnswers.map((answer) => [
-        answer.attemptAnswerId,
-        answer,
-      ]),
+      gradedAnswers.map((answer) => [answer.attemptAnswerId, answer]),
     );
 
     const reviewAnswers = attempt.savedAnswers.map((answer) => {
@@ -1261,119 +1141,6 @@ export class LearnerAssessmentsService {
 
       serverNow: now,
     };
-  }
-
-  private gradeQuizAttempt(params: {
-    questions: {
-      id: string;
-      type: AssessmentQuestionType;
-      points: number;
-      answer: {
-        correctOptionAnswer: string | null;
-        correctTextAnswer: string | null;
-      } | null;
-    }[];
-    savedAnswers: {
-      id: string;
-      questionId: string;
-      textAnswer: string | null;
-    }[];
-    passingScore: number | null;
-  }): {
-    score: number;
-    maxScore: number;
-    passed: boolean;
-    gradedAnswers: {
-      attemptAnswerId: string;
-      isCorrect: boolean;
-      pointsEarned: number;
-    }[];
-  } {
-    const savedAnswerByQuestionId = new Map(
-      params.savedAnswers.map((answer) => [answer.questionId, answer]),
-    );
-
-    let score = 0;
-    let maxScore = 0;
-
-    const gradedAnswers: {
-      attemptAnswerId: string;
-      isCorrect: boolean;
-      pointsEarned: number;
-    }[] = [];
-
-    for (const question of params.questions) {
-      maxScore += question.points;
-
-      const savedAnswer = savedAnswerByQuestionId.get(question.id);
-
-      if (!savedAnswer) {
-        continue;
-      }
-
-      const isCorrect = this.isAnswerCorrect({
-        questionType: question.type,
-        learnerAnswer: savedAnswer.textAnswer,
-        correctOptionAnswer: question.answer?.correctOptionAnswer ?? null,
-        correctTextAnswer: question.answer?.correctTextAnswer ?? null,
-      });
-
-      const pointsEarned = isCorrect ? question.points : 0;
-
-      score += pointsEarned;
-
-      gradedAnswers.push({
-        attemptAnswerId: savedAnswer.id,
-        isCorrect,
-        pointsEarned,
-      });
-    }
-
-    const passingPercentage = params.passingScore ?? 100;
-    const requiredScore = (maxScore * passingPercentage) / 100;
-
-    const passed = score >= requiredScore;
-
-    return {
-      score,
-      maxScore,
-      passed,
-      gradedAnswers,
-    };
-  }
-
-  private isAnswerCorrect(params: {
-    questionType: AssessmentQuestionType;
-    learnerAnswer: string | null;
-    correctOptionAnswer: string | null;
-    correctTextAnswer: string | null;
-  }): boolean {
-    const learnerAnswer = params.learnerAnswer?.trim();
-
-    if (!learnerAnswer) {
-      return false;
-    }
-
-    switch (params.questionType) {
-      case AssessmentQuestionType.MULTIPLE_CHOICE:
-      case AssessmentQuestionType.TRUE_FALSE:
-        return (
-          learnerAnswer.toLowerCase() ===
-          params.correctOptionAnswer?.trim().toLowerCase()
-        );
-
-      case AssessmentQuestionType.FILL_IN_THE_BLANK:
-        return (
-          learnerAnswer.toLowerCase() ===
-          params.correctTextAnswer?.trim().toLowerCase()
-        );
-
-      case AssessmentQuestionType.PROJECT:
-        return false;
-
-      default:
-        return false;
-    }
   }
 
   private computeCanRetake(params: {
@@ -1457,7 +1224,13 @@ export class LearnerAssessmentsService {
     input: GetAttemptHistoryInput,
   ): Promise<AttemptHistoryDto> {
     const { courseId, assessmentId, learnerId } = input;
-    const now = new Date();
+
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
+      learnerId,
+      courseId,
+      assessmentId,
+      { requirePublished: false },
+    );
 
     const assessment =
       await this.iAttemptRepository.findAssessmentForLearnerEntry(
@@ -1469,26 +1242,12 @@ export class LearnerAssessmentsService {
       throw new NotFoundException('Assessment not found.');
     }
 
-    const enrollment = await this.iAttemptRepository.findLearnerEnrollment(
-      courseId,
-      learnerId,
-    );
-
-    if (
-      !enrollment ||
-      !enrollment.isActive ||
-      enrollment.deletedAt ||
-      enrollment.status !== EnrollmentStatus.ACTIVE
-    ) {
-      throw new ForbiddenException(
-        'You are not allowed to view this assessment history.',
-      );
-    }
-
     const attempts = await this.iAttemptRepository.findLearnerAttempts(
       assessmentId,
       learnerId,
     );
+
+    const now = new Date();
 
     const sortedAttempts = [...attempts].sort(
       (a, b) => a.attemptNumber - b.attemptNumber,
@@ -1502,13 +1261,12 @@ export class LearnerAssessmentsService {
     );
 
     const items: AttemptHistoryItemDto[] = sortedAttempts.map((attempt) => {
-      const remainingSeconds = this.computeRemainingSeconds({
+      const isExpired = isAttemptExpired({
         now,
         startedAt: attempt.startedAt,
         timeLimitMinutes: assessment.timeLimitMinutes,
+        availableUntil: assessment.availableUntil,
       });
-
-      const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
 
       const assessmentOpen = this.isInsideAvailabilityWindow(
         now,
@@ -1564,12 +1322,10 @@ export class LearnerAssessmentsService {
     input: GetAttemptResultInput,
   ): Promise<AttemptResultDto> {
     const { courseId, assessmentId, attemptId, learnerId } = input;
-    const now = new Date();
 
-    await this.ensureActiveLearnerEnrollment(
-      courseId,
+    await this.assessmentAccessService.ensureLearnerCanAccessCourse(
       learnerId,
-      'You are not allowed to view this result.',
+      courseId,
     );
 
     const attempt = await this.iAttemptRepository.findAttemptResult(
@@ -1614,6 +1370,8 @@ export class LearnerAssessmentsService {
       assessmentId,
       learnerId,
     );
+
+    const now = new Date();
 
     const canRetake = this.computeCanRetake({
       assessmentStatus: assessment.status,
@@ -1830,12 +1588,11 @@ export class LearnerAssessmentsService {
     input: SubmitProjectInput,
   ): Promise<SubmitProjectResponseDto> {
     const { courseId, assessmentId, attemptId, learnerId, dto } = input;
-    const now = new Date();
 
-    await this.ensureActiveLearnerEnrollment(
-      courseId,
+    await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
       learnerId,
-      'You are not allowed to submit this project.',
+      courseId,
+      assessmentId,
     );
 
     const attempt = await this.iAttemptRepository.findProjectAttemptForSubmit(
@@ -1844,6 +1601,8 @@ export class LearnerAssessmentsService {
       attemptId,
       learnerId,
     );
+
+    const now = new Date();
 
     if (!attempt) {
       throw new NotFoundException('Project attempt not found.');
@@ -1899,33 +1658,14 @@ export class LearnerAssessmentsService {
       throw new BadRequestException('Attempt is not in progress.');
     }
 
-    await this.assertAttemptOperationAllowedByAvailability({
-      attemptId: attempt.id,
-      attemptStatus: attempt.status,
-      now,
-      availableFrom: assessment.availableFrom,
-      availableUntil: assessment.availableUntil,
-    });
-
-    await this.assertAttemptOperationAllowedByAvailability({
-      attemptId: attempt.id,
-      attemptStatus: attempt.status,
-      now,
-      availableFrom: assessment.availableFrom,
-      availableUntil: assessment.availableUntil,
-    });
-
-    const remainingSeconds = this.computeRemainingSeconds({
+    const isExpired = isAttemptExpired({
       now,
       startedAt: attempt.startedAt,
       timeLimitMinutes: assessment.timeLimitMinutes,
+      availableUntil: assessment.availableUntil,
     });
 
-    const isExpired = remainingSeconds !== null && remainingSeconds <= 0;
-
     if (isExpired) {
-      await this.iAttemptRepository.markAttemptFailedDueToExpiry(attempt.id);
-
       throw new ForbiddenException('Attempt has expired.');
     }
 
@@ -1937,14 +1677,17 @@ export class LearnerAssessmentsService {
 
     this.validateProjectSubmissionContent(dto);
 
-    const submission = await this.iAttemptRepository.submitProjectTransaction({
-      attemptId: attempt.id,
-      githubUrl: dto.githubUrl ?? null,
-      deployUrl: dto.deployUrl ?? null,
-      documentUrl: dto.documentUrl ?? null,
-      note: dto.note ?? null,
-      submittedAt: now,
-    });
+    const submission = await this.iAttemptRepository.submitProjectTransaction(
+      {
+        attemptId: attempt.id,
+        githubUrl: dto.githubUrl ?? null,
+        deployUrl: dto.deployUrl ?? null,
+        documentUrl: dto.documentUrl ?? null,
+        note: dto.note ?? null,
+        submittedAt: now,
+      },
+      (context) => this.assertAttemptWriteAllowed(context),
+    );
 
     if (!submission) {
       throw new BadRequestException(
@@ -1992,30 +1735,36 @@ export class LearnerAssessmentsService {
     }
   }
 
-  private async assertAttemptOperationAllowedByAvailability(params: {
-    attemptId: string;
-    attemptStatus: AssessmentAttemptStatus;
-    now: Date;
-    availableFrom: Date | null;
-    availableUntil: Date | null;
-  }): Promise<void> {
-    const { attemptId, attemptStatus, now, availableFrom, availableUntil } =
-      params;
-
-    const isOpen = this.isInsideAvailabilityWindow(
-      now,
-      availableFrom,
-      availableUntil,
-    );
-
-    if (isOpen) {
-      return;
+  private assertAttemptWriteAllowed(context: AttemptWriteContext): void {
+    const { assessment } = context;
+    const now = new Date();
+    if (
+      assessment.status !== AssessmentStatus.PUBLISHED ||
+      !assessment.isActive ||
+      assessment.deletedAt
+    ) {
+      throw new ForbiddenException('Assessment is not available.');
     }
-
-    if (attemptStatus === AssessmentAttemptStatus.IN_PROGRESS) {
-      await this.iAttemptRepository.markAttemptFailedDueToExpiry(attemptId);
+    if (
+      !this.isInsideAvailabilityWindow(
+        now,
+        assessment.availableFrom,
+        assessment.availableUntil,
+      )
+    ) {
+      throw new ForbiddenException('Assessment availability window is closed.');
     }
-
-    throw new ForbiddenException('Assessment availability window is closed.');
+    if (
+      isAttemptExpired({
+        startedAt: context.startedAt,
+        timeLimitMinutes: assessment.timeLimitMinutes,
+        availableUntil: assessment.availableUntil,
+        now,
+      })
+    ) {
+      throw new ForbiddenException(
+        'Attempt has expired. Finalization is pending.',
+      );
+    }
   }
 }

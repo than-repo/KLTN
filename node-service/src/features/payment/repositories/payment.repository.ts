@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from 'src/core/database/prisma.service';
 import {
@@ -152,7 +152,7 @@ export class PaymentRepository implements IPaymentRepository {
       return Prisma.DbNull;
     }
 
-    return value as Prisma.InputJsonValue;
+    return value;
   }
 
   private isCurrentEnrollment(enrollment: PrismaEnrollment): boolean {

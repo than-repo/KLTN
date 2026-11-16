@@ -16,6 +16,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiConflictResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -63,7 +64,7 @@ export class LearnerAssessmentsController {
   ) {}
 
   @Get()
-  @Throttle({ default: { ttl: 60, limit: 300 } })
+  @Throttle({ default: { ttl: 60_000, limit: 300 } })
   @ApiOperation({ summary: 'Get learner course assessments' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiOkResponse({ type: LearnerCourseAssessmentsDto })
@@ -90,7 +91,7 @@ export class LearnerAssessmentsController {
    * - Locked / not available
    */
   @Get(':assessmentId')
-  @Throttle({ default: { ttl: 60, limit: 300 } })
+  @Throttle({ default: { ttl: 60_000, limit: 300 } })
   @ApiOperation({ summary: 'Get learner assessment entry page' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
@@ -121,7 +122,7 @@ export class LearnerAssessmentsController {
    * - backend creates new attempt
    */
   @Post(':assessmentId/attempts')
-  @Throttle({ default: { ttl: 60, limit: 10 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Create or resume learner assessment attempt' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
@@ -154,8 +155,36 @@ export class LearnerAssessmentsController {
    * Must not expose correct answers.
    */
   @Get(':assessmentId/attempts/:attemptId')
-  @Throttle({ default: { ttl: 60, limit: 60 } })
+  @Throttle({ default: { ttl: 60_000, limit: 60_000 } })
   @ApiOperation({ summary: 'Get active learner assessment attempt' })
+  @ApiConflictResponse({
+    description:
+      'ATTEMPT_FINALIZING: the timer expired or assessment closed; finalization is pending. ' +
+      'ATTEMPT_NOT_ACTIVE: the attempt was already submitted or finished. ' +
+      'The stable reason is returned in the error field.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: false },
+        statusCode: { type: 'integer', example: 409 },
+        timestamp: { type: 'string', format: 'date-time' },
+        path: { type: 'string' },
+        error: {
+          type: 'string',
+          enum: ['ATTEMPT_FINALIZING', 'ATTEMPT_NOT_ACTIVE'],
+        },
+        message: { type: 'string' },
+      },
+      required: [
+        'success',
+        'statusCode',
+        'timestamp',
+        'path',
+        'error',
+        'message',
+      ],
+    },
+  })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
   @ApiParam({ name: 'attemptId', type: String })
@@ -190,8 +219,35 @@ export class LearnerAssessmentsController {
    * Must not accept score, isCorrect, pointsEarned, or correct answer from client.
    */
   @Patch(':assessmentId/attempts/:attemptId/answers/:questionId')
-  @Throttle({ default: { ttl: 60, limit: 120 } })
+  @Throttle({ default: { ttl: 60_000, limit: 120 } })
   @ApiOperation({ summary: 'Autosave learner answer for active attempt' })
+  @ApiConflictResponse({
+    description:
+      'ANSWER_VERSION_CONFLICT: expectedSavedAt does not match the current answer version. Reload the saved answer and reconcile before retrying. The stable reason is returned in the error field.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: false },
+        statusCode: { type: 'integer', example: 409 },
+        timestamp: { type: 'string', format: 'date-time' },
+        path: { type: 'string' },
+        error: { type: 'string', enum: ['ANSWER_VERSION_CONFLICT'] },
+        message: {
+          type: 'string',
+          example:
+            'Answer has changed. Reload the saved answer before saving again.',
+        },
+      },
+      required: [
+        'success',
+        'statusCode',
+        'timestamp',
+        'path',
+        'error',
+        'message',
+      ],
+    },
+  })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
   @ApiParam({ name: 'attemptId', type: String })
@@ -228,7 +284,7 @@ export class LearnerAssessmentsController {
    */
   @Post(':assessmentId/attempts/:attemptId/submit')
   @HttpCode(200)
-  @Throttle({ default: { ttl: 60, limit: 10 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Submit learner quiz attempt' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
@@ -259,7 +315,7 @@ export class LearnerAssessmentsController {
    * Does not return questions, learner answers, or correct answers.
    */
   @Get(':assessmentId/attempts')
-  @Throttle({ default: { ttl: 60, limit: 300 } })
+  @Throttle({ default: { ttl: 60_000, limit: 300 } })
   @ApiOperation({ summary: 'Get learner assessment attempt history' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
@@ -290,7 +346,7 @@ export class LearnerAssessmentsController {
    * FE must not decide whether correct answers are visible.
    */
   @Get(':assessmentId/attempts/:attemptId/result')
-  @Throttle({ default: { ttl: 60, limit: 300 } })
+  @Throttle({ default: { ttl: 60_000, limit: 300 } })
   @ApiOperation({ summary: 'Get learner attempt result or review' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
@@ -321,7 +377,7 @@ export class LearnerAssessmentsController {
    * Learner submits GitHub URL, deploy URL, document URL, or note.
    */
   @Post(':assessmentId/attempts/:attemptId/project-submission')
-  @Throttle({ default: { ttl: 60, limit: 10 } })
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Submit learner project assessment' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })

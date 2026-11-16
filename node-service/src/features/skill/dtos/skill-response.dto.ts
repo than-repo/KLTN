@@ -1,5 +1,4 @@
 import { Expose, Transform, Type } from 'class-transformer';
-import { IsArray } from 'class-validator';
 import { Difficulty } from 'generated/prisma/enums';
 
 export class SkillResponseDto {
