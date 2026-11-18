@@ -1,4 +1,4 @@
-package com.springservice.repository;
+package com.springservice.wishlist.repository;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.springservice.entity.Wishlist;
+import com.springservice.wishlist.entity.Wishlist;
 
 public interface WishlistRepository extends JpaRepository<Wishlist, String> {
 

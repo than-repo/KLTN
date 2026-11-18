@@ -1,4 +1,4 @@
-package com.springservice.service;
+package com.springservice.wishlist.service;
 
 import java.util.List;
 import java.util.UUID;
@@ -7,12 +7,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.springservice.dto.WishlistAddResult;
-import com.springservice.dto.WishlistItemResponse;
-import com.springservice.dto.WishlistRemoveResult;
-import com.springservice.entity.Wishlist;
-import com.springservice.exception.InvalidCourseIdException;
-import com.springservice.repository.WishlistRepository;
+import com.springservice.wishlist.dto.WishlistAddResult;
+import com.springservice.wishlist.dto.WishlistItemResponse;
+import com.springservice.wishlist.dto.WishlistRemoveResult;
+import com.springservice.wishlist.entity.Wishlist;
+import com.springservice.wishlist.exception.InvalidCourseIdException;
+import com.springservice.wishlist.repository.WishlistRepository;
 
 @Service
 public class WishlistService {

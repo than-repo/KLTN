@@ -1,11 +1,11 @@
-package com.springservice.exception;
+package com.springservice.wishlist.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.springservice.dto.WishlistResponse;
+import com.springservice.wishlist.dto.WishlistResponse;
 
 @RestControllerAdvice
 public class WishlistExceptionHandler {

@@ -1,4 +1,4 @@
-package com.springservice.controller;
+package com.springservice.wishlist.controller;
 
 import java.net.URI;
 import java.util.List;
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springservice.dto.WishlistAddResult;
-import com.springservice.dto.WishlistItemResponse;
-import com.springservice.dto.WishlistRemoveResult;
-import com.springservice.dto.WishlistResponse;
-import com.springservice.service.WishlistService;
+import com.springservice.wishlist.dto.WishlistAddResult;
+import com.springservice.wishlist.dto.WishlistItemResponse;
+import com.springservice.wishlist.dto.WishlistRemoveResult;
+import com.springservice.wishlist.dto.WishlistResponse;
+import com.springservice.wishlist.service.WishlistService;
 
 @RestController
 @RequestMapping("/api/wishlist")

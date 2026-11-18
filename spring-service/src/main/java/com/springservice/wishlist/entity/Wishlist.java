@@ -1,4 +1,4 @@
-package com.springservice.entity;
+package com.springservice.wishlist.entity;
 
 import java.time.LocalDateTime;
 
@@ -45,11 +45,19 @@ public class Wishlist {
         this.courseId = courseId;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
     public String getCourseId() {
         return courseId;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }	
+    }
 }

@@ -1,4 +1,4 @@
-package com.springservice.exception;
+package com.springservice.wishlist.exception;
 
 public class InvalidCourseIdException extends RuntimeException {
 

@@ -33,7 +33,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        
+
+                        .requestMatchers("/api/payments/vnpay/return").permitAll()
+                        .requestMatchers("/api/payments/vnpay/ipn").permitAll()
+                        .requestMatchers("/api/payments/**").hasRole("LEARNER")
                         .requestMatchers("/api/wishlist/**").hasRole("LEARNER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
