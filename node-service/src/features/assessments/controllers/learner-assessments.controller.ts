@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -22,6 +23,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -43,7 +45,10 @@ import {
   SaveAttemptAnswerResponseDto,
 } from '../dtos/attempts/save-attempt-answer.dto';
 import { AttemptResultDto } from '../dtos/attempts/attempt-result.dto';
-import { AttemptHistoryDto } from '../dtos/attempts/attempt-history.dto';
+import {
+  AttemptHistoryDto,
+  AttemptHistoryQueryDto,
+} from '../dtos/attempts/attempt-history.dto';
 import {
   SubmitProjectDto,
   SubmitProjectResponseDto,
@@ -319,6 +324,7 @@ export class LearnerAssessmentsController {
   @ApiOperation({ summary: 'Get learner assessment attempt history' })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiOkResponse({ type: AttemptHistoryDto })
   @ApiUnauthorizedResponse()
   @ApiForbiddenResponse()
@@ -326,12 +332,14 @@ export class LearnerAssessmentsController {
   async getAttemptHistory(
     @Param('courseId', ParseUUIDPipe) courseId: string,
     @Param('assessmentId', ParseUUIDPipe) assessmentId: string,
+    @Query() query: AttemptHistoryQueryDto,
     @CurrentUser('sub') learnerId: string,
   ): Promise<AttemptHistoryDto> {
     return this.learnerAssessmentsService.getAttemptHistory({
       courseId,
       assessmentId,
       learnerId,
+      page: query.page,
     });
   }
 

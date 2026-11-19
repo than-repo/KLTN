@@ -47,6 +47,7 @@ export interface GetAttemptHistoryInput {
   courseId: string;
   assessmentId: string;
   learnerId: string;
+  page: number;
 }
 
 export interface GetAttemptResultInput {

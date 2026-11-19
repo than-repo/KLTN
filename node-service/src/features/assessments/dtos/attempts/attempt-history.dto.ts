@@ -1,7 +1,14 @@
 // src/features/assessments/dtos/attempts/attempt-history.dto.ts
 
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import {
   AssessmentAttemptStatus,
   AssessmentType,
@@ -17,6 +24,14 @@ export class AttemptHistoryParamsDto {
   @IsNotEmpty({ message: 'assessmentId is required.' })
   @IsUUID('4', { message: 'assessmentId must be a valid UUID.' })
   readonly assessmentId!: string;
+}
+
+export class AttemptHistoryQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'page must be an integer.' })
+  @Min(1, { message: 'page must be greater than or equal to 1.' })
+  readonly page = 1;
 }
 
 /**
@@ -44,6 +59,9 @@ export class AttemptHistoryItemDto {
    * FE can show "View result" for finished attempts.
    */
   readonly canViewResult!: boolean;
+
+  /** True while an expired in-progress attempt awaits background finalization. */
+  readonly isFinalizing!: boolean;
 }
 
 /**
@@ -60,6 +78,15 @@ export class AttemptHistoryDto {
   readonly attemptsRemaining?: number | null;
 
   readonly attempts!: AttemptHistoryItemDto[];
+
+  readonly pagination!: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 
   readonly serverNow!: Date;
 }

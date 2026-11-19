@@ -421,6 +421,7 @@ export type AssessmentHistoryItem = {
 
   canContinue: boolean;
   canViewResult: boolean;
+  isFinalizing: boolean;
 };
 
 export type AssessmentHistory = {
@@ -434,6 +435,15 @@ export type AssessmentHistory = {
   attemptsRemaining?: number | null;
 
   attempts: AssessmentHistoryItem[];
+
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 
   serverNow: ISODateString;
 };

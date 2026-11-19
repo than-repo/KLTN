@@ -177,9 +177,10 @@ export function getAssessmentHistory(
   accessToken: string,
   courseId: string,
   assessmentId: string,
+  page = 1,
 ) {
   return apiRequest<AssessmentHistory>(
-    `${learnerAssessmentsPath(courseId)}/${assessmentId}/attempts`,
+    `${learnerAssessmentsPath(courseId)}/${assessmentId}/attempts?page=${page}`,
     {
       accessToken,
       method: "GET",

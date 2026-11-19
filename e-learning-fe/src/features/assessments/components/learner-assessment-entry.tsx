@@ -202,7 +202,9 @@ function AttemptHistoryRow({
               getAttemptStatusClasses(attempt.status),
             )}
           >
-            {formatAttemptStatus(attempt.status)}
+            {attempt.isFinalizing
+              ? "Finalizing"
+              : formatAttemptStatus(attempt.status)}
           </span>
         </div>
 
@@ -253,8 +255,10 @@ export function LearnerAssessmentEntry({
     assessment,
     error: loadError,
     history,
+    historyPage,
     isLoading,
     refetch,
+    setHistoryPage,
   } = useLearnerAssessment({
     accessToken,
     assessmentId,
@@ -541,6 +545,30 @@ export function LearnerAssessmentEntry({
                 You have not started this assessment yet.
               </div>
             )}
+            {history && history.pagination.totalPages > 1 ? (
+              <div className="mt-4 flex items-center justify-between gap-4">
+                <button
+                  className="inline-flex min-h-10 items-center justify-center rounded-pill border border-border px-4 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!history.pagination.hasPreviousPage || isLoading}
+                  onClick={() => setHistoryPage(historyPage - 1)}
+                  type="button"
+                >
+                  Previous
+                </button>
+                <p className="text-sm text-muted-foreground">
+                  Page {history.pagination.page} of{" "}
+                  {history.pagination.totalPages}
+                </p>
+                <button
+                  className="inline-flex min-h-10 items-center justify-center rounded-pill border border-border px-4 text-sm font-semibold transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!history.pagination.hasNextPage || isLoading}
+                  onClick={() => setHistoryPage(historyPage + 1)}
+                  type="button"
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

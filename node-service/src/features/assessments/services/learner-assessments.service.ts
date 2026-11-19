@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   AssessmentAttemptStatus,
+  AssessmentReviewContent,
   AssessmentStatus,
   ProjectSubmissionStatus,
 } from 'generated/prisma/enums';
@@ -1046,7 +1047,8 @@ export class LearnerAssessmentsService {
 
       const isFinishedQuiz =
         existingResult.assessmentType === AssessmentType.QUIZ &&
-        (existingResult.status === AssessmentAttemptStatus.PASSED ||
+        (existingResult.status === AssessmentAttemptStatus.GRADED ||
+          existingResult.status === AssessmentAttemptStatus.PASSED ||
           existingResult.status === AssessmentAttemptStatus.FAILED);
 
       if (!isFinishedQuiz) {
@@ -1223,7 +1225,8 @@ export class LearnerAssessmentsService {
   async getAttemptHistory(
     input: GetAttemptHistoryInput,
   ): Promise<AttemptHistoryDto> {
-    const { courseId, assessmentId, learnerId } = input;
+    const { courseId, assessmentId, learnerId, page } = input;
+    const pageSize = 20;
 
     await this.assessmentAccessService.ensureLearnerCanAccessAssessment(
       learnerId,
@@ -1242,25 +1245,25 @@ export class LearnerAssessmentsService {
       throw new NotFoundException('Assessment not found.');
     }
 
-    const attempts = await this.iAttemptRepository.findLearnerAttempts(
-      assessmentId,
-      learnerId,
-    );
+    const [attempts, attemptsUsed] = await Promise.all([
+      this.iAttemptRepository.findLearnerAttemptsPage(
+        assessmentId,
+        learnerId,
+        (page - 1) * pageSize,
+        pageSize,
+      ),
+      this.iAttemptRepository.countLearnerAttempts(assessmentId, learnerId),
+    ]);
 
     const now = new Date();
-
-    const sortedAttempts = [...attempts].sort(
-      (a, b) => a.attemptNumber - b.attemptNumber,
-    );
-
-    const attemptsUsed = attempts.length;
+    const totalPages = Math.ceil(attemptsUsed / pageSize);
 
     const attemptsRemaining = this.computeAttemptsRemaining(
       assessment.maxAttempts,
       attemptsUsed,
     );
 
-    const items: AttemptHistoryItemDto[] = sortedAttempts.map((attempt) => {
+    const items: AttemptHistoryItemDto[] = attempts.map((attempt) => {
       const isExpired = isAttemptExpired({
         now,
         startedAt: attempt.startedAt,
@@ -1299,6 +1302,8 @@ export class LearnerAssessmentsService {
 
         canContinue,
         canViewResult,
+        isFinalizing:
+          attempt.status === AssessmentAttemptStatus.IN_PROGRESS && isExpired,
       };
     });
 
@@ -1313,6 +1318,14 @@ export class LearnerAssessmentsService {
       attemptsRemaining,
 
       attempts: items,
+      pagination: {
+        page,
+        pageSize,
+        total: attemptsUsed,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
 
       serverNow: now,
     };
@@ -1392,6 +1405,11 @@ export class LearnerAssessmentsService {
       assessmentAvailableUntil: assessment.availableUntil,
     });
 
+    const canShowScore = this.computeCanShowScore({
+      canReview,
+      reviewContent: assessment.reviewContent,
+    });
+
     const answers = this.buildReviewAnswers({
       canReview,
       reviewContent: assessment.reviewContent,
@@ -1415,11 +1433,11 @@ export class LearnerAssessmentsService {
       assessmentType: assessment.type,
 
       attemptNumber: attempt.attemptNumber,
-      status: attempt.status,
+      status: this.toPublicResultStatus(attempt.status, canShowScore),
 
-      score: attempt.score,
+      score: canShowScore ? attempt.score : null,
       maxScore: attempt.maxScore,
-      passed: attempt.passed,
+      passed: canShowScore ? attempt.passed : null,
 
       startedAt: attempt.startedAt,
       submittedAt: attempt.submittedAt,
@@ -1432,6 +1450,40 @@ export class LearnerAssessmentsService {
 
       serverNow: now,
     };
+  }
+  private computeCanShowScore(params: {
+    canReview: boolean;
+    reviewContent: AssessmentReviewContent;
+  }): boolean {
+    const { canReview, reviewContent } = params;
+
+    if (!canReview) {
+      return false;
+    }
+
+    switch (reviewContent) {
+      case AssessmentReviewContent.SCORE_ONLY:
+      case AssessmentReviewContent.SCORE_AND_ANSWERS:
+      case AssessmentReviewContent.FULL_REVIEW:
+        return true;
+
+      default:
+        return false;
+    }
+  }
+  private toPublicResultStatus(
+    status: AssessmentAttemptStatus,
+    canShowScore: boolean,
+  ): AssessmentAttemptStatus {
+    if (
+      !canShowScore &&
+      (status === AssessmentAttemptStatus.PASSED ||
+        status === AssessmentAttemptStatus.FAILED)
+    ) {
+      return AssessmentAttemptStatus.GRADED;
+    }
+
+    return status;
   }
 
   private buildReviewAnswers(params: {

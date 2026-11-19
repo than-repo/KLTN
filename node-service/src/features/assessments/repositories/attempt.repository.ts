@@ -180,6 +180,37 @@ export class AttemptRepository implements IAttemptRepository {
     });
   }
 
+  async findLearnerAttemptsPage(
+    assessmentId: string,
+    learnerId: string,
+    skip: number,
+    take: number,
+  ): Promise<LearnerAttemptSummaryRecord[]> {
+    return this.prisma.assessmentAttempt.findMany({
+      where: {
+        assessmentId,
+        learnerId,
+      },
+      orderBy: {
+        attemptNumber: 'asc',
+      },
+      skip,
+      take,
+      select: {
+        id: true,
+        assessmentId: true,
+        learnerId: true,
+        attemptNumber: true,
+        status: true,
+        score: true,
+        maxScore: true,
+        passed: true,
+        startedAt: true,
+        submittedAt: true,
+      },
+    });
+  }
+
   async findActiveAttempt(
     assessmentId: string,
     learnerId: string,

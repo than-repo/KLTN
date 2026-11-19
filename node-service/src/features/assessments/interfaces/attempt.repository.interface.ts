@@ -6,6 +6,10 @@ import {
 } from 'generated/prisma/enums';
 import { AssessmentQuestionType } from './assessment-questions.repository.interface';
 
+import {
+  AssessmentReviewContent,
+  AssessmentReviewTiming,
+} from 'generated/prisma/enums';
 export interface LearnerCourseAssessmentListRecord {
   id: string;
   courseId: string;
@@ -420,8 +424,8 @@ export interface AttemptResultRecord {
     availableFrom: Date | null;
     availableUntil: Date | null;
 
-    reviewTiming: string;
-    reviewContent: string;
+    reviewTiming: AssessmentReviewTiming;
+    reviewContent: AssessmentReviewContent;
   };
 
   questions: AttemptResultQuestionRecord[];
@@ -499,6 +503,12 @@ export interface IAttemptRepository {
   findLearnerAttempts(
     assessmentId: string,
     learnerId: string,
+  ): Promise<LearnerAttemptSummaryRecord[]>;
+  findLearnerAttemptsPage(
+    assessmentId: string,
+    learnerId: string,
+    skip: number,
+    take: number,
   ): Promise<LearnerAttemptSummaryRecord[]>;
   findActiveAttempt(
     assessmentId: string,

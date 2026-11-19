@@ -87,9 +87,9 @@ export class AttemptResultDto {
   readonly attemptNumber!: number;
   readonly status!: AssessmentAttemptStatus;
 
-  readonly score?: number | null;
-  readonly maxScore?: number | null;
-  readonly passed!: boolean;
+  readonly score!: number | null;
+  readonly maxScore!: number | null;
+  readonly passed!: boolean | null;
 
   readonly startedAt!: Date;
   readonly submittedAt?: Date | null;

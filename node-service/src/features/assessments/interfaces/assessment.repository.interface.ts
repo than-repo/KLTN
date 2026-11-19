@@ -1,3 +1,5 @@
+import { AssessmentQuestionType } from './assessment-questions.repository.interface';
+
 export class InvalidAfterLessonError extends Error {
   constructor() {
     super('Invalid assessment lesson reference.');
@@ -34,6 +36,50 @@ export interface IAssessmentRepository {
   ): Promise<Assessment[]>;
 
   count(where: WhereAssessmentInput): Promise<number>;
+
+  withPublishSession<T>(
+    courseId: string,
+    assessmentId: string,
+    work: (session: AssessmentPublishSession) => Promise<T>,
+  ): Promise<T>;
+}
+export interface AssessmentPublishSession {
+  // Locks the assessment and returns its content.
+  findForUpdate(): Promise<AssessmentPublishValidationRecord | null>;
+
+  // Returns whether the update succeeded.
+  publish(totalPoints: number): Promise<boolean>;
+
+  findAssessment(): Promise<Assessment | null>;
+}
+
+export interface AssessmentPublishValidationRecord {
+  id: string;
+  courseId: string;
+
+  type: AssessmentType;
+  status: AssessmentStatus;
+
+  isActive: boolean;
+  deletedAt: Date | null;
+
+  passingScore: number | null;
+
+  afterLessonId: string | null;
+
+  // Only active, non-deleted questions.
+  questions: {
+    id: string;
+    type: AssessmentQuestionType;
+    points: number;
+
+    // Null when the question has no answer key.
+    answer: {
+      correctOptionAnswer: string | null;
+      correctTextAnswer: string | null;
+      wrongAnswers: unknown;
+    } | null;
+  }[];
 }
 export interface CreateAssessmentInput {
   courseId: string;

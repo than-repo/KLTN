@@ -1,6 +1,8 @@
 import { PrismaService } from 'src/core/database/prisma.service';
 import {
   Assessment,
+  AssessmentPublishSession,
+  AssessmentPublishValidationRecord,
   CreateAssessmentInput,
   IAssessmentRepository,
   InvalidAfterLessonError,
@@ -10,12 +12,131 @@ import {
   WhereAssessmentInput,
 } from '../interfaces/assessment.repository.interface';
 import { AssessmentMapper } from '../mappers/assessment.mapper';
-import { Prisma } from 'generated/prisma/client';
+import { AssessmentStatus, Prisma } from 'generated/prisma/client';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class AssessmentRepository implements IAssessmentRepository {
+export class AssessmentRepository
+  implements IAssessmentRepository, AssessmentPublishSession
+{
   constructor(private readonly prisma: PrismaService) {}
+  findForUpdate(): Promise<AssessmentPublishValidationRecord | null> {
+    throw new Error('Method not implemented.');
+  }
+  publish(totalPoints: number): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
+  findAssessment(): Promise<Assessment | null> {
+    throw new Error('Method not implemented.');
+  }
+  async withPublishSession<T>(
+    courseId: string,
+    assessmentId: string,
+    work: (session: AssessmentPublishSession) => Promise<T>,
+  ): Promise<T> {
+    return this.prisma.$transaction(
+      async (tx) => {
+        const session: AssessmentPublishSession = {
+          findForUpdate: async () => {
+            const rows = await tx.$queryRaw<{ id: string }[]>`
+            SELECT id
+            FROM assessments
+            WHERE id = ${assessmentId}
+              AND courseId = ${courseId}
+            FOR UPDATE
+          `;
+
+            if (rows.length === 0) {
+              return null;
+            }
+
+            const assessment = await tx.assessment.findUnique({
+              where: { id: assessmentId },
+              select: {
+                id: true,
+                courseId: true,
+                type: true,
+                status: true,
+                isActive: true,
+                deletedAt: true,
+                passingScore: true,
+                afterLessonId: true,
+
+                questions: {
+                  where: {
+                    isActive: true,
+                    deletedAt: null,
+                  },
+                  select: {
+                    id: true,
+                    type: true,
+                    points: true,
+                    answers: {
+                      take: 1,
+                      select: {
+                        correctOptionAnswer: true,
+                        correctTextAnswer: true,
+                        wrongAnswers: true,
+                      },
+                    },
+                  },
+                },
+              },
+            });
+
+            if (!assessment) {
+              return null;
+            }
+
+            return {
+              ...assessment,
+              questions: assessment.questions.map(
+                ({ answers, ...question }) => ({
+                  ...question,
+                  answer: answers[0] ?? null,
+                }),
+              ),
+            };
+          },
+
+          publish: async (totalPoints) => {
+            const result = await tx.assessment.updateMany({
+              where: {
+                id: assessmentId,
+                courseId,
+              },
+              data: {
+                totalPoints,
+                status: AssessmentStatus.PUBLISHED,
+              },
+            });
+
+            return result.count === 1;
+          },
+
+          findAssessment: async () => {
+            const assessment = await tx.assessment.findFirst({
+              where: {
+                id: assessmentId,
+                courseId,
+              },
+            });
+
+            return assessment
+              ? AssessmentMapper.toAssessment(assessment)
+              : null;
+          },
+        };
+
+        return await work(session);
+      },
+      {
+        isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+        maxWait: 5_000,
+        timeout: 10_000,
+      },
+    );
+  }
 
   async createDraftAssessment(
     input: CreateAssessmentInput,

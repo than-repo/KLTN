@@ -30,6 +30,7 @@ export function useLearnerAssessment({
 }: UseLearnerAssessmentArgs) {
   const [assessment, setAssessment] = useState<LearnerAssessment | null>(null);
   const [history, setHistory] = useState<AssessmentHistory | null>(null);
+  const [historyPage, setHistoryPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const loadRef = useRef<() => Promise<void>>(async () => {});
@@ -69,6 +70,7 @@ export function useLearnerAssessment({
               accessToken,
               courseId,
               assessmentId,
+              historyPage,
             );
             if (cancelled) return;
             setHistory(nextHistory);
@@ -99,7 +101,14 @@ export function useLearnerAssessment({
       clearTimeout(timer);
       loadRef.current = async () => {};
     };
-  }, [accessToken, assessmentId, canFetch, courseId, includeHistory]);
+  }, [
+    accessToken,
+    assessmentId,
+    canFetch,
+    courseId,
+    historyPage,
+    includeHistory,
+  ]);
 
   const refetch = useCallback(() => loadRef.current(), []);
 
@@ -108,7 +117,9 @@ export function useLearnerAssessment({
     canFetch,
     error,
     history,
+    historyPage,
     isLoading,
     refetch,
+    setHistoryPage,
   };
 }
