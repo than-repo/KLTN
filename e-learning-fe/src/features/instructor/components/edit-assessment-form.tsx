@@ -256,7 +256,11 @@ export function EditAssessmentForm({
   }
 
   function getLessonOptions() {
-    const lessonOptions: { value: string; label: string; sectionTitle?: string }[] = [
+    const lessonOptions: {
+      value: string;
+      label: string;
+      sectionTitle?: string;
+    }[] = [
       { value: "", label: "No lesson (assessment appears at course start)" },
     ];
 
@@ -441,17 +445,24 @@ export function EditAssessmentForm({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-sm font-medium" htmlFor="edit-a-after-lesson">
+              <label
+                className="text-sm font-medium"
+                htmlFor="edit-a-after-lesson"
+              >
                 Position after lesson (optional)
               </label>
               <select
                 className={fieldClasses}
                 disabled={isPublished || loadingLessons}
                 id="edit-a-after-lesson"
-                onChange={(event) => update("afterLessonId", event.target.value)}
+                onChange={(event) =>
+                  update("afterLessonId", event.target.value)
+                }
                 value={form.afterLessonId ?? ""}
               >
-                <option value="">No lesson (assessment appears at course start)</option>
+                <option value="">
+                  No lesson (assessment appears at course start)
+                </option>
                 {(() => {
                   const lessonOptions = getLessonOptions();
                   const sectionsMap = new Map<string, typeof lessonOptions>();
@@ -462,20 +473,23 @@ export function EditAssessmentForm({
                     }
                     sectionsMap.get(sectionTitle)!.push(opt);
                   }
-                  return Array.from(sectionsMap.entries()).map(([sectionTitle, lessons]) => (
-                    <optgroup key={sectionTitle} label={sectionTitle}>
-                      {lessons.map((lesson) => (
-                        <option key={lesson.value} value={lesson.value}>
-                          {lesson.label}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ));
+                  return Array.from(sectionsMap.entries()).map(
+                    ([sectionTitle, lessons]) => (
+                      <optgroup key={sectionTitle} label={sectionTitle}>
+                        {lessons.map((lesson) => (
+                          <option key={lesson.value} value={lesson.value}>
+                            {lesson.label}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ),
+                  );
                 })()}
               </select>
               <p className="mt-1 text-xs text-muted-foreground">
-                The assessment will appear after the selected lesson in the course
-                curriculum. Leave empty to place at the start of the course.
+                The assessment will appear after the selected lesson in the
+                course curriculum. Leave empty to place at the start of the
+                course.
               </p>
             </div>
 
@@ -509,7 +523,7 @@ export function EditAssessmentForm({
               <input
                 className={fieldClasses}
                 id="edit-a-attempts"
-                max={10}
+                max={101}
                 min={1}
                 onChange={(event) =>
                   update(

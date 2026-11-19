@@ -164,7 +164,7 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
 
     if (
       form.maxAttempts !== "" &&
-      (Number(form.maxAttempts) < 1 || Number(form.maxAttempts) > 10)
+      (Number(form.maxAttempts) < 1 || Number(form.maxAttempts) > 100)
     ) {
       return "Max attempts must be between 1 and 10.";
     }
@@ -244,7 +244,11 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
   }, [courseId, accessToken]);
 
   function getLessonOptions() {
-    const lessonOptions: { value: string; label: string; sectionTitle?: string }[] = [
+    const lessonOptions: {
+      value: string;
+      label: string;
+      sectionTitle?: string;
+    }[] = [
       { value: "", label: "No lesson (assessment appears at course start)" },
     ];
 
@@ -352,7 +356,10 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="text-sm font-medium" htmlFor="assessment-after-lesson">
+            <label
+              className="text-sm font-medium"
+              htmlFor="assessment-after-lesson"
+            >
               Position after lesson (optional)
             </label>
             <select
@@ -362,7 +369,9 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
               value={form.afterLessonId}
               disabled={loadingLessons}
             >
-              <option value="">No lesson (assessment appears at course start)</option>
+              <option value="">
+                No lesson (assessment appears at course start)
+              </option>
               {(() => {
                 const lessonOptions = getLessonOptions();
                 const sectionsMap = new Map<string, typeof lessonOptions>();
@@ -373,15 +382,17 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
                   }
                   sectionsMap.get(sectionTitle)!.push(opt);
                 }
-                return Array.from(sectionsMap.entries()).map(([sectionTitle, lessons]) => (
-                  <optgroup key={sectionTitle} label={sectionTitle}>
-                    {lessons.map((lesson) => (
-                      <option key={lesson.value} value={lesson.value}>
-                        {lesson.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ));
+                return Array.from(sectionsMap.entries()).map(
+                  ([sectionTitle, lessons]) => (
+                    <optgroup key={sectionTitle} label={sectionTitle}>
+                      {lessons.map((lesson) => (
+                        <option key={lesson.value} value={lesson.value}>
+                          {lesson.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ),
+                );
               })()}
             </select>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -421,7 +432,7 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
             <input
               className={fieldClasses}
               id="assessment-attempts"
-              max={10}
+              max={100}
               min={1}
               onChange={(event) =>
                 update(

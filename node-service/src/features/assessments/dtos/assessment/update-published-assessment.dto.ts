@@ -22,7 +22,7 @@ import {
   AssessmentReviewTiming,
 } from '../../interfaces/assessment.repository.interface';
 
-const MAX_ATTEMPTS = 10;
+const MAX_ATTEMPTS = 101;
 const MAX_TIME_LIMIT_MINUTES = 60;
 
 function IsAfterDate(
