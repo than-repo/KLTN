@@ -23,6 +23,7 @@ import com.springservice.payment.dto.SimulationPaymentResponse;
 import com.springservice.payment.dto.VnpayIpnResponse;
 import com.springservice.payment.dto.VnpayReturnQuery;
 import com.springservice.payment.dto.VnpayReturnResponse;
+import com.springservice.payment.dto.VnpayVerifyReturnResponse;
 import com.springservice.payment.service.PaymentService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,9 +40,9 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    // Create VNPay payment
-    @PostMapping("/vnpay")
-    public ResponseEntity<CreateVnpayPaymentResponse> createVnpayPayment(
+    // Create VNPay payment URL
+    @PostMapping("/vnpay/create-payment-url")
+    public ResponseEntity<CreateVnpayPaymentResponse> createVnpayPaymentUrl(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateVnpayPaymentRequest request,
             HttpServletRequest httpRequest) {
@@ -56,7 +57,7 @@ public class PaymentController {
     }
 
     // Create Simulation payment (for testing)
-    @PostMapping("/simulation")
+    @PostMapping("/simulation/create-payment")
     public ResponseEntity<SimulationPaymentResponse> createSimulationPayment(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateSimulationPaymentRequest request) {
@@ -91,10 +92,17 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // VNPay Return URL (user redirected back from VNPay)
+    // VNPay Return URL (user redirected back from VNPay) - redirects to frontend
     @GetMapping("/vnpay/return")
     public ResponseEntity<VnpayReturnResponse> handleVnpayReturn(VnpayReturnQuery query) {
         VnpayReturnResponse response = paymentService.handleVnpayReturn(query);
+        return ResponseEntity.ok(response);
+    }
+
+    // VNPay Verify Return (for frontend to check payment result)
+    @GetMapping("/vnpay/verify-return")
+    public ResponseEntity<VnpayVerifyReturnResponse> verifyVnpayReturn(VnpayReturnQuery query) {
+        VnpayVerifyReturnResponse response = paymentService.verifyVnpayReturn(query);
         return ResponseEntity.ok(response);
     }
 
@@ -125,7 +133,7 @@ public class PaymentController {
     }
 
     // Get learner payment history
-    @GetMapping
+    @GetMapping("/me")
     public ResponseEntity<GetPaymentsResponse> getLearnerPayments(
             @AuthenticationPrincipal Jwt jwt,
             GetPaymentsQuery query) {

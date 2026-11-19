@@ -1,6 +1,7 @@
 package com.springservice.payment.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +29,21 @@ public class CourseService {
     @Transactional(readOnly = true)
     public CoursePrice getCoursePrice(String courseId) {
         try {
-            CourseClient.CoursePriceResponse response = courseClient.getCoursePrice(courseId);
+            List<CourseClient.CoursePriceResponse> responses = courseClient.getCoursesByIds(courseId);
 
-            if (response == null || response.id() == null) {
+            if (responses == null || responses.isEmpty()) {
                 throw new CourseNotFoundException(courseId);
             }
 
-            if (!response.isPublished()) {
-                throw new CourseUnavailableException(courseId, "Course is not published");
+            CourseClient.CoursePriceResponse response = responses.get(0);
+
+            if (response.id() == null) {
+                throw new CourseNotFoundException(courseId);
+            }
+
+            // Check if course is published and active
+            if (!"PUBLISHED".equals(response.status()) || Boolean.FALSE.equals(response.isActive())) {
+                throw new CourseUnavailableException(courseId, "Course is not published or not active");
             }
 
             BigDecimal price = response.price();
@@ -58,9 +66,15 @@ public class CourseService {
     @Transactional(readOnly = true)
     public CourseClient.CourseDetailResponse getCourseDetail(String courseId) {
         try {
-            CourseClient.CourseDetailResponse response = courseClient.getCourseDetail(courseId);
+            List<CourseClient.CourseDetailResponse> responses = courseClient.getCourseDetailsByIds(courseId);
 
-            if (response == null || response.id() == null) {
+            if (responses == null || responses.isEmpty()) {
+                throw new CourseNotFoundException(courseId);
+            }
+
+            CourseClient.CourseDetailResponse response = responses.get(0);
+
+            if (response.id() == null) {
                 throw new CourseNotFoundException(courseId);
             }
 

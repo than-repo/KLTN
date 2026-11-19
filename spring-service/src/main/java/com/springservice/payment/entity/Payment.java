@@ -1,10 +1,11 @@
 package com.springservice.payment.entity;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.JdbcTypeCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,7 +42,7 @@ public class Payment {
     private String courseId;
 
     @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    private Integer amount;
 
     @Column(name = "currency", nullable = false, length = 3)
     private String currency = "VND";
@@ -63,7 +64,8 @@ public class Payment {
     @Column(name = "provider_payment_id", length = 100)
     private String providerPaymentId;
 
-    @Column(name = "provider_metadata", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "provider_metadata", columnDefinition = "JSON")
     private String providerMetadata;
 
     @Column(name = "paid_at")
@@ -109,7 +111,7 @@ public class Payment {
     }
 
     // Constructor for creating new payments
-    public Payment(String userId, String courseId, BigDecimal amount, PaymentMethod paymentMethod, String provider, String txnRef) {
+    public Payment(String userId, String courseId, Integer amount, PaymentMethod paymentMethod, String provider, String txnRef) {
         this.userId = userId;
         this.courseId = courseId;
         this.amount = amount;
@@ -131,7 +133,7 @@ public class Payment {
         return courseId;
     }
 
-    public BigDecimal getAmount() {
+    public Integer getAmount() {
         return amount;
     }
 
@@ -220,7 +222,7 @@ public class Payment {
         this.provider = provider;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(Integer amount) {
         this.amount = amount;
     }
 

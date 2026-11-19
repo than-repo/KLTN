@@ -25,6 +25,7 @@ import com.springservice.payment.dto.SimulationPaymentResponse;
 import com.springservice.payment.dto.VnpayIpnResponse;
 import com.springservice.payment.dto.VnpayReturnQuery;
 import com.springservice.payment.dto.VnpayReturnResponse;
+import com.springservice.payment.dto.VnpayVerifyReturnResponse;
 import com.springservice.payment.entity.Enrollment;
 import com.springservice.payment.entity.Payment;
 import com.springservice.payment.entity.PaymentMethod;
@@ -66,6 +67,8 @@ public class PaymentService {
             throw new IllegalArgumentException("Invalid course price");
         }
 
+        Integer amountInt = amount.intValue();
+
         // Check if user already has an active payment for this course
         if (courseService.hasActivePaymentForCourse(userId, request.getCourseId())) {
             throw new IllegalStateException("User already has an active payment for this course");
@@ -73,7 +76,7 @@ public class PaymentService {
 
         String txnRef = generateTxnRef("PAY");
 
-        Payment payment = new Payment(userId, request.getCourseId(), amount, PaymentMethod.VNPAY, "VNPAY", txnRef);
+        Payment payment = new Payment(userId, request.getCourseId(), amountInt, PaymentMethod.VNPAY, "VNPAY", txnRef);
         payment = paymentRepository.save(payment);
 
         String paymentUrl = vnpayService.createPaymentUrl(new CreateVnpayPaymentUrlParams(
@@ -102,13 +105,15 @@ public class PaymentService {
             throw new IllegalArgumentException("Invalid course price");
         }
 
+        Integer amountInt = amount.intValue();
+
         // Check if user already has an active payment for this course
         if (courseService.hasActivePaymentForCourse(userId, request.getCourseId())) {
             throw new IllegalStateException("User already has an active payment for this course");
         }
 
         String txnRef = generateTxnRef("SIM");
-        Payment payment = new Payment(userId, request.getCourseId(), amount, PaymentMethod.SIMULATION, "SIMULATION", txnRef);
+        Payment payment = new Payment(userId, request.getCourseId(), amountInt, PaymentMethod.SIMULATION, "SIMULATION", txnRef);
         payment = paymentRepository.save(payment);
 
         return toSimulationPaymentResponse("pending", payment);
@@ -173,6 +178,34 @@ public class PaymentService {
         }
 
         return toVnpayReturnResponse(isSuccess ? "success" : "failed", payment);
+    }
+
+    // VNPay Verify Return (for frontend to check payment result)
+    public VnpayVerifyReturnResponse verifyVnpayReturn(VnpayReturnQuery query) {
+        java.util.Map<String, String> safeQuery = normalizeVnpayQuery(query);
+
+        if (!vnpayService.verifyReturnUrl(safeQuery)) {
+            throw new VnpaySignatureException("Invalid VNPay signature");
+        }
+
+        String txnRef = getRequiredVnpayParam(safeQuery, "vnp_TxnRef");
+        String responseCode = getRequiredVnpayParam(safeQuery, "vnp_ResponseCode");
+        String transactionStatus = getRequiredVnpayParam(safeQuery, "vnp_TransactionStatus");
+
+        boolean isSuccess = "00".equals(responseCode) && "00".equals(transactionStatus);
+
+        Payment payment = paymentRepository.findByTxnRef(txnRef)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for txnRef", txnRef));
+
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            return toVnpayVerifyReturnResponse("already_paid", payment);
+        }
+
+        return toVnpayVerifyReturnResponse(isSuccess ? "success" : "failed", payment);
+    }
+
+    private VnpayVerifyReturnResponse toVnpayVerifyReturnResponse(String status, Payment payment) {
+        return new VnpayVerifyReturnResponse(status, toPaymentResponseDto(payment));
     }
 
     // VNPay IPN (server-to-server notification)
@@ -343,13 +376,14 @@ public class PaymentService {
         return value;
     }
 
-    private boolean isValidVnpayAmount(String vnpAmount, BigDecimal paymentAmount) {
+    private boolean isValidVnpayAmount(String vnpAmount, Integer paymentAmount) {
         if (vnpAmount == null || vnpAmount.isEmpty()) {
             return false;
         }
         try {
-            BigDecimal amount = new BigDecimal(vnpAmount);
-            return amount.compareTo(paymentAmount.multiply(BigDecimal.valueOf(100))) == 0;
+            Integer amount = Integer.valueOf(vnpAmount);
+            // VNPay sends amount * 100
+            return amount.equals(paymentAmount * 100);
         } catch (NumberFormatException e) {
             return false;
         }
@@ -368,7 +402,7 @@ public class PaymentService {
                 .id(payment.getId())
                 .userId(payment.getUserId())
                 .courseId(payment.getCourseId())
-                .amount(payment.getAmount())
+                .amount(BigDecimal.valueOf(payment.getAmount()))
                 .currency(payment.getCurrency())
                 .paymentMethod(payment.getPaymentMethod())
                 .status(payment.getStatus())
@@ -384,7 +418,7 @@ public class PaymentService {
     private LearnerPaymentItem toLearnerPaymentItem(Payment payment) {
         return LearnerPaymentItem.builder()
                 .id(payment.getId())
-                .amount(payment.getAmount())
+                .amount(BigDecimal.valueOf(payment.getAmount()))
                 .currency(payment.getCurrency())
                 .paymentMethod(payment.getPaymentMethod())
                 .status(payment.getStatus())

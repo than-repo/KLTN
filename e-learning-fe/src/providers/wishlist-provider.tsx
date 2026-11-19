@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import type { UserRole } from "@/features/auth/types/auth";
 import {
   addToWishlist,
   getWishlist,
@@ -37,16 +38,32 @@ type WishlistContextValue = {
 
 const WishlistContext = createContext<WishlistContextValue | null>(null);
 
+/**
+ * Check if user has LEARNER role
+ */
+function isLearner(role: UserRole | undefined): boolean {
+  return role === "LEARNER";
+}
+
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const { accessToken, status } = useAuth();
+  const { accessToken, status, user } = useAuth();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const requestId = useRef(0);
 
+  const isLearnerUser = isLearner(user?.role);
+
   const loadWishlist = useCallback(async () => {
-    if (status !== "authenticated" || !accessToken) {
+    // Only fetch wishlist for authenticated LEARNER users
+    if (status !== "authenticated" || !accessToken || !isLearnerUser) {
+      if (!isLearnerUser && status === "authenticated") {
+        // Clear wishlist for non-LEARNER users
+        setItems([]);
+        setLoading(false);
+        setError(null);
+      }
       return;
     }
 
@@ -71,7 +88,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     }
-  }, [accessToken, status]);
+  }, [accessToken, status, isLearnerUser]);
 
   useEffect(() => {
     let active = true;
@@ -104,8 +121,9 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const addCourse = useCallback(
     async (courseId: string) => {
-      if (!accessToken) {
-        setError("Please sign in to add courses to your wishlist.");
+      // Only allow LEARNER users to add to wishlist
+      if (!accessToken || !isLearnerUser) {
+        setError("Only learners can add courses to wishlist.");
         return null;
       }
 
@@ -137,13 +155,14 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     },
-    [accessToken, loadWishlist],
+    [accessToken, loadWishlist, isLearnerUser],
   );
 
   const removeCourse = useCallback(
     async (courseId: string) => {
-      if (!accessToken) {
-        setError("Please sign in to remove courses from your wishlist.");
+      // Only allow LEARNER users to remove from wishlist
+      if (!accessToken || !isLearnerUser) {
+        setError("Only learners can remove courses from wishlist.");
         return null;
       }
 
@@ -172,7 +191,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     },
-    [accessToken],
+    [accessToken, isLearnerUser],
   );
 
   const isWishlisted = useCallback(

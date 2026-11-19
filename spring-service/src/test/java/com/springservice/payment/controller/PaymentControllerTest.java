@@ -169,7 +169,7 @@ class PaymentControllerTest {
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay")
+        mockMvc.perform(post("/api/payments/vnpay/create-payment-url")
                         .with(jwt().jwt(testJwt))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -187,7 +187,7 @@ class PaymentControllerTest {
         request.setCourseId("course-456");
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay")
+        mockMvc.perform(post("/api/payments/vnpay/create-payment-url")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
@@ -205,7 +205,7 @@ class PaymentControllerTest {
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(post("/api/payments/simulation")
+        mockMvc.perform(post("/api/payments/simulation/create-payment")
                         .with(jwt().jwt(testJwt))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -360,7 +360,7 @@ class PaymentControllerTest {
     @Test
     void getLearnerPayments_Success() throws Exception {
         // Given
-        
+
         GetPaymentsResponse mockResponse = new GetPaymentsResponse(
                 Collections.emptyList(),
                 new GetPaymentsResponse.PaginationMeta(1, 10, 0, 0, false, false)
@@ -370,7 +370,7 @@ class PaymentControllerTest {
                 .thenReturn(mockResponse);
 
         // When/Then
-        mockMvc.perform(get("/api/payments")
+        mockMvc.perform(get("/api/payments/me")
                         .with(jwt().jwt(testJwt))
                         .param("page", "1")
                         .param("limit", "10"))
@@ -382,7 +382,7 @@ class PaymentControllerTest {
     @Test
     void getLearnerPayments_WithCustomPagination() throws Exception {
         // Given
-        
+
         GetPaymentsResponse mockResponse = new GetPaymentsResponse(
                 Collections.emptyList(),
                 new GetPaymentsResponse.PaginationMeta(2, 20, 50, 3, true, true)
@@ -392,7 +392,7 @@ class PaymentControllerTest {
                 .thenReturn(mockResponse);
 
         // When/Then
-        mockMvc.perform(get("/api/payments")
+        mockMvc.perform(get("/api/payments/me")
                         .with(jwt().jwt(testJwt))
                         .param("page", "2")
                         .param("limit", "20"))
@@ -404,7 +404,7 @@ class PaymentControllerTest {
     @Test
     void getLearnerPayments_Unauthorized() throws Exception {
         // When/Then
-        mockMvc.perform(get("/api/payments"))
+        mockMvc.perform(get("/api/payments/me"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -418,7 +418,7 @@ class PaymentControllerTest {
                 .thenThrow(new IllegalArgumentException("Invalid course ID"));
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay")
+        mockMvc.perform(post("/api/payments/vnpay/create-payment-url")
                         .with(jwt().jwt(testJwt))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
