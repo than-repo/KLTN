@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
 import { CurriculumBuilder } from "@/features/instructor/components/curriculum-builder";
 import { instructorNavLinks } from "@/features/instructor/utils/instructor-nav";
+import { Tag } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Curriculum Builder | E-Learning System",
@@ -35,6 +36,14 @@ export default async function InstructorCurriculumPage({
               </h1>
             </div>
             <div className="flex flex-wrap gap-2">
+              <ButtonLink
+                href={`/instructor/courses/${id}/skills`}
+                size="sm"
+                variant="secondary"
+              >
+                <Tag className="size-3.5 mr-1.5" aria-hidden="true" />
+                Skills
+              </ButtonLink>
               <ButtonLink
                 href={`/instructor/courses/${id}/edit`}
                 size="sm"

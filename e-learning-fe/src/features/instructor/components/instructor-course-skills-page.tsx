@@ -480,14 +480,7 @@ export function InstructorCourseSkillsPage({ courseId }: { courseId: string }) {
             </p>
           </div>
 
-          <div className="flex justify-end gap-2">
-            <button
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
-              onClick={() => setCreateModalOpen(false)}
-              type="button"
-            >
-              Cancel
-            </button>
+          <div className="flex justify-end">
             <button
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-60 hover:bg-primary-focus"
               disabled={
@@ -578,14 +571,7 @@ export function InstructorCourseSkillsPage({ courseId }: { courseId: string }) {
               </p>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <button
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
-                onClick={() => setEditingSkill(null)}
-                type="button"
-              >
-                Cancel
-              </button>
+            <div className="flex justify-end">
               <button
                 className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-60 hover:bg-primary-focus"
                 disabled={
@@ -611,15 +597,7 @@ export function InstructorCourseSkillsPage({ courseId }: { courseId: string }) {
             undone. Skills attached to lessons or assessment questions cannot be
             deleted until they are detached.
           </p>
-          <div className="mt-5 flex justify-end gap-2">
-            <button
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
-              disabled={deleteLoading}
-              onClick={() => setDeletingSkill(null)}
-              type="button"
-            >
-              Cancel
-            </button>
+          <div className="mt-5 flex justify-end">
             <button
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-danger bg-danger px-5 text-sm font-semibold text-danger-foreground disabled:cursor-not-allowed disabled:opacity-60"
               disabled={deleteLoading}

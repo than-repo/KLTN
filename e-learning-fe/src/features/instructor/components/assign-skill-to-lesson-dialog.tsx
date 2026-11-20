@@ -26,6 +26,7 @@ type AssignSkillToLessonDialogProps = {
   assignedSkills: Skill[];
   onClose: () => void;
   onAssign: (skill: Skill) => void;
+  onUnassign: (skill: Skill) => void;
   onCreate?: (skill: Skill) => void;
 };
 
@@ -73,6 +74,7 @@ export function AssignSkillToLessonDialog({
   assignedSkills,
   onClose,
   onAssign,
+  onUnassign,
 }: AssignSkillToLessonDialogProps) {
   const { accessToken, status } = useAuth();
   const [tab, setTab] = useState<Tab>("browse");
@@ -246,9 +248,11 @@ export function AssignSkillToLessonDialog({
       onClose={onClose}
       open={true}
       title={`Assign skills to "${lessonTitle}"`}
+      className="w-full max-w-5xl md:max-w-6xl"
+      showCloseButton={true}
     >
       <div className="text-foreground">
-        <div className="mt-3 grid gap-3">
+        <div className="mt-3 grid gap-4 max-h-[65vh] overflow-y-auto custom-scrollbar overflow-x-hidden px-1">
           <div className="flex gap-1">
             <button
               className={tabClasses("browse")}
@@ -276,10 +280,21 @@ export function AssignSkillToLessonDialog({
                   <Badge
                     key={skill.id}
                     variant="action"
-                    className={difficultyColors[skill.difficulty]}
+                    className={`${difficultyColors[skill.difficulty]} gap-1`}
                     title={skill.canonicalName}
                   >
                     {skill.canonicalName}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUnassign(skill);
+                      }}
+                      className="inline-flex items-center justify-center rounded hover:bg-black/10 p-0.5 transition-colors"
+                      aria-label={`Remove ${skill.canonicalName} skill`}
+                    >
+                      <X className="size-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -297,6 +312,7 @@ export function AssignSkillToLessonDialog({
               skillsLoading={skillsLoading}
               assignedSkillIds={assignedSkillIds}
               onAssign={handleAssign}
+              onUnassign={onUnassign}
               inputRef={inputRef}
             />
           ) : (
@@ -328,6 +344,7 @@ type BrowseTabProps = {
   skillsLoading: boolean;
   assignedSkillIds: Set<string>;
   onAssign: (skill: Skill) => void;
+  onUnassign: (skill: Skill) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
 };
 
@@ -341,6 +358,7 @@ function BrowseTab({
   skillsLoading,
   assignedSkillIds,
   onAssign,
+  onUnassign,
   inputRef,
 }: BrowseTabProps) {
   // Combine available skills and suggestions, deduplicate by ID
@@ -413,7 +431,7 @@ function BrowseTab({
       ) : null}
 
       {filteredSkills.length > 0 ? (
-        <div className="grid gap-2 max-h-96 overflow-y-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredSkills.map(({ skill, source }) => {
             const alreadyAssigned = assignedSkillIds.has(skill.id);
             const isSuggestion = source === "suggestion";
@@ -421,55 +439,70 @@ function BrowseTab({
             return (
               <div
                 key={skill.id}
-                className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 transition-colors ${
+                className={`flex flex-col md:flex-row items-start md:items-center justify-between p-4 border rounded-xl gap-4 transition-colors min-w-0 ${
                   alreadyAssigned
                     ? "border-border bg-muted/50 opacity-60"
                     : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
                 }`}
               >
-                <div className="min-w-0 flex-1 flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <p className="line-clamp-1 font-semibold">
+                <div className="min-w-0 flex-1 md:mr-4">
+                  <div className="flex items-start gap-2 flex-wrap min-w-0">
+                    <p className="line-clamp-1 font-semibold truncate min-w-0">
                       {skill.canonicalName}
                     </p>
                     <Badge
                       variant="action"
-                      className={difficultyColors[skill.difficulty]}
+                      className={`${difficultyColors[skill.difficulty]} flex-shrink-0`}
                     >
                       {skill.difficulty}
                     </Badge>
                     {isSuggestion && (
-                      <Badge variant="neutral" className="text-xs">
+                      <Badge variant="neutral" className="text-xs flex-shrink-0">
                         Suggested
                       </Badge>
                     )}
                   </div>
                   {skill.description ? (
-                    <p className="line-clamp-1 text-xs text-muted-foreground">
+                    <p className="line-clamp-2 text-xs text-muted-foreground mt-1 break-words">
                       {skill.description}
                     </p>
                   ) : null}
                   {skill.aliases?.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {skill.aliases.slice(0, 3).map((alias) => (
-                        <Badge key={alias} variant="neutral" className="text-xs">
+                    <div className="flex flex-wrap gap-1.5 mt-1.5 min-w-0 break-words">
+                      {skill.aliases.slice(0, 4).map((alias) => (
+                        <Badge
+                          key={alias}
+                          variant="neutral"
+                          className="text-xs flex-shrink-0"
+                        >
                           {alias}
                         </Badge>
                       ))}
-                      {skill.aliases.length > 3 && (
-                        <Badge variant="neutral" className="text-xs">
-                          +{skill.aliases.length - 3}
+                      {skill.aliases.length > 4 && (
+                        <Badge variant="neutral" className="text-xs flex-shrink-0">
+                          +{skill.aliases.length - 4}
                         </Badge>
                       )}
                     </div>
                   ) : null}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex-shrink-0 md:w-auto">
                   {alreadyAssigned ? (
-                    <Badge variant="neutral">Assigned</Badge>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onUnassign(skill);
+                      }}
+                      className="inline-flex items-center justify-center gap-1.5 min-h-9 rounded-md border border-red-200 bg-red-50 text-red-600 px-3 text-xs font-semibold transition-colors hover:bg-red-100 flex-shrink-0"
+                      aria-label={`Remove ${skill.canonicalName} skill`}
+                    >
+                      <X className="size-3.5" />
+                      <span>Remove</span>
+                    </button>
                   ) : (
                     <button
-                      className="inline-flex items-center gap-1.5 min-h-9 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-focus"
+                      className="inline-flex items-center justify-center gap-1.5 min-h-9 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-focus flex-shrink-0"
                       onClick={() => onAssign(skill)}
                       type="button"
                     >

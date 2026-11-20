@@ -510,4 +510,49 @@ export class SkillService {
 
     return skillIds.every((id) => validIds.has(id));
   }
+
+  async getLessonSkills(
+    courseId: string,
+    sectionId: string,
+    lessonId: string,
+    instructorId: string,
+  ): Promise<SkillResponseDto[]> {
+    await this.courseAccessService.ensureInstructorCanManageLesson(
+      courseId,
+      instructorId,
+      sectionId,
+      lessonId,
+    );
+
+    const skills = await this.skillRepository.getSkillsByLessonId(lessonId);
+
+    return skills.map((skill) =>
+      plainToInstance(SkillResponseDto, skill, {
+        excludeExtraneousValues: true,
+      }),
+    );
+  }
+
+  async unassignSkillFromLesson(
+    courseId: string,
+    sectionId: string,
+    lessonId: string,
+    skillId: string,
+    instructorId: string,
+  ): Promise<void> {
+    await this.courseAccessService.ensureInstructorCanManageLesson(
+      courseId,
+      instructorId,
+      sectionId,
+      lessonId,
+    );
+
+    const skill = await this.skillRepository.getSkillById(skillId, courseId);
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    await this.skillRepository.disconnectSkillFromLesson(lessonId, skillId);
+  }
 }

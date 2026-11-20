@@ -316,4 +316,41 @@ export class SkillRepository {
       },
     );
   }
+
+  async getSkillsByLessonId(lessonId: string): Promise<Prisma.SkillModel[]> {
+    return this.prisma.skill.findMany({
+      where: {
+        isActive: true,
+        deletedAt: null,
+        lessons: {
+          some: {
+            id: lessonId,
+            isActive: true,
+            deletedAt: null,
+          },
+        },
+      },
+    });
+  }
+
+  async disconnectSkillFromLesson(
+    lessonId: string,
+    skillId: string,
+  ): Promise<Prisma.SkillModel> {
+    return this.prisma.skill.update({
+      where: {
+        id: skillId,
+        isActive: true,
+        deletedAt: null,
+      },
+      data: {
+        lessons: {
+          disconnect: {
+            id: lessonId,
+          },
+        },
+        version: { increment: 1 },
+      },
+    });
+  }
 }
