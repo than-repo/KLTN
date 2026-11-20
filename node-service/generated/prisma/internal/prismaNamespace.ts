@@ -405,6 +405,8 @@ export const ModelName = {
   FileMedia: 'FileMedia',
   Enrollment: 'Enrollment',
   Payment: 'Payment',
+  wishlist: 'wishlist',
+  flyway_schema_history: 'flyway_schema_history',
   Skill: 'Skill'
 } as const
 
@@ -421,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "assessment" | "assessmentQuestion" | "assessmentAnswer" | "assessmentAttempt" | "assessmentAttemptAnswer" | "projectSubmission" | "user" | "userIdentity" | "refreshToken" | "passwordResetToken" | "courseReview" | "courseReviewerCategory" | "courseInstructor" | "course" | "category" | "courseCategory" | "courseSection" | "lesson" | "fileMedia" | "enrollment" | "payment" | "skill"
+    modelProps: "assessment" | "assessmentQuestion" | "assessmentAnswer" | "assessmentAttempt" | "assessmentAttemptAnswer" | "projectSubmission" | "user" | "userIdentity" | "refreshToken" | "passwordResetToken" | "courseReview" | "courseReviewerCategory" | "courseInstructor" | "course" | "category" | "courseCategory" | "courseSection" | "lesson" | "fileMedia" | "enrollment" | "payment" | "wishlist" | "flyway_schema_history" | "skill"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1811,6 +1813,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    wishlist: {
+      payload: Prisma.$wishlistPayload<ExtArgs>
+      fields: Prisma.wishlistFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.wishlistFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.wishlistFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>
+        }
+        findFirst: {
+          args: Prisma.wishlistFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.wishlistFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>
+        }
+        findMany: {
+          args: Prisma.wishlistFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>[]
+        }
+        create: {
+          args: Prisma.wishlistCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>
+        }
+        createMany: {
+          args: Prisma.wishlistCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.wishlistDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>
+        }
+        update: {
+          args: Prisma.wishlistUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>
+        }
+        deleteMany: {
+          args: Prisma.wishlistDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.wishlistUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.wishlistUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$wishlistPayload>
+        }
+        aggregate: {
+          args: Prisma.WishlistAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWishlist>
+        }
+        groupBy: {
+          args: Prisma.wishlistGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WishlistGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.wishlistCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WishlistCountAggregateOutputType> | number
+        }
+      }
+    }
+    flyway_schema_history: {
+      payload: Prisma.$flyway_schema_historyPayload<ExtArgs>
+      fields: Prisma.flyway_schema_historyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.flyway_schema_historyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.flyway_schema_historyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>
+        }
+        findFirst: {
+          args: Prisma.flyway_schema_historyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.flyway_schema_historyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>
+        }
+        findMany: {
+          args: Prisma.flyway_schema_historyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>[]
+        }
+        create: {
+          args: Prisma.flyway_schema_historyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>
+        }
+        createMany: {
+          args: Prisma.flyway_schema_historyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.flyway_schema_historyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>
+        }
+        update: {
+          args: Prisma.flyway_schema_historyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>
+        }
+        deleteMany: {
+          args: Prisma.flyway_schema_historyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.flyway_schema_historyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.flyway_schema_historyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$flyway_schema_historyPayload>
+        }
+        aggregate: {
+          args: Prisma.Flyway_schema_historyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFlyway_schema_history>
+        }
+        groupBy: {
+          args: Prisma.flyway_schema_historyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Flyway_schema_historyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.flyway_schema_historyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Flyway_schema_historyCountAggregateOutputType> | number
+        }
+      }
+    }
     Skill: {
       payload: Prisma.$SkillPayload<ExtArgs>
       fields: Prisma.SkillFieldRefs
@@ -2263,6 +2397,32 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const WishlistScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId',
+  createdAt: 'createdAt'
+} as const
+
+export type WishlistScalarFieldEnum = (typeof WishlistScalarFieldEnum)[keyof typeof WishlistScalarFieldEnum]
+
+
+export const Flyway_schema_historyScalarFieldEnum = {
+  installed_rank: 'installed_rank',
+  version: 'version',
+  description: 'description',
+  type: 'type',
+  script: 'script',
+  checksum: 'checksum',
+  installed_by: 'installed_by',
+  installed_on: 'installed_on',
+  execution_time: 'execution_time',
+  success: 'success'
+} as const
+
+export type Flyway_schema_historyScalarFieldEnum = (typeof Flyway_schema_historyScalarFieldEnum)[keyof typeof Flyway_schema_historyScalarFieldEnum]
+
+
 export const SkillScalarFieldEnum = {
   id: 'id',
   courseId: 'courseId',
@@ -2546,6 +2706,26 @@ export const PaymentOrderByRelevanceFieldEnum = {
 } as const
 
 export type PaymentOrderByRelevanceFieldEnum = (typeof PaymentOrderByRelevanceFieldEnum)[keyof typeof PaymentOrderByRelevanceFieldEnum]
+
+
+export const wishlistOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId'
+} as const
+
+export type wishlistOrderByRelevanceFieldEnum = (typeof wishlistOrderByRelevanceFieldEnum)[keyof typeof wishlistOrderByRelevanceFieldEnum]
+
+
+export const flyway_schema_historyOrderByRelevanceFieldEnum = {
+  version: 'version',
+  description: 'description',
+  type: 'type',
+  script: 'script',
+  installed_by: 'installed_by'
+} as const
+
+export type flyway_schema_historyOrderByRelevanceFieldEnum = (typeof flyway_schema_historyOrderByRelevanceFieldEnum)[keyof typeof flyway_schema_historyOrderByRelevanceFieldEnum]
 
 
 export const SkillOrderByRelevanceFieldEnum = {
@@ -2877,6 +3057,8 @@ export type GlobalOmitConfig = {
   fileMedia?: Prisma.FileMediaOmit
   enrollment?: Prisma.EnrollmentOmit
   payment?: Prisma.PaymentOmit
+  wishlist?: Prisma.wishlistOmit
+  flyway_schema_history?: Prisma.flyway_schema_historyOmit
   skill?: Prisma.SkillOmit
 }
 

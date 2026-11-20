@@ -52,7 +52,7 @@ export interface CourseSectionWhereInput {
   id?: string;
   courseId: string;
   isActive?: boolean;
-  deletedAt?: Date;
+  deletedAt?: Date | null;
   includeDeleted?: boolean;
   titleContains?: string;
 }

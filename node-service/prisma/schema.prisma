@@ -317,7 +317,7 @@ model CourseSection {
   id           String    @id @default(uuid())
   courseId     String
   title        String
-  description  String?
+  description  String?  @db.Text
   sectionIndex Int
   isActive     Boolean   @default(true)
   createdAt    DateTime  @default(now())

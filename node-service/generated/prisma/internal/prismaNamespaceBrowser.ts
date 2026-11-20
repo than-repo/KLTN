@@ -72,6 +72,8 @@ export const ModelName = {
   FileMedia: 'FileMedia',
   Enrollment: 'Enrollment',
   Payment: 'Payment',
+  wishlist: 'wishlist',
+  flyway_schema_history: 'flyway_schema_history',
   Skill: 'Skill'
 } as const
 
@@ -438,6 +440,32 @@ export const PaymentScalarFieldEnum = {
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+export const WishlistScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId',
+  createdAt: 'createdAt'
+} as const
+
+export type WishlistScalarFieldEnum = (typeof WishlistScalarFieldEnum)[keyof typeof WishlistScalarFieldEnum]
+
+
+export const Flyway_schema_historyScalarFieldEnum = {
+  installed_rank: 'installed_rank',
+  version: 'version',
+  description: 'description',
+  type: 'type',
+  script: 'script',
+  checksum: 'checksum',
+  installed_by: 'installed_by',
+  installed_on: 'installed_on',
+  execution_time: 'execution_time',
+  success: 'success'
+} as const
+
+export type Flyway_schema_historyScalarFieldEnum = (typeof Flyway_schema_historyScalarFieldEnum)[keyof typeof Flyway_schema_historyScalarFieldEnum]
+
+
 export const SkillScalarFieldEnum = {
   id: 'id',
   courseId: 'courseId',
@@ -721,6 +749,26 @@ export const PaymentOrderByRelevanceFieldEnum = {
 } as const
 
 export type PaymentOrderByRelevanceFieldEnum = (typeof PaymentOrderByRelevanceFieldEnum)[keyof typeof PaymentOrderByRelevanceFieldEnum]
+
+
+export const wishlistOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId'
+} as const
+
+export type wishlistOrderByRelevanceFieldEnum = (typeof wishlistOrderByRelevanceFieldEnum)[keyof typeof wishlistOrderByRelevanceFieldEnum]
+
+
+export const flyway_schema_historyOrderByRelevanceFieldEnum = {
+  version: 'version',
+  description: 'description',
+  type: 'type',
+  script: 'script',
+  installed_by: 'installed_by'
+} as const
+
+export type flyway_schema_historyOrderByRelevanceFieldEnum = (typeof flyway_schema_historyOrderByRelevanceFieldEnum)[keyof typeof flyway_schema_historyOrderByRelevanceFieldEnum]
 
 
 export const SkillOrderByRelevanceFieldEnum = {

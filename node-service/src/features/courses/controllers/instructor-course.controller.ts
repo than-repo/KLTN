@@ -55,6 +55,7 @@ import { QueryFileMediaDto } from '../dtos/file-media/query-file-media.dto';
 import { UpdateFileMediaDto } from '../dtos/file-media/update-file-media.dto';
 import { FileMediaService } from '../services/file-media.service';
 import { InstructorCourseLatestReviewResponseDto } from '../dtos/course/instructor-course-review.dto';
+import { SummarizeSectionDto } from '../dtos/section-lesson/summarize-section.dto';
 
 @Controller({ path: 'instructor/courses', version: '1' })
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -160,6 +161,22 @@ export class InstructorCoursesController {
     return this.coursesService.deleteDraftCourse(instructorId, courseId);
   }
   //===================section======================
+
+  @Get(':courseId/listSectionSummaries')
+  @ApiOperation({ summary: 'Get all section summaries - Instructor' })
+  @ApiOkResponse({ type: SummarizeSectionDto })
+  @ApiBadRequestResponse()
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
+  async listSectionSummaries(
+    @Param('courseId', ParseUUIDPipe) courseId: string,
+    @CurrentUser('sub') instructorId: string,
+  ): Promise<SummarizeSectionDto[]> {
+    return this.courseSectionsService.listSectionSummaries(
+      courseId,
+      instructorId,
+    );
+  }
 
   @Post(':courseId/sections')
   @ApiOperation({ summary: 'Create Section - Instructor' })

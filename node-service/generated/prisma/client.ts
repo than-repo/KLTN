@@ -145,6 +145,16 @@ export type Enrollment = Prisma.EnrollmentModel
  */
 export type Payment = Prisma.PaymentModel
 /**
+ * Model wishlist
+ * 
+ */
+export type wishlist = Prisma.wishlistModel
+/**
+ * Model flyway_schema_history
+ * 
+ */
+export type flyway_schema_history = Prisma.flyway_schema_historyModel
+/**
  * Model Skill
  * 
  */

@@ -32,6 +32,7 @@ import { QuerySectionsDto } from '../dtos/section-lesson/query-section.dto';
 import { PaginatedResponse } from '../dtos/paginated-response.dto';
 import { cleanData } from 'src/common/utils/clean-data-util';
 import { CourseAccessService } from './course-access.service';
+import { SummarizeSectionDto } from '../dtos/section-lesson/summarize-section.dto';
 
 @Injectable()
 export class CourseSectionsService {
@@ -276,5 +277,27 @@ export class CourseSectionsService {
         hasPreviousPage: page > 1,
       },
     };
+  }
+
+  async listSectionSummaries(
+    courseId: string,
+    instructorId: string,
+  ): Promise<SummarizeSectionDto[]> {
+    await this.courseAccessService.ensureInstructorCanManageCourse(
+      courseId,
+      instructorId,
+    );
+
+    const sections = await this.iCourseSectionRepository.findMany({
+      where: { courseId, deletedAt: null },
+      orderBy: { field: 'sectionIndex', direction: 'asc' },
+    });
+
+    return sections.map((section) => {
+      return plainToInstance(SummarizeSectionDto, section, {
+        excludeExtraneousValues: true,
+        groups: [SECTION_VIEW_GROUPS.INSTRUCTOR],
+      });
+    });
   }
 }
