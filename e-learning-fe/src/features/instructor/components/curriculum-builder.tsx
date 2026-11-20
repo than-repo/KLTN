@@ -28,7 +28,7 @@ import {
   reorderInstructorCourseLessons,
   updateInstructorCourseLesson,
 } from "../api/instructor-lesson-api";
-import { attachInstructorSkillToLesson, detachInstructorSkillFromLesson, getInstructorLessonSkills } from "../api/instructor-skill-api";
+import { attachInstructorSkillToLesson, detachInstructorSkillFromLesson } from "../api/instructor-skill-api";
 import { X } from "lucide-react";
 import {
   createInstructorLessonFile,
@@ -60,18 +60,6 @@ import {
 } from "../utils/lesson-media";
 import { InstructorModal } from "./instructor-modal";
 import { Toast } from "@/components/ui/toast";
-
-const difficultyOptions: { value: Skill["difficulty"]; label: string }[] = [
-  { value: "EASY", label: "Easy" },
-  { value: "MEDIUM", label: "Medium" },
-  { value: "HARD", label: "Hard" },
-];
-
-const difficultyColors: Record<Skill["difficulty"], string> = {
-  EASY: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600",
-  MEDIUM: "border-amber-500/30 bg-amber-500/10 text-amber-600",
-  HARD: "border-rose-500/30 bg-rose-500/10 text-rose-600",
-};
 
 const fieldClasses =
   "mt-2 min-h-11 w-full rounded-md border border-border bg-background px-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-focus/20";
@@ -281,15 +269,6 @@ export function CurriculumBuilder() {
     );
   }
 
-  async function fetchLessonSkills(sectionId: string, lessonId: string) {
-    if (!accessToken) return [];
-    try {
-      return await getInstructorLessonSkills(courseId, sectionId, lessonId, accessToken);
-    } catch {
-      return [];
-    }
-  }
-
   async function fetchSectionsAndLessons(silent = false) {
     if (!accessToken) return;
 
@@ -302,7 +281,6 @@ export function CurriculumBuilder() {
         accessToken,
       );
       const nextUploadedFiles: Record<string, LessonFileMedia[]> = {};
-      const nextAssignedSkills: Record<string, Skill[]> = {};
 
       const sectionsWithLessons = await Promise.all(
         sectionList.map(async (section) => {
@@ -321,13 +299,8 @@ export function CurriculumBuilder() {
                     section.id,
                     lesson.id,
                   );
-                  nextAssignedSkills[lesson.id] = await fetchLessonSkills(
-                    section.id,
-                    lesson.id,
-                  );
                 } catch {
                   nextUploadedFiles[lesson.id] = [];
-                  nextAssignedSkills[lesson.id] = [];
                 }
               }),
             );
@@ -341,7 +314,6 @@ export function CurriculumBuilder() {
 
       setSections(sectionsWithLessons);
       setUploadedFiles(nextUploadedFiles);
-      setAssignedSkills(nextAssignedSkills);
     } catch (loadError) {
       showError(getErrorMessage(loadError, "Failed to load curriculum."));
     } finally {
@@ -1475,19 +1447,18 @@ export function CurriculumBuilder() {
                                           <Badge
                                             variant="action"
                                             title={skill.canonicalName}
-                                            className={`gap-1 ${difficultyColors[skill.difficulty]}`}
+                                            className="gap-1"
                                           >
                                             {skill.canonicalName}
                                             <button
                                               type="button"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
+                                              onClick={() =>
                                                 handleDetachSkillFromLesson(
                                                   section.id,
                                                   lesson,
                                                   skill,
-                                                );
-                                              }}
+                                                )
+                                              }
                                               className="inline-flex items-center justify-center rounded hover:bg-black/10 p-0.5 transition-colors"
                                               aria-label={`Remove ${skill.canonicalName} skill`}
                                             >
@@ -1834,6 +1805,13 @@ export function CurriculumBuilder() {
           />
           <div className="flex justify-end gap-2">
             <button
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+              onClick={() => setSectionModalOpen(false)}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
               disabled={creatingSection}
               type="submit"
@@ -1858,6 +1836,13 @@ export function CurriculumBuilder() {
         </p>
         <div className="mt-5 flex justify-end gap-2">
           <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+            onClick={() => setSectionToDelete(null)}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-danger bg-danger px-5 text-sm font-semibold text-danger-foreground"
             onClick={confirmDeleteSection}
             type="button"
@@ -1880,6 +1865,13 @@ export function CurriculumBuilder() {
           ? This action cannot be undone.
         </p>
         <div className="mt-5 flex justify-end gap-2">
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+            onClick={() => setLessonToDelete(null)}
+            type="button"
+          >
+            Cancel
+          </button>
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-danger bg-danger px-5 text-sm font-semibold text-danger-foreground"
             onClick={confirmDeleteLesson}
@@ -1913,6 +1905,14 @@ export function CurriculumBuilder() {
               />
             ) : null}
             <div className="flex justify-end gap-2">
+              <button
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+                disabled={uploading !== null}
+                onClick={cancelPendingUpload}
+                type="button"
+              >
+                Cancel
+              </button>
               <button
                 className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={uploading !== null}
@@ -1989,6 +1989,14 @@ export function CurriculumBuilder() {
             </div>
             <div className="flex justify-end gap-2">
               <button
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+                disabled={savingFileEdit}
+                onClick={() => setEditingFile(null)}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
                 className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={savingFileEdit}
                 onClick={handleUpdateFileMedia}
@@ -2014,6 +2022,14 @@ export function CurriculumBuilder() {
         </p>
         <div className="mt-5 flex justify-end gap-2">
           <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+            disabled={deletingFile}
+            onClick={() => setFileToDelete(null)}
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-danger bg-danger px-5 text-sm font-semibold text-danger-foreground disabled:cursor-not-allowed disabled:opacity-60"
             disabled={deletingFile}
             onClick={confirmDeleteFileMedia}
@@ -2032,13 +2048,6 @@ export function CurriculumBuilder() {
           onClose={() => setSkillDialogLesson(null)}
           onAssign={(skill) =>
             handleAssignSkillToLesson(
-              skillDialogLesson.sectionId,
-              skillDialogLesson,
-              skill,
-            )
-          }
-          onUnassign={(skill) =>
-            handleDetachSkillFromLesson(
               skillDialogLesson.sectionId,
               skillDialogLesson,
               skill,

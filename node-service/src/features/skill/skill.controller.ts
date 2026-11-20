@@ -101,27 +101,6 @@ export class SkillController {
     return this.skillService.findListSkill(query, instructorId, courseId);
   }
 
-  @Get('course/:courseId/sections/:sectionId/lessons/:lessonId/skills')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.INSTRUCTOR)
-  @Throttle({ default: { ttl: 60_000, limit: 20 } })
-  @ApiOperation({
-    summary: 'Get skills assigned to a lesson - Instructors',
-  })
-  async getLessonSkills(
-    @CurrentUser('sub') instructorId: string,
-    @Param('courseId') courseId: string,
-    @Param('sectionId') sectionId: string,
-    @Param('lessonId') lessonId: string,
-  ): Promise<SkillResponseDto[]> {
-    return this.skillService.getLessonSkills(
-      courseId,
-      sectionId,
-      lessonId,
-      instructorId,
-    );
-  }
-
   // ==================Suggestion Skill========================
   @Post('course/:courseId/suggestions')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -156,32 +135,6 @@ export class SkillController {
     @CurrentUser('sub') instructorId: string,
   ): Promise<SkillResponseDto> {
     return this.skillService.attachSkillToLesson(
-      courseId,
-      sectionId,
-      lessonId,
-      skillId,
-      instructorId,
-    );
-  }
-
-  @Delete(
-    'course/:courseId/sections/:sectionId/lessons/:lessonId/skills/:skillId/skill-attachment',
-  )
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(UserRole.INSTRUCTOR)
-  @Throttle({ default: { ttl: 60_000, limit: 50 } })
-  @ApiOperation({
-    summary: 'Unassign a skill from Lesson - Instructors',
-  })
-  async unassignSkillFromLesson(
-    @Param('courseId') courseId: string,
-    @Param('sectionId') sectionId: string,
-    @Param('lessonId') lessonId: string,
-    @Param('skillId') skillId: string,
-    @CurrentUser('sub') instructorId: string,
-  ): Promise<void> {
-    return this.skillService.unassignSkillFromLesson(
       courseId,
       sectionId,
       lessonId,

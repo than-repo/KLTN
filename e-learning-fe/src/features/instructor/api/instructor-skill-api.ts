@@ -100,15 +100,3 @@ export function detachInstructorSkillFromLesson(
     { accessToken, method: "DELETE" },
   );
 }
-
-export function getInstructorLessonSkills(
-  courseId: string,
-  sectionId: string,
-  lessonId: string,
-  accessToken: string,
-) {
-  return apiRequest<Skill[]>(
-    `/skill/course/${courseId}/sections/${sectionId}/lessons/${lessonId}/skills`,
-    { accessToken, method: "GET" },
-  );
-}

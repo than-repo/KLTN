@@ -2,17 +2,11 @@
 
 import type { ReactNode } from "react";
 
-import { X } from "lucide-react";
-
 type AdminModalProps = {
   children: ReactNode;
   onClose: () => void;
   open: boolean;
   title: string;
-  /** Additional className for modal container (e.g., max-w-2xl) */
-  className?: string;
-  /** Whether to show the header close button (X icon) */
-  showCloseButton?: boolean;
 };
 
 export function AdminModal({
@@ -20,8 +14,6 @@ export function AdminModal({
   onClose,
   open,
   title,
-  className = "",
-  showCloseButton = true,
 }: AdminModalProps) {
   if (!open) {
     return null;
@@ -34,23 +26,21 @@ export function AdminModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
       role="dialog"
     >
-      <div className={`max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-border bg-card shadow-xl ${className}`}>
-        <div className="flex items-start justify-between gap-4 p-6 border-b border-border">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {showCloseButton && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-              aria-label="Close modal"
-            >
-              <X className="size-4" />
-            </button>
-          )}
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg border border-border bg-card p-6 shadow-xl">
+        <h2 className="text-lg font-semibold">{title}</h2>
+
+        <div className="mt-3 text-sm leading-6 text-muted-foreground">
+          {children}
         </div>
 
-        <div className="p-6">
-          {children}
+        <div className="mt-6 flex justify-end">
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-6 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-focus"
+            onClick={onClose}
+            type="button"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
