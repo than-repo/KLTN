@@ -11,12 +11,21 @@ export type LearningFile = {
   url: string;
 };
 
+export type LearningSkill = {
+  id: string;
+  canonicalName: string;
+  description: string | null;
+  aliases: string[] | null;
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+};
+
 export type LearningLesson = {
   description?: string | null;
   files: LearningFile[];
   id: string;
   lessonIndex: number;
   title: string;
+  skills?: LearningSkill[];
 };
 
 export type LearningSection = {
@@ -77,6 +86,8 @@ export type LearningLessonSummary = {
   id: string;
   lessonIndex: number;
   title: string;
+  skillCount?: number;
+  skills?: LearningSkill[];
 };
 
 export type LearningLessonDetail = LearningLesson;

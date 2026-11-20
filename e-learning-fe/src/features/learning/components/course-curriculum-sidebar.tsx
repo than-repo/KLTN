@@ -1,10 +1,13 @@
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import type { SectionLessonsState } from "./learning-course-page";
 import type {
   LearningAssessment,
+  LearningLessonSummary,
   LearningPaginationMeta,
   LearningSectionSummary,
+  LearningSkill,
 } from "../types/learning-course";
 
 type CourseCurriculumSidebarProps = {
@@ -158,6 +161,8 @@ export function CourseCurriculumSidebar({
 
                 {lessons.map((lesson, lessonIndex) => {
                   const isActive = lesson.id === activeLessonId;
+                  const lessonWithSkills = lesson as LearningLessonSummary & { skills?: LearningSkill[] };
+                  const skills: LearningSkill[] = lessonWithSkills.skills ?? [];
 
                   return (
                     <Link
@@ -190,6 +195,25 @@ export function CourseCurriculumSidebar({
                         <span className="mt-1 block text-xs text-muted-foreground">
                           {lesson.fileCount} files
                         </span>
+
+                        {skills.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {skills.slice(0, 3).map((skill) => (
+                              <Badge
+                                key={skill.id}
+                                variant="action"
+                                className="text-[10px] px-1.5 py-0.5"
+                              >
+                                {skill.canonicalName}
+                              </Badge>
+                            ))}
+                            {skills.length > 3 && (
+                              <Badge variant="neutral" className="text-[10px] px-1.5 py-0.5">
+                                +{skills.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                       </span>
                     </Link>
                   );

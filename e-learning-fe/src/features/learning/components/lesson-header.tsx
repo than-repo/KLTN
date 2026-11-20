@@ -1,8 +1,10 @@
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import type {
   LearningLessonDetail,
   LearningLessonSummary,
+  LearningSkill,
 } from "../types/learning-course";
 
 type LessonHeaderProps = {
@@ -15,6 +17,12 @@ type LessonHeaderProps = {
   sectionTitle: string;
 };
 
+const difficultyColors: Record<LearningSkill["difficulty"], string> = {
+  EASY: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  MEDIUM: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  HARD: "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400",
+};
+
 export function LessonHeader({
   courseSlug,
   lesson,
@@ -24,6 +32,8 @@ export function LessonHeader({
   sectionNumber,
   sectionTitle,
 }: LessonHeaderProps) {
+  const skills = lesson.skills ?? [];
+
   return (
     <section className="rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap gap-2 text-sm font-semibold">
@@ -51,6 +61,21 @@ export function LessonHeader({
           {lesson.description}
         </p>
       ) : null}
+
+      {skills.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2" aria-label="Lesson skills">
+          {skills.map((skill) => (
+            <Badge
+              key={skill.id}
+              variant="action"
+              className={difficultyColors[skill.difficulty]}
+              title={skill.description ?? undefined}
+            >
+              {skill.canonicalName}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       {(previousLesson || nextLesson) && (
         <nav

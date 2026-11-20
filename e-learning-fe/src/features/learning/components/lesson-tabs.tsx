@@ -2,12 +2,19 @@
 
 import { useState } from "react";
 
-import type { LearningFile, LearningLessonDetail } from "../types/learning-course";
+import { Badge } from "@/components/ui/badge";
+import type { LearningFile, LearningLessonDetail, LearningSkill } from "../types/learning-course";
 import {
   mediaTypeClasses,
   mediaTypeLabels,
   mediaTypeMarks,
 } from "../utils/learning-course";
+
+const difficultyColors: Record<LearningSkill["difficulty"], string> = {
+  EASY: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+  MEDIUM: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  HARD: "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400",
+};
 
 type LearningTab = "overview" | "resources";
 
@@ -76,6 +83,8 @@ function TabButton({
 }
 
 function LessonOverview({ lesson }: { lesson: LearningLessonDetail }) {
+  const skills = lesson.skills ?? [];
+
   return (
     <div className="grid gap-5">
       <div>
@@ -94,7 +103,28 @@ function LessonOverview({ lesson }: { lesson: LearningLessonDetail }) {
             lesson.files[0] ? mediaTypeLabels[lesson.files[0].type] : "None"
           }
         />
+        <OverviewFact label="Skills" value={`${skills.length}`} />
       </div>
+
+      {skills.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">
+            Skills taught in this lesson
+          </h4>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {skills.map((skill) => (
+              <Badge
+                key={skill.id}
+                variant="action"
+                className={difficultyColors[skill.difficulty]}
+                title={skill.description ?? undefined}
+              >
+                {skill.canonicalName}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

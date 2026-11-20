@@ -29,6 +29,7 @@ import {
   updateInstructorCourseLesson,
 } from "../api/instructor-lesson-api";
 import { attachInstructorSkillToLesson, detachInstructorSkillFromLesson } from "../api/instructor-skill-api";
+import { X } from "lucide-react";
 import {
   createInstructorLessonFile,
   deleteInstructorLessonFile,
@@ -787,6 +788,39 @@ export function CurriculumBuilder() {
     }
   }
 
+  async function handleDetachSkillFromLesson(
+    sectionId: string,
+    lesson: Lesson,
+    skill: Skill,
+  ) {
+    if (!ensureCourseEditable() || !accessToken) return;
+
+    try {
+      setError("");
+      setSuccessMessage("");
+
+      await detachInstructorSkillFromLesson(
+        courseId,
+        sectionId,
+        lesson.id,
+        skill.id,
+        accessToken,
+      );
+
+      setAssignedSkills((prev) => ({
+        ...prev,
+        [lesson.id]: (prev[lesson.id] ?? []).filter((s) => s.id !== skill.id),
+      }));
+
+      showSuccess(`Skill "${skill.canonicalName}" removed from lesson.`);
+      await fetchSectionsAndLessons(true);
+    } catch (detachError) {
+      showError(
+        getErrorMessage(detachError, "Failed to remove skill from lesson."),
+      );
+    }
+  }
+
   async function confirmDeleteLesson() {
     if (!lessonToDelete || !accessToken) return;
     if (!ensureCourseEditable()) return;
@@ -1406,13 +1440,32 @@ export function CurriculumBuilder() {
                                     </Badge>
                                     {(assignedSkills[lesson.id] ?? []).map(
                                       (skill) => (
-                                        <Badge
+                                        <div
                                           key={skill.id}
-                                          variant="action"
-                                          title={skill.canonicalName}
+                                          className="inline-flex items-center gap-1"
                                         >
-                                          {skill.canonicalName}
-                                        </Badge>
+                                          <Badge
+                                            variant="action"
+                                            title={skill.canonicalName}
+                                            className="gap-1"
+                                          >
+                                            {skill.canonicalName}
+                                            <button
+                                              type="button"
+                                              onClick={() =>
+                                                handleDetachSkillFromLesson(
+                                                  section.id,
+                                                  lesson,
+                                                  skill,
+                                                )
+                                              }
+                                              className="inline-flex items-center justify-center rounded hover:bg-black/10 p-0.5 transition-colors"
+                                              aria-label={`Remove ${skill.canonicalName} skill`}
+                                            >
+                                              <X className="size-3" />
+                                            </button>
+                                          </Badge>
+                                        </div>
                                       ),
                                     )}
                                   </div>

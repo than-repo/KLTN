@@ -53,6 +53,28 @@ export function getInstructorCourseSkills(
   );
 }
 
+export function updateInstructorSkill(
+  payload: CreateSkillPayload,
+  skillId: string,
+  accessToken: string,
+) {
+  return apiRequest<Skill>(
+    `/skill/course/${payload.courseId}/skill/${skillId}`,
+    { accessToken, body: payload, method: "PATCH" },
+  );
+}
+
+export function deleteInstructorSkill(
+  courseId: string,
+  skillId: string,
+  accessToken: string,
+) {
+  return apiRequest<void>(
+    `/skill/course/${courseId}/skill/${skillId}`,
+    { accessToken, method: "DELETE" },
+  );
+}
+
 export function attachInstructorSkillToLesson(
   courseId: string,
   sectionId: string,
