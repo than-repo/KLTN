@@ -43,8 +43,8 @@ import type {
   LessonFileMedia,
   MediaType,
   Section,
+  Skill,
 } from "../types/instructor-course";
-import type { Skill } from "../types/instructor-skill";
 import { AssignSkillToLessonDialog } from "./assign-skill-to-lesson-dialog";
 import { isCourseEditable } from "../utils/course-status";
 import { formatFileSize, getErrorMessage } from "../utils/instructor-format";
@@ -182,9 +182,6 @@ export function CurriculumBuilder() {
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [editLessonTitle, setEditLessonTitle] = useState("");
   const [editLessonDescription, setEditLessonDescription] = useState("");
-  const [assignedSkills, setAssignedSkills] = useState<Record<string, Skill[]>>(
-    {},
-  );
   const [skillDialogLesson, setSkillDialogLesson] = useState<Lesson | null>(
     null,
   );
@@ -774,10 +771,21 @@ export function CurriculumBuilder() {
         accessToken,
       );
 
-      setAssignedSkills((prev) => ({
-        ...prev,
-        [lesson.id]: [...(prev[lesson.id] ?? []), skill],
-      }));
+      // Optimistically update the local state to reflect the change immediately
+      setSections((prevSections) =>
+        prevSections.map((section) => {
+          if (section.id !== sectionId) return section;
+          return {
+            ...section,
+            lessons: section.lessons?.map((l) => {
+              if (l.id !== lesson.id) return l;
+              const existingSkills = l.skills ?? [];
+              if (existingSkills.some((s) => s.id === skill.id)) return l;
+              return { ...l, skills: [...existingSkills, skill] };
+            }),
+          };
+        }),
+      );
 
       showSuccess(`Skill "${skill.canonicalName}" assigned to lesson.`);
       await fetchSectionsAndLessons(true);
@@ -807,10 +815,22 @@ export function CurriculumBuilder() {
         accessToken,
       );
 
-      setAssignedSkills((prev) => ({
-        ...prev,
-        [lesson.id]: (prev[lesson.id] ?? []).filter((s) => s.id !== skill.id),
-      }));
+      // Optimistically update the local state to reflect the change immediately
+      setSections((prevSections) =>
+        prevSections.map((section) => {
+          if (section.id !== sectionId) return section;
+          return {
+            ...section,
+            lessons: section.lessons?.map((l) => {
+              if (l.id !== lesson.id) return l;
+              return {
+                ...l,
+                skills: (l.skills ?? []).filter((s) => s.id !== skill.id),
+              };
+            }),
+          };
+        }),
+      );
 
       showSuccess(`Skill "${skill.canonicalName}" removed from lesson.`);
       await fetchSectionsAndLessons(true);
@@ -1438,7 +1458,7 @@ export function CurriculumBuilder() {
                                       {(uploadedFiles[lesson.id] ?? []).length}{" "}
                                       media
                                     </Badge>
-                                    {(assignedSkills[lesson.id] ?? []).map(
+                                    {(lesson.skills ?? []).map(
                                       (skill) => (
                                         <div
                                           key={skill.id}
@@ -1447,7 +1467,13 @@ export function CurriculumBuilder() {
                                           <Badge
                                             variant="action"
                                             title={skill.canonicalName}
-                                            className="gap-1"
+                                            className={
+                                              skill.difficulty === "EASY"
+                                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 gap-1"
+                                                : skill.difficulty === "MEDIUM"
+                                                ? "bg-amber-50 text-amber-700 border-amber-200 gap-1"
+                                                : "bg-rose-50 text-rose-700 border-rose-200 gap-1"
+                                            }
                                           >
                                             {skill.canonicalName}
                                             <button
@@ -2044,10 +2070,17 @@ export function CurriculumBuilder() {
         <AssignSkillToLessonDialog
           courseId={courseId}
           lessonTitle={skillDialogLesson.title}
-          assignedSkills={assignedSkills[skillDialogLesson.id] ?? []}
+          assignedSkills={skillDialogLesson.skills ?? []}
           onClose={() => setSkillDialogLesson(null)}
           onAssign={(skill) =>
             handleAssignSkillToLesson(
+              skillDialogLesson.sectionId,
+              skillDialogLesson,
+              skill,
+            )
+          }
+          onRemove={(skill) =>
+            handleDetachSkillFromLesson(
               skillDialogLesson.sectionId,
               skillDialogLesson,
               skill,

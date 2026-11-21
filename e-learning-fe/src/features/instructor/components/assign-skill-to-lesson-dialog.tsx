@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, Search, X, Check } from "lucide-react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 
 import {
@@ -18,7 +18,7 @@ import type {
   SuggestSkillVariables,
 } from "../types/instructor-skill";
 
-type Tab = "browse" | "create";
+type Tab = "assigned" | "browse" | "create";
 
 type AssignSkillToLessonDialogProps = {
   courseId: string;
@@ -26,6 +26,7 @@ type AssignSkillToLessonDialogProps = {
   assignedSkills: Skill[];
   onClose: () => void;
   onAssign: (skill: Skill) => void;
+  onRemove: (skill: Skill) => void;
   onCreate?: (skill: Skill) => void;
 };
 
@@ -73,9 +74,10 @@ export function AssignSkillToLessonDialog({
   assignedSkills,
   onClose,
   onAssign,
+  onRemove,
 }: AssignSkillToLessonDialogProps) {
   const { accessToken, status } = useAuth();
-  const [tab, setTab] = useState<Tab>("browse");
+  const [tab, setTab] = useState<Tab>("assigned");
   const [searchQuery, setSearchQuery] = useState("");
   const [allCourseSkills, setAllCourseSkills] = useState<Skill[]>([]);
   const [suggestions, setSuggestions] = useState<SuggestSkillResult[]>([]);
@@ -188,6 +190,13 @@ export function AssignSkillToLessonDialog({
     [assignedSkillIds, onAssign],
   );
 
+  const handleRemove = useCallback(
+    (skill: Skill) => {
+      onRemove(skill);
+    },
+    [onRemove],
+  );
+
   const handleCreateAndAssign = useCallback(async () => {
     if (!accessToken || status !== "authenticated") return;
 
@@ -220,6 +229,7 @@ export function AssignSkillToLessonDialog({
 
       setCreateForm({ canonicalName: "", description: "", difficulty: "MEDIUM", aliases: "" });
       onAssign(skill);
+      setTab("assigned");
     } catch (error) {
       setCreateError(
         error instanceof Error
@@ -246,48 +256,52 @@ export function AssignSkillToLessonDialog({
       onClose={onClose}
       open={true}
       title={`Assign skills to "${lessonTitle}"`}
+      size="xl"
     >
       <div className="text-foreground">
         <div className="mt-3 grid gap-3">
-          <div className="flex gap-1">
+          {/* Tab Navigation */}
+          <div className="flex gap-1" role="tablist" aria-label="Skill management tabs">
             <button
+              role="tab"
+              aria-selected={tab === "assigned"}
+              className={tabClasses("assigned")}
+              onClick={() => setTab("assigned")}
+              type="button"
+            >
+              Assigned Skills
+            </button>
+            <button
+              role="tab"
+              aria-selected={tab === "browse"}
               className={tabClasses("browse")}
               onClick={() => setTab("browse")}
               type="button"
             >
-              Browse skills
+              Browse Skills
             </button>
             <button
+              role="tab"
+              aria-selected={tab === "create"}
               className={tabClasses("create")}
               onClick={() => setTab("create")}
               type="button"
             >
-              Create new skill
+              Create New Skill
             </button>
           </div>
 
-          {(assignedSkills.length > 0 ? (
-            <>
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
-                Already assigned
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {assignedSkills.map((skill) => (
-                  <Badge
-                    key={skill.id}
-                    variant="action"
-                    className={difficultyColors[skill.difficulty]}
-                    title={skill.canonicalName}
-                  >
-                    {skill.canonicalName}
-                  </Badge>
-                ))}
-              </div>
-            </>
-          ) : null)}
+          {/* Tab Panels */}
+          {tab === "assigned" && (
+            <AssignedSkillsTab
+              assignedSkills={assignedSkills}
+              difficultyColors={difficultyColors}
+              onRemove={handleRemove}
+            />
+          )}
 
-          {tab === "browse" ? (
-            <BrowseTab
+          {tab === "browse" && (
+            <BrowseSkillsTab
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               suggestions={displayedSuggestions}
@@ -298,9 +312,12 @@ export function AssignSkillToLessonDialog({
               assignedSkillIds={assignedSkillIds}
               onAssign={handleAssign}
               inputRef={inputRef}
+              difficultyColors={difficultyColors}
             />
-          ) : (
-            <CreateTab
+          )}
+
+          {tab === "create" && (
+            <CreateSkillTab
               createForm={createForm}
               setCreateForm={(patch) =>
                 setCreateForm((prev) => ({ ...prev, ...patch }))
@@ -318,7 +335,77 @@ export function AssignSkillToLessonDialog({
   );
 }
 
-type BrowseTabProps = {
+/**
+ * Tab 1: Assigned Skills - Shows skills currently attached to the lesson
+ */
+type AssignedSkillsTabProps = {
+  assignedSkills: Skill[];
+  difficultyColors: Record<Skill["difficulty"], string>;
+  onRemove: (skill: Skill) => void;
+};
+
+function AssignedSkillsTab({
+  assignedSkills,
+  difficultyColors,
+  onRemove,
+}: AssignedSkillsTabProps) {
+  if (assignedSkills.length === 0) {
+    return (
+      <div className="rounded-md border border-border bg-surface-pearl p-8 text-center">
+        <X className="mx-auto size-12 text-muted-foreground/50" />
+        <p className="mt-3 text-lg font-semibold text-foreground">No skills assigned</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          No skills assigned to this lesson yet. Switch to the "Browse Skills" or "Create New Skill" tab to add skills.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-h-[60vh] overflow-y-auto">
+      <div className="divide-y divide-border/60">
+        {assignedSkills.map((skill) => (
+          <div
+            key={skill.id}
+            className="flex items-center justify-between gap-4 py-3 min-w-0"
+          >
+            <div className="min-w-0 flex-1 flex items-center gap-3">
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <p className="font-semibold truncate max-w-[280px]">
+                  {skill.canonicalName}
+                </p>
+                <Badge variant="action" className={difficultyColors[skill.difficulty]}>
+                  {skill.difficulty}
+                </Badge>
+              </div>
+              {skill.description && (
+                <p className="truncate text-sm text-muted-foreground max-w-[350px]">
+                  {skill.description}
+                </p>
+              )}
+            </div>
+            <div className="flex-shrink-0">
+              <button
+                className="inline-flex items-center gap-1.5 min-h-9 rounded-md border border-danger/40 bg-card text-danger px-3 text-sm font-semibold transition-colors hover:bg-danger/10"
+                onClick={() => onRemove(skill)}
+                type="button"
+                aria-label={`Remove ${skill.canonicalName}`}
+              >
+                <X className="size-4" />
+                <span>Remove</span>
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Tab 2: Browse Skills - Search and browse available skills
+ */
+type BrowseSkillsTabProps = {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   suggestions: SuggestSkillResult[];
@@ -329,9 +416,10 @@ type BrowseTabProps = {
   assignedSkillIds: Set<string>;
   onAssign: (skill: Skill) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  difficultyColors: Record<Skill["difficulty"], string>;
 };
 
-function BrowseTab({
+function BrowseSkillsTab({
   searchQuery,
   setSearchQuery,
   suggestions,
@@ -342,7 +430,8 @@ function BrowseTab({
   assignedSkillIds,
   onAssign,
   inputRef,
-}: BrowseTabProps) {
+  difficultyColors,
+}: BrowseSkillsTabProps) {
   // Combine available skills and suggestions, deduplicate by ID
   const combinedSkills = useMemo(() => {
     const seen = new Set<string>();
@@ -373,6 +462,7 @@ function BrowseTab({
 
   return (
     <div className="grid gap-3">
+      {/* Search Input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
@@ -395,9 +485,11 @@ function BrowseTab({
         </div>
       ) : null}
 
+      {/* Empty States */}
       {filteredSkills.length === 0 && searchQuery.trim().length > 0 && !suggestionsLoading && !skillsLoading ? (
-        <div className="rounded-md border border-border bg-card p-4 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="rounded-md border border-border bg-card p-6 text-center">
+          <Search className="mx-auto size-12 text-muted-foreground/50" />
+          <p className="mt-3 text-sm text-muted-foreground">
             No skills found matching "{searchQuery}".
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
@@ -407,87 +499,102 @@ function BrowseTab({
       ) : null}
 
       {filteredSkills.length === 0 && searchQuery.trim().length === 0 && !skillsLoading ? (
-        <p className="text-xs text-muted-foreground text-center py-4">
-          No skills available. Create your first skill in the "Create new skill" tab.
-        </p>
+        <div className="rounded-md border border-border bg-surface-pearl p-8 text-center">
+          <Search className="mx-auto size-12 text-muted-foreground/50" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            No skills available. Create your first skill in the "Create New Skill" tab.
+          </p>
+        </div>
       ) : null}
 
+      {/* Skills List */}
       {filteredSkills.length > 0 ? (
-        <div className="grid gap-2 max-h-96 overflow-y-auto">
-          {filteredSkills.map(({ skill, source }) => {
-            const alreadyAssigned = assignedSkillIds.has(skill.id);
-            const isSuggestion = source === "suggestion";
+        <div className="max-h-[60vh] overflow-y-auto">
+          <div className="divide-y divide-border/60">
+            {filteredSkills.map(({ skill, source }) => {
+              const alreadyAssigned = assignedSkillIds.has(skill.id);
+              const isSuggestion = source === "suggestion";
 
-            return (
-              <div
-                key={skill.id}
-                className={`flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2 transition-colors ${
-                  alreadyAssigned
-                    ? "border-border bg-muted/50 opacity-60"
-                    : "border-border bg-card hover:border-primary/50 hover:bg-primary/5"
-                }`}
-              >
-                <div className="min-w-0 flex-1 flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <p className="line-clamp-1 font-semibold">
-                      {skill.canonicalName}
-                    </p>
-                    <Badge
-                      variant="action"
-                      className={difficultyColors[skill.difficulty]}
-                    >
-                      {skill.difficulty}
-                    </Badge>
-                    {isSuggestion && (
-                      <Badge variant="neutral" className="text-xs">
-                        Suggested
+              return (
+                <div
+                  key={skill.id}
+                  className={`flex items-center justify-between gap-4 py-3 min-w-0 transition-colors ${
+                    alreadyAssigned
+                      ? "bg-muted/50 opacity-60"
+                      : "bg-card hover:bg-primary/5"
+                  }`}
+                >
+                  <div className="min-w-0 flex-1 flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <p className="font-semibold truncate max-w-[280px]">
+                        {skill.canonicalName}
+                      </p>
+                      <Badge variant="action" className={difficultyColors[skill.difficulty]}>
+                        {skill.difficulty}
                       </Badge>
-                    )}
-                  </div>
-                  {skill.description ? (
-                    <p className="line-clamp-1 text-xs text-muted-foreground">
-                      {skill.description}
-                    </p>
-                  ) : null}
-                  {skill.aliases?.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {skill.aliases.slice(0, 3).map((alias) => (
-                        <Badge key={alias} variant="neutral" className="text-xs">
-                          {alias}
-                        </Badge>
-                      ))}
-                      {skill.aliases.length > 3 && (
+                      {isSuggestion && (
                         <Badge variant="neutral" className="text-xs">
-                          +{skill.aliases.length - 3}
+                          Suggested
                         </Badge>
                       )}
                     </div>
-                  ) : null}
+                    {skill.description && (
+                      <p className="truncate text-sm text-muted-foreground max-w-[350px]">
+                        {skill.description}
+                      </p>
+                    )}
+                    {skill.aliases?.length && (
+                      <div className="flex flex-wrap gap-1">
+                        {skill.aliases.slice(0, 3).map((alias) => (
+                          <Badge key={alias} variant="neutral" className="text-xs">
+                            {alias}
+                          </Badge>
+                        ))}
+                        {skill.aliases.length > 3 && (
+                          <Badge variant="neutral" className="text-xs">
+                            +{skill.aliases.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-shrink-0">
+                    {alreadyAssigned ? (
+                      <button
+                        className="inline-flex items-center gap-1.5 min-h-9 rounded-md border border-danger/40 bg-card text-danger px-3 text-sm font-semibold transition-colors hover:bg-danger/10"
+                        onClick={() => onAssign(skill)}
+                        type="button"
+                        aria-label={`Remove ${skill.canonicalName}`}
+                      >
+                        <X className="size-4" />
+                        <span>Remove</span>
+                      </button>
+                    ) : (
+                      <button
+                        className="inline-flex items-center gap-1.5 min-h-9 rounded-md border border-primary bg-primary px-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-focus"
+                        onClick={() => onAssign(skill)}
+                        type="button"
+                        aria-label={`Add ${skill.canonicalName}`}
+                      >
+                        <Plus className="size-4" />
+                        <span>Add</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  {alreadyAssigned ? (
-                    <Badge variant="neutral">Assigned</Badge>
-                  ) : (
-                    <button
-                      className="inline-flex items-center gap-1.5 min-h-9 rounded-md border border-primary bg-primary px-3 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary-focus"
-                      onClick={() => onAssign(skill)}
-                      type="button"
-                    >
-                      <Plus className="size-3.5" />
-                      <span>Add</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       ) : null}
     </div>
   );
 }
 
-type CreateTabProps = {
+/**
+ * Tab 3: Create New Skill - Form to create a new skill
+ */
+type CreateSkillTabProps = {
   createForm: SkillCreateForm;
   setCreateForm: (patch: Partial<SkillCreateForm>) => void;
   createError: string;
@@ -497,7 +604,7 @@ type CreateTabProps = {
   isValid: boolean;
 };
 
-function CreateTab({
+function CreateSkillTab({
   createForm,
   setCreateForm,
   createError,
@@ -505,14 +612,14 @@ function CreateTab({
   difficultyOptions,
   onCreateAndAssign,
   isValid,
-}: CreateTabProps) {
+}: CreateSkillTabProps) {
   const { canonicalName, description, difficulty, aliases } = createForm;
 
   const fieldClasses =
     "min-h-11 w-full rounded-md border border-border bg-background px-4 text-base outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-focus/20";
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-4">
       {createError ? (
         <div className="rounded-md border border-danger/20 bg-danger/5 px-3 py-2 text-sm text-danger">
           {createError}

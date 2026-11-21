@@ -36,6 +36,13 @@ export default async function InstructorCurriculumPage({
             </div>
             <div className="flex flex-wrap gap-2">
               <ButtonLink
+                href={`/instructor/courses/${id}/skills`}
+                size="sm"
+                variant="secondary"
+              >
+                Skills
+              </ButtonLink>
+              <ButtonLink
                 href={`/instructor/courses/${id}/edit`}
                 size="sm"
                 variant="secondary"

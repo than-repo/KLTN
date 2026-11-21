@@ -1,3 +1,7 @@
+import type { Skill } from "./instructor-skill";
+
+export type { Skill };
+
 export type CourseLevel =
   | "BEGINNER"
   | "INTERMEDIATE"
@@ -56,6 +60,7 @@ export type Lesson = {
   lessonIndex: number;
   sectionId: string;
   title: string;
+  skills?: Skill[];
 };
 
 export type Section = {
