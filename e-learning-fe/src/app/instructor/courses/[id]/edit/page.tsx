@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 import { PublicNavbar } from "@/components/layout/public-navbar/public-navbar";
-import { ButtonLink } from "@/components/ui/button-link";
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
 import { EditCourseForm } from "@/features/instructor/components/edit-course-form";
+import { InstructorCourseTabsWithCounts } from "@/features/instructor/components/instructor-course-tabs-with-counts";
 import { instructorNavLinks } from "@/features/instructor/utils/instructor-nav";
 
 export const metadata: Metadata = {
-  title: "Edit Course | E-Learning System",
+  title: "Course Settings | E-Learning System",
   description: "Update course information before submitting it for review.",
 };
 
@@ -34,13 +34,7 @@ export default async function EditInstructorCoursePage({
                 Course Settings
               </h1>
             </div>
-            <ButtonLink
-              href="/instructor/courses"
-              size="sm"
-              variant="secondary"
-            >
-              Back to My Courses
-            </ButtonLink>
+            <InstructorCourseTabsWithCounts courseId={id} currentTab="settings" />
           </div>
           <EditCourseForm key={id} />
         </section>

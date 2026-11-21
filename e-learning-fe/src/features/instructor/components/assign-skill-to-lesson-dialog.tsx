@@ -28,6 +28,10 @@ type AssignSkillToLessonDialogProps = {
   onAssign: (skill: Skill) => void;
   onRemove: (skill: Skill) => void;
   onCreate?: (skill: Skill) => void;
+  /** Optional: all course skills to avoid stale data. If not provided, will fetch internally. */
+  allCourseSkills?: Skill[];
+  /** Optional: callback to trigger refetch of course skills when needed */
+  onRefreshCourseSkills?: () => void;
 };
 
 const DEBOUNCE_MS = 300;
@@ -75,6 +79,8 @@ export function AssignSkillToLessonDialog({
   onClose,
   onAssign,
   onRemove,
+  allCourseSkills: allCourseSkillsProp,
+  onRefreshCourseSkills,
 }: AssignSkillToLessonDialogProps) {
   const { accessToken, status } = useAuth();
   const [tab, setTab] = useState<Tab>("assigned");
@@ -95,14 +101,17 @@ export function AssignSkillToLessonDialog({
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Use passed allCourseSkills if provided, otherwise use internal state
+  const effectiveAllCourseSkills = allCourseSkillsProp ?? allCourseSkills;
+
   const assignedSkillIds = useMemo(
     () => new Set(assignedSkills.map((skill) => skill.id)),
     [assignedSkills],
   );
 
   const availableSkills = useMemo(() => {
-    return allCourseSkills.filter((skill) => !assignedSkillIds.has(skill.id));
-  }, [allCourseSkills, assignedSkillIds]);
+    return effectiveAllCourseSkills.filter((skill) => !assignedSkillIds.has(skill.id));
+  }, [effectiveAllCourseSkills, assignedSkillIds]);
 
   const displayedSuggestions = searchQuery.trim().length > 0 ? suggestions : [];
 
@@ -114,8 +123,9 @@ export function AssignSkillToLessonDialog({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
 
-  // Fetch all course skills on mount
+  // Fetch all course skills on mount (only if not provided by parent)
   useEffect(() => {
+    if (allCourseSkillsProp) return; // Parent provides skills, no need to fetch
     if (!accessToken || status !== "authenticated") return;
 
     async function loadSkills() {
@@ -131,7 +141,14 @@ export function AssignSkillToLessonDialog({
     }
 
     loadSkills();
-  }, [accessToken, status, courseId]);
+  }, [accessToken, status, courseId, allCourseSkillsProp]);
+
+  // Trigger refresh when parent requests it
+  useEffect(() => {
+    if (!onRefreshCourseSkills) return;
+    // We don't call it directly here - parent will call it via ref or we expose a function
+    // This effect is just for cleanup if needed
+  }, [onRefreshCourseSkills]);
 
   // Debounced search for suggestions
   useEffect(() => {

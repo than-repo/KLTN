@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 import { PublicNavbar } from "@/components/layout/public-navbar/public-navbar";
-import { ButtonLink } from "@/components/ui/button-link";
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
 import { InstructorAssessmentsContent } from "@/features/instructor/components/instructor-assessments-content";
+import { InstructorCourseTabsWithCounts } from "@/features/instructor/components/instructor-course-tabs-with-counts";
 import { instructorNavLinks } from "@/features/instructor/utils/instructor-nav";
 
 export const metadata: Metadata = {
@@ -37,18 +37,7 @@ export default async function InstructorCourseAssessmentsPage({
                 Manage quizzes and projects for this course.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <ButtonLink
-                href={`/instructor/courses/${id}/curriculum`}
-                size="sm"
-                variant="secondary"
-              >
-                Curriculum
-              </ButtonLink>
-              <ButtonLink href="/instructor/courses" size="sm">
-                My Courses
-              </ButtonLink>
-            </div>
+            <InstructorCourseTabsWithCounts courseId={id} currentTab="assessments" />
           </div>
           <InstructorAssessmentsContent courseId={id} />
         </section>

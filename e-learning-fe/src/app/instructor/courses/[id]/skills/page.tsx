@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { PublicNavbar } from "@/components/layout/public-navbar/public-navbar";
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
 import { InstructorCourseSkillsPage } from "@/features/instructor/components/instructor-course-skills-page";
+import { InstructorCourseTabsWithCounts } from "@/features/instructor/components/instructor-course-tabs-with-counts";
 import { instructorNavLinks } from "@/features/instructor/utils/instructor-nav";
 
 export const metadata: Metadata = {
@@ -33,32 +34,7 @@ export default async function InstructorCourseSkillsRoute({
                 Course Skills
               </h1>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <a
-                href={`/instructor/courses/${id}/edit`}
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-surface-pearl px-5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
-              >
-                Course Settings
-              </a>
-              <a
-                href={`/instructor/courses/${id}/curriculum`}
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-surface-pearl px-5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
-              >
-                Curriculum Builder
-              </a>
-              <a
-                href={`/instructor/courses/${id}/assessments`}
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-surface-pearl px-5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
-              >
-                Assessments
-              </a>
-              <a
-                href="/instructor/courses"
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-focus"
-              >
-                My Courses
-              </a>
-            </div>
+            <InstructorCourseTabsWithCounts courseId={id} currentTab="skills" />
           </div>
           <InstructorCourseSkillsPage courseId={id} />
         </section>

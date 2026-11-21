@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 import { PublicNavbar } from "@/components/layout/public-navbar/public-navbar";
-import { ButtonLink } from "@/components/ui/button-link";
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
 import { CoursePreviewContent } from "@/features/instructor/components/course-preview-content";
+import { InstructorCourseTabsWithCounts } from "@/features/instructor/components/instructor-course-tabs-with-counts";
 import { instructorNavLinks } from "@/features/instructor/utils/instructor-nav";
 
 export const metadata: Metadata = {
@@ -38,13 +38,7 @@ export default async function PreviewInstructorCoursePage({
                 for approval.
               </p>
             </div>
-            <ButtonLink
-              href="/instructor/courses"
-              size="sm"
-              variant="secondary"
-            >
-              Back to My Courses
-            </ButtonLink>
+            <InstructorCourseTabsWithCounts courseId={id} currentTab="preview" />
           </div>
           <CoursePreviewContent courseId={id} key={id} />
         </section>

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 import { PublicNavbar } from "@/components/layout/public-navbar/public-navbar";
-import { ButtonLink } from "@/components/ui/button-link";
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
-import { CurriculumBuilder } from "@/features/instructor/components/curriculum-builder";
+import { LazyCurriculumBuilder } from "@/features/instructor/components/curriculum-builder/LazyCurriculumBuilder";
+import { InstructorCourseTabsWithCounts } from "@/features/instructor/components/instructor-course-tabs-with-counts";
 import { instructorNavLinks } from "@/features/instructor/utils/instructor-nav";
 
 export const metadata: Metadata = {
@@ -34,34 +34,9 @@ export default async function InstructorCurriculumPage({
                 Curriculum Builder
               </h1>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <ButtonLink
-                href={`/instructor/courses/${id}/skills`}
-                size="sm"
-                variant="secondary"
-              >
-                Skills
-              </ButtonLink>
-              <ButtonLink
-                href={`/instructor/courses/${id}/edit`}
-                size="sm"
-                variant="secondary"
-              >
-                Course Settings
-              </ButtonLink>
-              <ButtonLink
-                href={`/instructor/courses/${id}/assessments`}
-                size="sm"
-                variant="secondary"
-              >
-                Assessments
-              </ButtonLink>
-              <ButtonLink href="/instructor/courses" size="sm">
-                My Courses
-              </ButtonLink>
-            </div>
+            <InstructorCourseTabsWithCounts courseId={id} currentTab="curriculum" />
           </div>
-          <CurriculumBuilder key={id} />
+          <LazyCurriculumBuilder key={id} />
         </section>
       </RoleProtectedRoute>
     </main>
