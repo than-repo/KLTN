@@ -39,7 +39,7 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
     return result?._count.skills ?? 0;
   }
 
-  async createQuestionAndSyncTotalPoints(
+  async createQuestion(
     input: CreateAssessmentQuestionInput,
   ): Promise<AssessmentQuestion> {
     return this.prisma.$transaction(async (tx) => {
@@ -58,8 +58,6 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
         },
         include: { skills: true },
       });
-
-      await this.syncAssessmentTotalPointsTx(tx, input.assessmentId);
 
       return AssessmentQuestionsMapper.toAssessmentQuestion(question);
     });
@@ -123,7 +121,7 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
     });
   }
 
-  async updateQuestionAndSyncTotalPoints(
+  async updateQuestion(
     questionId: string,
     assessmentId: string,
     input: UpdateAssessmentQuestionInput,
@@ -167,13 +165,11 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
         include: { skills: true },
       });
 
-      await this.syncAssessmentTotalPointsTx(tx, assessmentId);
-
       return AssessmentQuestionsMapper.toAssessmentQuestion(question);
     });
   }
 
-  async softDeleteQuestionAndSyncTotalPoints(
+  async softDeleteQuestion(
     assessmentId: string,
     questionId: string,
   ): Promise<boolean> {
@@ -193,8 +189,6 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
       if (result.count === 0) {
         return false;
       }
-
-      await this.syncAssessmentTotalPointsTx(tx, assessmentId);
 
       return true;
     });
@@ -327,28 +321,5 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
     return {
       [orderBy.field]: orderBy.direction,
     };
-  }
-
-  async syncAssessmentTotalPointsTx(
-    tx: Prisma.TransactionClient,
-    assessmentId: string,
-  ): Promise<void> {
-    const result = await tx.assessmentQuestion.aggregate({
-      where: {
-        assessmentId,
-        isActive: true,
-        deletedAt: null,
-      },
-
-      _sum: { points: true },
-    });
-    await tx.assessment.update({
-      where: {
-        id: assessmentId,
-      },
-      data: {
-        totalPoints: result._sum.points ?? 0,
-      },
-    });
   }
 }

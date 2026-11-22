@@ -161,6 +161,18 @@ export class DetailedAssessmentDto {
 
   @ApiPropertyOptional({ nullable: true })
   @Expose()
+  easyQuestionCount!: number | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  @Expose()
+  mediumQuestionCount!: number | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  @Expose()
+  hardQuestionCount!: number | null;
+
+  @ApiPropertyOptional({ nullable: true })
+  @Expose()
   availableFrom!: Date | null;
 
   @ApiPropertyOptional({ nullable: true })

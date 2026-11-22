@@ -94,19 +94,16 @@ export class AssessmentQuestionsService {
       assessment.id,
     );
 
-    const question =
-      await this.iAssessmentQuestionRepository.createQuestionAndSyncTotalPoints(
-        {
-          assessmentId: assessment.id,
-          questionText: dto.questionText,
-          type: dto.type,
-          explanation: dto.explanation ?? null,
-          points: dto.points ?? 1,
-          order,
-          isActive: true,
-          skillIds: dto.skillIds,
-        },
-      );
+    const question = await this.iAssessmentQuestionRepository.createQuestion({
+      assessmentId: assessment.id,
+      questionText: dto.questionText,
+      type: dto.type,
+      explanation: dto.explanation ?? null,
+      points: dto.points ?? 1,
+      order,
+      isActive: true,
+      skillIds: dto.skillIds,
+    });
 
     return this.toInstructorResponse(question);
   }
@@ -162,7 +159,7 @@ export class AssessmentQuestionsService {
     this.ensureQuestionTypeAllowedForAssessment(assessment.type, question.type);
 
     const updatedQuestion =
-      await this.iAssessmentQuestionRepository.updateQuestionAndSyncTotalPoints(
+      await this.iAssessmentQuestionRepository.updateQuestion(
         question.id,
         assessmentId,
         {
@@ -212,11 +209,10 @@ export class AssessmentQuestionsService {
     }
     this.ensureAssessmentIsDraft(assessment.status);
 
-    const deleted =
-      await this.iAssessmentQuestionRepository.softDeleteQuestionAndSyncTotalPoints(
-        assessmentId,
-        question.id,
-      );
+    const deleted = await this.iAssessmentQuestionRepository.softDeleteQuestion(
+      assessmentId,
+      question.id,
+    );
 
     if (!deleted) {
       throw new NotFoundException('Can not delete question. Try again');
@@ -300,17 +296,6 @@ export class AssessmentQuestionsService {
     }
 
     throw new BadRequestException('Unsupported assessment type');
-  }
-
-  private async syncAssessmentTotalPoints(assessmentId: string): Promise<void> {
-    const totalPoints =
-      await this.iAssessmentQuestionRepository.sumActiveQuestionPoints(
-        assessmentId,
-      );
-
-    await this.iAssessmentRepository.updateDraftAssessment(assessmentId, {
-      totalPoints,
-    });
   }
 
   private toInstructorResponse(

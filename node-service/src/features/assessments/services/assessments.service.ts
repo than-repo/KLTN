@@ -1,4 +1,3 @@
-import { lessonSkillsInclude } from './../../courses/repositories/lesson.repository';
 import {
   BadRequestException,
   ConflictException,
@@ -454,6 +453,7 @@ export class AssessmentsService {
     const detailedAssessment =
       await this.iDetailedAssessmentRepository.findDetailedAssessment(
         assessmentId,
+        courseId,
       );
 
     if (!detailedAssessment) {
