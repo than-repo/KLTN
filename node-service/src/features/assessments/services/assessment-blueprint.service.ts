@@ -43,6 +43,7 @@ export class AssessmentBlueprintService {
     const update = await this.iAssessmentRepository.updateBlueprint(
       assessmentId,
       input,
+      total,
     );
 
     return plainToInstance(
@@ -52,6 +53,7 @@ export class AssessmentBlueprintService {
         easyQuestionCount: update.easyQuestionCount,
         mediumQuestionCount: update.mediumQuestionCount,
         hardQuestionCount: update.hardQuestionCount,
+        questionNumber: update.totalPoints,
       },
       { excludeExtraneousValues: true },
     );

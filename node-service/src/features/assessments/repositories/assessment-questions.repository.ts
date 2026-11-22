@@ -204,21 +204,6 @@ export class AssessmentQuestionsRepository implements IAssessmentQuestionReposit
     });
   }
 
-  async sumActiveQuestionPoints(assessmentId: string): Promise<number> {
-    const result = await this.prisma.assessmentQuestion.aggregate({
-      where: {
-        assessmentId,
-        isActive: true,
-        deletedAt: null,
-      },
-      _sum: {
-        points: true,
-      },
-    });
-
-    return result._sum.points ?? 0;
-  }
-
   private buildWhere(
     where: WhereAssessmentQuestionInput,
   ): Prisma.AssessmentQuestionWhereInput {

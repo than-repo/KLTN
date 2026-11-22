@@ -27,4 +27,7 @@ export class AssessmentBlueprintResponseDto {
   mediumQuestionCount!: number;
   @Expose()
   hardQuestionCount!: number;
+
+  @Expose()
+  questionNumber!: number;
 }

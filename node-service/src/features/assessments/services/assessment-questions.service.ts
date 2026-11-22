@@ -162,6 +162,7 @@ export class AssessmentQuestionsService {
       await this.iAssessmentQuestionRepository.updateQuestion(
         question.id,
         assessmentId,
+
         {
           questionText: dto.questionText,
           explanation:

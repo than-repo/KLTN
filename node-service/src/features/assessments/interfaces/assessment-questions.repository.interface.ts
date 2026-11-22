@@ -21,8 +21,9 @@ export interface IAssessmentQuestionRepository {
   count(where: WhereAssessmentQuestionInput): Promise<number>;
 
   updateQuestion(
-    assessmentId: string,
     questionId: string,
+    assessmentId: string,
+
     input: UpdateAssessmentQuestionInput,
   ): Promise<AssessmentQuestion | null>;
 
@@ -32,8 +33,6 @@ export interface IAssessmentQuestionRepository {
   ): Promise<boolean>;
 
   countActiveQuestions(assessmentId: string): Promise<number>;
-
-  sumActiveQuestionPoints(assessmentId: string): Promise<number>;
 
   countSkill(questionId: string): Promise<number>;
 }

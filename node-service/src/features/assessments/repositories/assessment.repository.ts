@@ -27,6 +27,7 @@ export class AssessmentRepository
   async updateBlueprint(
     assessmentId: string,
     input: UpdateBlueprintInput,
+    questionNumber: number,
   ): Promise<Assessment> {
     const update = await this.prisma.assessment.update({
       where: {
@@ -39,6 +40,7 @@ export class AssessmentRepository
         easyQuestionCount: input.easyQuestionCount,
         mediumQuestionCount: input.mediumQuestionCount,
         hardQuestionCount: input.hardQuestionCount,
+        totalPoints: questionNumber,
       },
     });
 

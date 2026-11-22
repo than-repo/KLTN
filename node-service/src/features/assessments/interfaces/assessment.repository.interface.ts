@@ -46,6 +46,7 @@ export interface IAssessmentRepository {
   updateBlueprint(
     assessmentId: string,
     input: UpdateBlueprintInput,
+    questionNumber: number,
   ): Promise<Assessment>;
 }
 export interface AssessmmentBlueprint {
