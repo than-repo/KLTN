@@ -26,6 +26,8 @@ import { SkillModule } from '../skill/skill.module';
 import { QuizGradingService } from './services/quiz-grading.service';
 import { AttemptFinalizationService } from './services/attempt-finalization.service';
 import { AssessmentExpiryService } from './services/assessment-expiry.service';
+import { InstructorQuestionBankController } from './controllers/instructor-question-bank.controller';
+import { AssessmentBlueprintService } from './services/assessment-blueprint.service';
 
 @Module({
   providers: [
@@ -61,9 +63,14 @@ import { AssessmentExpiryService } from './services/assessment-expiry.service';
       provide: ATTEMPT_REPOSITORY,
       useClass: AttemptRepository,
     },
+    AssessmentBlueprintService,
   ],
   imports: [PrismaModule, forwardRef(() => SkillModule)],
-  controllers: [InstructorAssessmentsController, LearnerAssessmentsController],
+  controllers: [
+    InstructorAssessmentsController,
+    LearnerAssessmentsController,
+    InstructorQuestionBankController,
+  ],
   exports: [AssessmentQuestionsService, AssessmentAccessService],
 })
 export class AssessmentsModule {}

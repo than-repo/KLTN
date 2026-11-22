@@ -31,6 +31,10 @@ export class AssessmentMapper {
       assessmentReviewTiming: assessmentPrisma.reviewTiming,
       assessmentReviewContent: assessmentPrisma.reviewContent,
 
+      easyQuestionCount: assessmentPrisma.easyQuestionCount ?? undefined,
+      mediumQuestionCount: assessmentPrisma.mediumQuestionCount ?? undefined,
+      hardQuestionCount: assessmentPrisma.hardQuestionCount ?? undefined,
+
       isActive: assessmentPrisma.isActive,
       afterLesson: assessmentPrisma.afterLessonId,
 

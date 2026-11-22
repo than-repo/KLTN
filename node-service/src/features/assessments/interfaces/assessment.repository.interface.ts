@@ -42,6 +42,22 @@ export interface IAssessmentRepository {
     assessmentId: string,
     work: (session: AssessmentPublishSession) => Promise<T>,
   ): Promise<T>;
+
+  updateBlueprint(
+    assessmentId: string,
+    input: UpdateBlueprintInput,
+  ): Promise<Assessment>;
+}
+export interface AssessmmentBlueprint {
+  id: string;
+  easyQuestionCount: number;
+  mediumQuestionCount: number;
+  hardQuestionCount: number;
+}
+export interface UpdateBlueprintInput {
+  easyQuestionCount: number;
+  mediumQuestionCount: number;
+  hardQuestionCount: number;
 }
 export interface AssessmentPublishSession {
   // Locks the assessment and returns its content.
@@ -66,6 +82,10 @@ export interface AssessmentPublishValidationRecord {
   passingScore: number | null;
 
   afterLessonId: string | null;
+
+  easyQuestionCount: number | null;
+  mediumQuestionCount: number | null;
+  hardQuestionCount: number | null;
 
   // Only active, non-deleted questions.
   questions: {
@@ -176,6 +196,10 @@ export interface Assessment {
 
   availableFrom: Date | null;
   availableUntil: Date | null;
+
+  easyQuestionCount?: number;
+  mediumQuestionCount?: number;
+  hardQuestionCount?: number;
 
   assessmentReviewTiming: AssessmentReviewTiming;
   assessmentReviewContent: AssessmentReviewContent;
