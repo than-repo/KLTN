@@ -175,7 +175,7 @@ export class SkillController {
   @Throttle({ default: { ttl: 60_000, limit: 50 } })
   @Roles(UserRole.INSTRUCTOR)
   @ApiOperation({
-    summary: 'Attach a skill into Assessment Question- Instructors',
+    summary: 'detach a skill into Assessment Question- Instructors',
   })
   async removeSkillFromQuestion(
     @CurrentUser('sub') instructorId: string,

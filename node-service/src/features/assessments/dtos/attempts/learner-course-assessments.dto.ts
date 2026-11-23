@@ -35,6 +35,7 @@ export class LearnerCourseAssessmentItemDto {
 export class LearnerCourseAssessmentsDto {
   @ApiProperty({ type: [LearnerCourseAssessmentItemDto] })
   readonly assessments!: LearnerCourseAssessmentItemDto[];
+
   @ApiProperty({ type: String, format: 'date-time' })
   readonly serverNow!: Date;
 }

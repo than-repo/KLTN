@@ -70,7 +70,9 @@ export class LearnerAssessmentsController {
 
   @Get()
   @Throttle({ default: { ttl: 60_000, limit: 300 } })
-  @ApiOperation({ summary: 'Get learner course assessments' })
+  @ApiOperation({
+    summary: 'Lists the assessments available to the learner in the course.',
+  })
   @ApiParam({ name: 'courseId', type: String })
   @ApiOkResponse({ type: LearnerCourseAssessmentsDto })
   @ApiUnauthorizedResponse()
@@ -97,7 +99,10 @@ export class LearnerAssessmentsController {
    */
   @Get(':assessmentId')
   @Throttle({ default: { ttl: 60_000, limit: 300 } })
-  @ApiOperation({ summary: 'Get learner assessment entry page' })
+  @ApiOperation({
+    summary: 'Get learner assessment entry page',
+    description: `Loads the assessment entry page. Returns the learner’s current state, remaining attempts, and primary action such as Start, Continue, or View result.`,
+  })
   @ApiParam({ name: 'courseId', type: String })
   @ApiParam({ name: 'assessmentId', type: String })
   @ApiOkResponse({ type: LearnerAssessmentDto })
