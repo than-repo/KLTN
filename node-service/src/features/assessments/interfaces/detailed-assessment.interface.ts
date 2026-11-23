@@ -12,6 +12,7 @@ import {
 export interface IDetailedAssessmentRepository {
   findDetailedAssessment(
     assessmentId: string,
+    courseId: string,
   ): Promise<DetailedAssessment | null>;
 }
 
@@ -46,6 +47,11 @@ export interface DetailedAssessment {
 
   availableFrom: Date | null;
   availableUntil: Date | null;
+
+  //blueprint attempt
+  easyQuestionCount: number | null;
+  mediumQuestionCount: number | null;
+  hardQuestionCount: number | null;
 
   reviewTiming: AssessmentReviewTiming;
   reviewContent: AssessmentReviewContent;

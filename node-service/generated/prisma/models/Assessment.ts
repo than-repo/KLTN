@@ -32,6 +32,9 @@ export type AssessmentAvgAggregateOutputType = {
   passingScore: number | null
   maxAttempts: number | null
   timeLimitMinutes: number | null
+  easyQuestionCount: number | null
+  mediumQuestionCount: number | null
+  hardQuestionCount: number | null
 }
 
 export type AssessmentSumAggregateOutputType = {
@@ -40,6 +43,9 @@ export type AssessmentSumAggregateOutputType = {
   passingScore: number | null
   maxAttempts: number | null
   timeLimitMinutes: number | null
+  easyQuestionCount: number | null
+  mediumQuestionCount: number | null
+  hardQuestionCount: number | null
 }
 
 export type AssessmentMinAggregateOutputType = {
@@ -59,6 +65,9 @@ export type AssessmentMinAggregateOutputType = {
   reviewTiming: $Enums.AssessmentReviewTiming | null
   reviewContent: $Enums.AssessmentReviewContent | null
   afterLessonId: string | null
+  easyQuestionCount: number | null
+  mediumQuestionCount: number | null
+  hardQuestionCount: number | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -82,6 +91,9 @@ export type AssessmentMaxAggregateOutputType = {
   reviewTiming: $Enums.AssessmentReviewTiming | null
   reviewContent: $Enums.AssessmentReviewContent | null
   afterLessonId: string | null
+  easyQuestionCount: number | null
+  mediumQuestionCount: number | null
+  hardQuestionCount: number | null
   isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -105,6 +117,9 @@ export type AssessmentCountAggregateOutputType = {
   reviewTiming: number
   reviewContent: number
   afterLessonId: number
+  easyQuestionCount: number
+  mediumQuestionCount: number
+  hardQuestionCount: number
   isActive: number
   createdAt: number
   updatedAt: number
@@ -119,6 +134,9 @@ export type AssessmentAvgAggregateInputType = {
   passingScore?: true
   maxAttempts?: true
   timeLimitMinutes?: true
+  easyQuestionCount?: true
+  mediumQuestionCount?: true
+  hardQuestionCount?: true
 }
 
 export type AssessmentSumAggregateInputType = {
@@ -127,6 +145,9 @@ export type AssessmentSumAggregateInputType = {
   passingScore?: true
   maxAttempts?: true
   timeLimitMinutes?: true
+  easyQuestionCount?: true
+  mediumQuestionCount?: true
+  hardQuestionCount?: true
 }
 
 export type AssessmentMinAggregateInputType = {
@@ -146,6 +167,9 @@ export type AssessmentMinAggregateInputType = {
   reviewTiming?: true
   reviewContent?: true
   afterLessonId?: true
+  easyQuestionCount?: true
+  mediumQuestionCount?: true
+  hardQuestionCount?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -169,6 +193,9 @@ export type AssessmentMaxAggregateInputType = {
   reviewTiming?: true
   reviewContent?: true
   afterLessonId?: true
+  easyQuestionCount?: true
+  mediumQuestionCount?: true
+  hardQuestionCount?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -192,6 +219,9 @@ export type AssessmentCountAggregateInputType = {
   reviewTiming?: true
   reviewContent?: true
   afterLessonId?: true
+  easyQuestionCount?: true
+  mediumQuestionCount?: true
+  hardQuestionCount?: true
   isActive?: true
   createdAt?: true
   updatedAt?: true
@@ -302,6 +332,9 @@ export type AssessmentGroupByOutputType = {
   reviewTiming: $Enums.AssessmentReviewTiming
   reviewContent: $Enums.AssessmentReviewContent
   afterLessonId: string | null
+  easyQuestionCount: number | null
+  mediumQuestionCount: number | null
+  hardQuestionCount: number | null
   isActive: boolean
   createdAt: Date
   updatedAt: Date
@@ -348,6 +381,9 @@ export type AssessmentWhereInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.StringNullableFilter<"Assessment"> | string | null
+  easyQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  mediumQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  hardQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
   isActive?: Prisma.BoolFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
@@ -375,6 +411,9 @@ export type AssessmentOrderByWithRelationInput = {
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
   afterLessonId?: Prisma.SortOrderInput | Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -406,6 +445,9 @@ export type AssessmentWhereUniqueInput = Prisma.AtLeast<{
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.StringNullableFilter<"Assessment"> | string | null
+  easyQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  mediumQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  hardQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
   isActive?: Prisma.BoolFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
@@ -433,6 +475,9 @@ export type AssessmentOrderByWithAggregationInput = {
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
   afterLessonId?: Prisma.SortOrderInput | Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrderInput | Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -464,6 +509,9 @@ export type AssessmentScalarWhereWithAggregatesInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingWithAggregatesFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentWithAggregatesFilter<"Assessment"> | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.StringNullableWithAggregatesFilter<"Assessment"> | string | null
+  easyQuestionCount?: Prisma.IntNullableWithAggregatesFilter<"Assessment"> | number | null
+  mediumQuestionCount?: Prisma.IntNullableWithAggregatesFilter<"Assessment"> | number | null
+  hardQuestionCount?: Prisma.IntNullableWithAggregatesFilter<"Assessment"> | number | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Assessment"> | Date | string
@@ -485,6 +533,9 @@ export type AssessmentCreateInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -512,6 +563,9 @@ export type AssessmentUncheckedCreateInput = {
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
   afterLessonId?: string | null
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -535,6 +589,9 @@ export type AssessmentUpdateInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -562,6 +619,9 @@ export type AssessmentUncheckedUpdateInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -587,6 +647,9 @@ export type AssessmentCreateManyInput = {
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
   afterLessonId?: string | null
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -608,6 +671,9 @@ export type AssessmentUpdateManyMutationInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -631,6 +697,9 @@ export type AssessmentUncheckedUpdateManyInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -660,6 +729,9 @@ export type AssessmentCountOrderByAggregateInput = {
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
   afterLessonId?: Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -672,6 +744,9 @@ export type AssessmentAvgOrderByAggregateInput = {
   passingScore?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   timeLimitMinutes?: Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrder
 }
 
 export type AssessmentMaxOrderByAggregateInput = {
@@ -691,6 +766,9 @@ export type AssessmentMaxOrderByAggregateInput = {
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
   afterLessonId?: Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -714,6 +792,9 @@ export type AssessmentMinOrderByAggregateInput = {
   reviewTiming?: Prisma.SortOrder
   reviewContent?: Prisma.SortOrder
   afterLessonId?: Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -726,6 +807,9 @@ export type AssessmentSumOrderByAggregateInput = {
   passingScore?: Prisma.SortOrder
   maxAttempts?: Prisma.SortOrder
   timeLimitMinutes?: Prisma.SortOrder
+  easyQuestionCount?: Prisma.SortOrder
+  mediumQuestionCount?: Prisma.SortOrder
+  hardQuestionCount?: Prisma.SortOrder
 }
 
 export type AssessmentScalarRelationFilter = {
@@ -922,6 +1006,9 @@ export type AssessmentCreateWithoutQuestionsInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -948,6 +1035,9 @@ export type AssessmentUncheckedCreateWithoutQuestionsInput = {
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
   afterLessonId?: string | null
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -986,6 +1076,9 @@ export type AssessmentUpdateWithoutQuestionsInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1012,6 +1105,9 @@ export type AssessmentUncheckedUpdateWithoutQuestionsInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1034,6 +1130,9 @@ export type AssessmentCreateWithoutAttemptsInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1060,6 +1159,9 @@ export type AssessmentUncheckedCreateWithoutAttemptsInput = {
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
   afterLessonId?: string | null
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1098,6 +1200,9 @@ export type AssessmentUpdateWithoutAttemptsInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1124,6 +1229,9 @@ export type AssessmentUncheckedUpdateWithoutAttemptsInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1146,6 +1254,9 @@ export type AssessmentCreateWithoutCourseInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1171,6 +1282,9 @@ export type AssessmentUncheckedCreateWithoutCourseInput = {
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
   afterLessonId?: string | null
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1225,6 +1339,9 @@ export type AssessmentScalarWhereInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFilter<"Assessment"> | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFilter<"Assessment"> | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.StringNullableFilter<"Assessment"> | string | null
+  easyQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  mediumQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
+  hardQuestionCount?: Prisma.IntNullableFilter<"Assessment"> | number | null
   isActive?: Prisma.BoolFilter<"Assessment"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Assessment"> | Date | string
@@ -1246,6 +1363,9 @@ export type AssessmentCreateWithoutAfterLessonInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1271,6 +1391,9 @@ export type AssessmentUncheckedCreateWithoutAfterLessonInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1321,6 +1444,9 @@ export type AssessmentCreateManyCourseInput = {
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
   afterLessonId?: string | null
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1342,6 +1468,9 @@ export type AssessmentUpdateWithoutCourseInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1367,6 +1496,9 @@ export type AssessmentUncheckedUpdateWithoutCourseInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1391,6 +1523,9 @@ export type AssessmentUncheckedUpdateManyWithoutCourseInput = {
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
   afterLessonId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1413,6 +1548,9 @@ export type AssessmentCreateManyAfterLessonInput = {
   availableUntil?: Date | string | null
   reviewTiming?: $Enums.AssessmentReviewTiming
   reviewContent?: $Enums.AssessmentReviewContent
+  easyQuestionCount?: number | null
+  mediumQuestionCount?: number | null
+  hardQuestionCount?: number | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1434,6 +1572,9 @@ export type AssessmentUpdateWithoutAfterLessonInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1459,6 +1600,9 @@ export type AssessmentUncheckedUpdateWithoutAfterLessonInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1483,6 +1627,9 @@ export type AssessmentUncheckedUpdateManyWithoutAfterLessonInput = {
   availableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   reviewTiming?: Prisma.EnumAssessmentReviewTimingFieldUpdateOperationsInput | $Enums.AssessmentReviewTiming
   reviewContent?: Prisma.EnumAssessmentReviewContentFieldUpdateOperationsInput | $Enums.AssessmentReviewContent
+  easyQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  mediumQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  hardQuestionCount?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1546,6 +1693,9 @@ export type AssessmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   reviewTiming?: boolean
   reviewContent?: boolean
   afterLessonId?: boolean
+  easyQuestionCount?: boolean
+  mediumQuestionCount?: boolean
+  hardQuestionCount?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1576,13 +1726,16 @@ export type AssessmentSelectScalar = {
   reviewTiming?: boolean
   reviewContent?: boolean
   afterLessonId?: boolean
+  easyQuestionCount?: boolean
+  mediumQuestionCount?: boolean
+  hardQuestionCount?: boolean
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type AssessmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "title" | "description" | "type" | "status" | "order" | "totalPoints" | "passingScore" | "maxAttempts" | "timeLimitMinutes" | "availableFrom" | "availableUntil" | "reviewTiming" | "reviewContent" | "afterLessonId" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["assessment"]>
+export type AssessmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "title" | "description" | "type" | "status" | "order" | "totalPoints" | "passingScore" | "maxAttempts" | "timeLimitMinutes" | "availableFrom" | "availableUntil" | "reviewTiming" | "reviewContent" | "afterLessonId" | "easyQuestionCount" | "mediumQuestionCount" | "hardQuestionCount" | "isActive" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["assessment"]>
 export type AssessmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CourseDefaultArgs<ExtArgs>
   afterLesson?: boolean | Prisma.Assessment$afterLessonArgs<ExtArgs>
@@ -1616,6 +1769,9 @@ export type $AssessmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     reviewTiming: $Enums.AssessmentReviewTiming
     reviewContent: $Enums.AssessmentReviewContent
     afterLessonId: string | null
+    easyQuestionCount: number | null
+    mediumQuestionCount: number | null
+    hardQuestionCount: number | null
     isActive: boolean
     createdAt: Date
     updatedAt: Date
@@ -2009,6 +2165,9 @@ export interface AssessmentFieldRefs {
   readonly reviewTiming: Prisma.FieldRef<"Assessment", 'AssessmentReviewTiming'>
   readonly reviewContent: Prisma.FieldRef<"Assessment", 'AssessmentReviewContent'>
   readonly afterLessonId: Prisma.FieldRef<"Assessment", 'String'>
+  readonly easyQuestionCount: Prisma.FieldRef<"Assessment", 'Int'>
+  readonly mediumQuestionCount: Prisma.FieldRef<"Assessment", 'Int'>
+  readonly hardQuestionCount: Prisma.FieldRef<"Assessment", 'Int'>
   readonly isActive: Prisma.FieldRef<"Assessment", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Assessment", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Assessment", 'DateTime'>

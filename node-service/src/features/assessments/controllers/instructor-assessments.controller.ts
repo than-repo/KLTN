@@ -56,7 +56,7 @@ import { UpdatedPublishedAssessmentResponseDto } from '../dtos/assessment/update
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.INSTRUCTOR)
 @ApiTags('Assessment - Instructor')
-@Throttle({ default: { ttl: 60, limit: 5 } })
+@Throttle({ default: { ttl: 60_000, limit: 5 } })
 export class InstructorAssessmentsController {
   constructor(
     private readonly assessmentsService: AssessmentsService,

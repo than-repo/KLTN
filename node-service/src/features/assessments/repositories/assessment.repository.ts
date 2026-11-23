@@ -3,11 +3,14 @@ import {
   Assessment,
   AssessmentPublishSession,
   AssessmentPublishValidationRecord,
+  AssessmentType,
+  AssessmmentBlueprint,
   CreateAssessmentInput,
   IAssessmentRepository,
   InvalidAfterLessonError,
   OrderAssessmentInput,
   UpdateAssessmentInput,
+  UpdateBlueprintInput,
   UpdatePublishedAssessmentInput,
   WhereAssessmentInput,
 } from '../interfaces/assessment.repository.interface';
@@ -20,6 +23,29 @@ export class AssessmentRepository
   implements IAssessmentRepository, AssessmentPublishSession
 {
   constructor(private readonly prisma: PrismaService) {}
+
+  async updateBlueprint(
+    assessmentId: string,
+    input: UpdateBlueprintInput,
+    questionNumber: number,
+  ): Promise<Assessment> {
+    const update = await this.prisma.assessment.update({
+      where: {
+        id: assessmentId,
+        isActive: true,
+        deletedAt: null,
+        type: AssessmentType.QUIZ,
+      },
+      data: {
+        easyQuestionCount: input.easyQuestionCount,
+        mediumQuestionCount: input.mediumQuestionCount,
+        hardQuestionCount: input.hardQuestionCount,
+        totalPoints: questionNumber,
+      },
+    });
+
+    return AssessmentMapper.toAssessment(update);
+  }
   findForUpdate(): Promise<AssessmentPublishValidationRecord | null> {
     throw new Error('Method not implemented.');
   }
@@ -61,6 +87,9 @@ export class AssessmentRepository
                 deletedAt: true,
                 passingScore: true,
                 afterLessonId: true,
+                easyQuestionCount: true,
+                mediumQuestionCount: true,
+                hardQuestionCount: true,
 
                 questions: {
                   where: {

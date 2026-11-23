@@ -32,10 +32,12 @@ export class DetailedAssessmentRepository implements IDetailedAssessmentReposito
 
   async findDetailedAssessment(
     assessmentId: string,
+    courseId: string,
   ): Promise<DetailedAssessment | null> {
     const detailedAssessment = await this.prisma.assessment.findFirst({
       where: {
         id: assessmentId,
+        courseId,
       },
       include: detailedAssessmentInclude,
     });
@@ -69,6 +71,11 @@ export class DetailedAssessmentRepository implements IDetailedAssessmentReposito
 
       availableFrom: assessmentPrisma.availableFrom ?? null,
       availableUntil: assessmentPrisma.availableUntil ?? null,
+
+      //blueprint
+      easyQuestionCount: assessmentPrisma.easyQuestionCount ?? null,
+      mediumQuestionCount: assessmentPrisma.mediumQuestionCount ?? null,
+      hardQuestionCount: assessmentPrisma.hardQuestionCount ?? null,
 
       reviewTiming: assessmentPrisma.reviewTiming,
       reviewContent: assessmentPrisma.reviewContent,

@@ -3,7 +3,7 @@
 import { Difficulty, Prisma } from 'generated/prisma/client';
 
 export interface IAssessmentQuestionRepository {
-  createQuestionAndSyncTotalPoints(
+  createQuestion(
     input: CreateAssessmentQuestionInput,
   ): Promise<AssessmentQuestion>;
 
@@ -20,22 +20,19 @@ export interface IAssessmentQuestionRepository {
 
   count(where: WhereAssessmentQuestionInput): Promise<number>;
 
-  updateQuestionAndSyncTotalPoints(
-    assessmentId: string,
+  updateQuestion(
     questionId: string,
+    assessmentId: string,
+
     input: UpdateAssessmentQuestionInput,
   ): Promise<AssessmentQuestion | null>;
 
-  softDeleteQuestionAndSyncTotalPoints(
+  softDeleteQuestion(
     assessmentId: string,
     questionId: string,
   ): Promise<boolean>;
 
   countActiveQuestions(assessmentId: string): Promise<number>;
-
-  sumActiveQuestionPoints(assessmentId: string): Promise<number>;
-
-  syncAssessmentTotalPointsTx(tx: unknown, assessmentId: string): Promise<void>;
 
   countSkill(questionId: string): Promise<number>;
 }

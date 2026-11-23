@@ -1,4 +1,3 @@
-import { lessonSkillsInclude } from './../../courses/repositories/lesson.repository';
 import {
   BadRequestException,
   ConflictException,
@@ -340,7 +339,14 @@ export class AssessmentsService {
               assessment.courseId,
             );
           }
+          const questionNumber =
+            Number(assessment.easyQuestionCount || 0) +
+            Number(assessment.mediumQuestionCount || 0) +
+            Number(assessment.hardQuestionCount || 0);
 
+          if (questionNumber <= 0) {
+            throw new BadRequestException('Invalid difficulty distribution');
+          }
           const { totalPoints } = this.validateAssessmentContent(assessment);
           const published = await session.publish(totalPoints);
 
@@ -447,6 +453,7 @@ export class AssessmentsService {
     const detailedAssessment =
       await this.iDetailedAssessmentRepository.findDetailedAssessment(
         assessmentId,
+        courseId,
       );
 
     if (!detailedAssessment) {
