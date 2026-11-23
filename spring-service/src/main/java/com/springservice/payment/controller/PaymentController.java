@@ -1,7 +1,6 @@
 package com.springservice.payment.controller;
 
 import java.net.URI;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -10,23 +9,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springservice.payment.dto.CreateSepayPaymentRequest;
+import com.springservice.payment.dto.CreateSepayPaymentResponse;
 import com.springservice.payment.dto.CreateSimulationPaymentRequest;
-import com.springservice.payment.dto.CreateVnpayPaymentRequest;
-import com.springservice.payment.dto.CreateVnpayPaymentResponse;
 import com.springservice.payment.dto.GetPaymentsQuery;
 import com.springservice.payment.dto.GetPaymentsResponse;
+import com.springservice.payment.dto.SepayIpnRequest;
+import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.dto.SepayReturnQuery;
+import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
-import com.springservice.payment.dto.VnpayIpnResponse;
-import com.springservice.payment.dto.VnpayReturnQuery;
-import com.springservice.payment.dto.VnpayReturnResponse;
-import com.springservice.payment.dto.VnpayVerifyReturnResponse;
 import com.springservice.payment.service.PaymentService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
@@ -40,23 +39,21 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    // Create VNPay payment URL
-    @PostMapping("/vnpay/create-payment-url")
-    public ResponseEntity<CreateVnpayPaymentResponse> createVnpayPaymentUrl(
+    // Create SePay payment
+    @PostMapping("/sepay/create-payment")
+    public ResponseEntity<CreateSepayPaymentResponse> createSepayPayment(
             @AuthenticationPrincipal Jwt jwt,
-            @Valid @RequestBody CreateVnpayPaymentRequest request,
-            HttpServletRequest httpRequest) {
+            @Valid @RequestBody CreateSepayPaymentRequest request) {
 
         String userId = jwt.getSubject();
-        String ipAddr = getClientIpAddress(httpRequest);
 
-        CreateVnpayPaymentResponse response = paymentService.createVnpayPayment(userId, request, ipAddr);
+        CreateSepayPaymentResponse response = paymentService.createSepayPayment(userId, request);
 
         return ResponseEntity.created(URI.create("/api/payments/" + response.getPaymentId()))
                 .body(response);
     }
 
-    // Create Simulation payment (for testing)
+    // Create Simulation payment (for testing) - PRESERVED
     @PostMapping("/simulation/create-payment")
     public ResponseEntity<SimulationPaymentResponse> createSimulationPayment(
             @AuthenticationPrincipal Jwt jwt,
@@ -68,7 +65,7 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // Confirm simulation payment
+    // Confirm simulation payment - PRESERVED
     @PostMapping("/simulation/{paymentId}/confirm")
     public ResponseEntity<SimulationPaymentResponse> confirmSimulationPayment(
             @AuthenticationPrincipal Jwt jwt,
@@ -80,7 +77,7 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // Fail simulation payment
+    // Fail simulation payment - PRESERVED
     @PostMapping("/simulation/{paymentId}/fail")
     public ResponseEntity<SimulationPaymentResponse> failSimulationPayment(
             @AuthenticationPrincipal Jwt jwt,
@@ -92,43 +89,26 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // VNPay Return URL (user redirected back from VNPay) - redirects to frontend
-    @GetMapping("/vnpay/return")
-    public ResponseEntity<VnpayReturnResponse> handleVnpayReturn(VnpayReturnQuery query) {
-        VnpayReturnResponse response = paymentService.handleVnpayReturn(query);
+    // SePay Return URL (browser redirect from SePay) - public endpoint
+    @GetMapping("/sepay/return")
+    public ResponseEntity<SepayReturnResponse> handleSepayReturn(SepayReturnQuery query) {
+        SepayReturnResponse response = paymentService.handleSepayReturn(query);
         return ResponseEntity.ok(response);
     }
 
-    // VNPay Verify Return (for frontend to check payment result)
-    @GetMapping("/vnpay/verify-return")
-    public ResponseEntity<VnpayVerifyReturnResponse> verifyVnpayReturn(VnpayReturnQuery query) {
-        VnpayVerifyReturnResponse response = paymentService.verifyVnpayReturn(query);
-        return ResponseEntity.ok(response);
-    }
+    // SePay IPN (server-to-server notification) - public endpoint
+    @PostMapping("/sepay/ipn")
+    public ResponseEntity<SepayIpnResponse> handleSepayIpn(
+            @RequestHeader("X-Secret-Key") String secretKey,
+            @RequestBody SepayIpnRequest request) {
 
-    // VNPay IPN (server-to-server notification)
-    @PostMapping("/vnpay/ipn")
-    public ResponseEntity<VnpayIpnResponse> handleVnpayIpn(
-            @RequestParam Map<String, String> allParams) {
-        // Convert Map to VnpayReturnQuery
-        VnpayReturnQuery query = new VnpayReturnQuery();
-        java.lang.reflect.Field[] fields = VnpayReturnQuery.class.getDeclaredFields();
-        for (java.lang.reflect.Field field : fields) {
-            field.setAccessible(true);
-            try {
-                com.fasterxml.jackson.annotation.JsonProperty ann = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class);
-                if (ann != null) {
-                    String value = allParams.get(ann.value());
-                    if (value != null) {
-                        field.set(query, value);
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                // ignore
-            }
+        SepayIpnResponse response = paymentService.handleSepayIpn(secretKey, request);
+
+        // SePay expects HTTP 200 for all acknowledged responses
+        // Only return 500 for internal errors that should trigger retry
+        if (!response.isSuccess() && "INTERNAL_ERROR".equals(response.getCode())) {
+            return ResponseEntity.internalServerError().body(response);
         }
-
-        VnpayIpnResponse response = paymentService.handleVnpayIpn(query);
         return ResponseEntity.ok(response);
     }
 
@@ -142,29 +122,5 @@ public class PaymentController {
         GetPaymentsResponse response = paymentService.getLearnerPayments(userId, query);
 
         return ResponseEntity.ok(response);
-    }
-
-    private String getClientIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        // If multiple IPs, take the first one
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
     }
 }

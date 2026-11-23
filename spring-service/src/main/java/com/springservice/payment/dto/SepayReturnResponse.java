@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VnpayVerifyReturnResponse {
+public class SepayReturnResponse {
 
     @JsonProperty("status")
-    private String status; // "success", "failed", "already_paid"
+    private String status; // "success", "failed", "pending", "already_paid"
 
     @JsonProperty("payment")
     private PaymentResponseDto payment;

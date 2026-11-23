@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.springservice.payment.dto.VnpayIpnResponse;
+import com.springservice.payment.dto.SepayIpnResponse;
 
 @ControllerAdvice
 public class PaymentExceptionHandler {
@@ -25,10 +25,10 @@ public class PaymentExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler(VnpaySignatureException.class)
-    public ResponseEntity<VnpayIpnResponse> handleVnpaySignature(VnpaySignatureException ex) {
+    @ExceptionHandler(SepaySignatureException.class)
+    public ResponseEntity<SepayIpnResponse> handleSepaySignature(SepaySignatureException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new VnpayIpnResponse("97", "Checksum failed"));
+                .body(SepayIpnResponse.invalidSignature());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -2,9 +2,7 @@ package com.springservice.payment.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,20 +10,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.springservice.payment.config.VnpayConfig;
+import com.springservice.payment.config.SepayConfig;
+import com.springservice.payment.dto.CreateSepayPaymentRequest;
+import com.springservice.payment.dto.CreateSepayPaymentResponse;
 import com.springservice.payment.dto.CreateSimulationPaymentRequest;
-import com.springservice.payment.dto.CreateVnpayPaymentRequest;
-import com.springservice.payment.dto.CreateVnpayPaymentResponse;
-import com.springservice.payment.dto.CreateVnpayPaymentUrlParams;
 import com.springservice.payment.dto.GetPaymentsQuery;
 import com.springservice.payment.dto.GetPaymentsResponse;
 import com.springservice.payment.dto.LearnerPaymentItem;
 import com.springservice.payment.dto.PaymentResponseDto;
+import com.springservice.payment.dto.SepayCheckoutForm;
+import com.springservice.payment.dto.SepayIpnRequest;
+import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.dto.SepayReturnQuery;
+import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
-import com.springservice.payment.dto.VnpayIpnResponse;
-import com.springservice.payment.dto.VnpayReturnQuery;
-import com.springservice.payment.dto.VnpayReturnResponse;
-import com.springservice.payment.dto.VnpayVerifyReturnResponse;
 import com.springservice.payment.entity.Enrollment;
 import com.springservice.payment.entity.Payment;
 import com.springservice.payment.entity.PaymentMethod;
@@ -34,7 +32,7 @@ import com.springservice.payment.exception.CourseNotFoundException;
 import com.springservice.payment.exception.CourseUnavailableException;
 import com.springservice.payment.exception.InvalidPaymentStateException;
 import com.springservice.payment.exception.PaymentNotFoundException;
-import com.springservice.payment.exception.VnpaySignatureException;
+import com.springservice.payment.exception.SepaySignatureException;
 import com.springservice.payment.repository.PaymentRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -46,16 +44,16 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final VnpayService vnpayService;
-    private final VnpayConfig vnpayConfig;
+    private final SepayService sepayService;
+    private final SepayConfig sepayConfig;
     private final CourseService courseService;
     private final EnrollmentService enrollmentService;
 
     private static final int DEFAULT_PAYMENT_LIMIT = 10;
     private static final int MAX_PAYMENT_LIMIT = 50;
 
-    // VNPay Payment
-    public CreateVnpayPaymentResponse createVnpayPayment(String userId, CreateVnpayPaymentRequest request, String ipAddr) {
+    // SePay Payment
+    public CreateSepayPaymentResponse createSepayPayment(String userId, CreateSepayPaymentRequest request) {
         CourseService.CoursePrice course = courseService.getCoursePrice(request.getCourseId());
 
         if (course == null) {
@@ -76,22 +74,15 @@ public class PaymentService {
 
         String txnRef = generateTxnRef("PAY");
 
-        Payment payment = new Payment(userId, request.getCourseId(), amountInt, PaymentMethod.VNPAY, "VNPAY", txnRef);
+        Payment payment = new Payment(userId, request.getCourseId(), amountInt, PaymentMethod.SEPAY, "SEPAY", txnRef);
         payment = paymentRepository.save(payment);
 
-        String paymentUrl = vnpayService.createPaymentUrl(new CreateVnpayPaymentUrlParams(
-                txnRef,
-                amount,
-                "Thanh toan khoa hoc",
-                ipAddr,
-                request.getBankCode(),
-                request.getLocale() != null ? request.getLocale() : "vn"
-        ));
+        SepayCheckoutForm checkoutForm = sepayService.createCheckoutForm(payment);
 
-        return new CreateVnpayPaymentResponse(payment.getId(), payment.getTxnRef(), amount, paymentUrl);
+        return new CreateSepayPaymentResponse(payment.getId(), payment.getTxnRef(), amount, checkoutForm);
     }
 
-    // Simulation Payment
+    // Simulation Payment (PRESERVED - unchanged)
     @Transactional
     public SimulationPaymentResponse createSimulationPayment(String userId, CreateSimulationPaymentRequest request) {
         CourseService.CoursePrice course = courseService.getCoursePrice(request.getCourseId());
@@ -156,118 +147,180 @@ public class PaymentService {
         return toSimulationPaymentResponse("failed", failed);
     }
 
-    // VNPay Return URL handling (user redirected back)
-    public VnpayReturnResponse handleVnpayReturn(VnpayReturnQuery query) {
-        java.util.Map<String, String> safeQuery = normalizeVnpayQuery(query);
-
-        if (!vnpayService.verifyReturnUrl(safeQuery)) {
-            throw new VnpaySignatureException("Invalid VNPay signature");
+    // SePay Return URL handling (browser redirect from SePay)
+    public SepayReturnResponse handleSepayReturn(SepayReturnQuery query) {
+        String invoiceNumber = query.getOrderInvoiceNumber();
+        if (invoiceNumber == null) {
+            invoiceNumber = query.getOrderId();
         }
+        final String finalInvoiceNumber = invoiceNumber;
 
-        String txnRef = getRequiredVnpayParam(safeQuery, "vnp_TxnRef");
-        String responseCode = getRequiredVnpayParam(safeQuery, "vnp_ResponseCode");
-        String transactionStatus = getRequiredVnpayParam(safeQuery, "vnp_TransactionStatus");
+        Payment payment = paymentRepository.findByTxnRef(finalInvoiceNumber)
+                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for txnRef", finalInvoiceNumber));
 
-        boolean isSuccess = "00".equals(responseCode) && "00".equals(transactionStatus);
-
-        Payment payment = paymentRepository.findByTxnRef(txnRef)
-                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for txnRef", txnRef));
-
+        // Return endpoint does NOT confirm payment - only shows current state
+        // Payment is confirmed only via IPN
+        String status;
         if (payment.getStatus() == PaymentStatus.PAID) {
-            return toVnpayReturnResponse("already_paid", payment);
+            status = "already_paid";
+        } else if (payment.getStatus() == PaymentStatus.PENDING) {
+            status = "pending";
+        } else if (payment.getStatus() == PaymentStatus.FAILED) {
+            status = "failed";
+        } else if (payment.getStatus() == PaymentStatus.CANCELLED) {
+            status = "cancelled";
+        } else if (payment.getStatus() == PaymentStatus.EXPIRED) {
+            status = "expired";
+        } else {
+            status = "unknown";
         }
 
-        return toVnpayReturnResponse(isSuccess ? "success" : "failed", payment);
+        return new SepayReturnResponse(status, toPaymentResponseDto(payment));
     }
 
-    // VNPay Verify Return (for frontend to check payment result)
-    public VnpayVerifyReturnResponse verifyVnpayReturn(VnpayReturnQuery query) {
-        java.util.Map<String, String> safeQuery = normalizeVnpayQuery(query);
-
-        if (!vnpayService.verifyReturnUrl(safeQuery)) {
-            throw new VnpaySignatureException("Invalid VNPay signature");
-        }
-
-        String txnRef = getRequiredVnpayParam(safeQuery, "vnp_TxnRef");
-        String responseCode = getRequiredVnpayParam(safeQuery, "vnp_ResponseCode");
-        String transactionStatus = getRequiredVnpayParam(safeQuery, "vnp_TransactionStatus");
-
-        boolean isSuccess = "00".equals(responseCode) && "00".equals(transactionStatus);
-
-        Payment payment = paymentRepository.findByTxnRef(txnRef)
-                .orElseThrow(() -> new PaymentNotFoundException("Payment not found for txnRef", txnRef));
-
-        if (payment.getStatus() == PaymentStatus.PAID) {
-            return toVnpayVerifyReturnResponse("already_paid", payment);
-        }
-
-        return toVnpayVerifyReturnResponse(isSuccess ? "success" : "failed", payment);
-    }
-
-    private VnpayVerifyReturnResponse toVnpayVerifyReturnResponse(String status, Payment payment) {
-        return new VnpayVerifyReturnResponse(status, toPaymentResponseDto(payment));
-    }
-
-    // VNPay IPN (server-to-server notification)
-    public VnpayIpnResponse handleVnpayIpn(VnpayReturnQuery query) {
+    // SePay IPN (server-to-server notification) - AUTHORITATIVE payment confirmation
+    public SepayIpnResponse handleSepayIpn(String secretKey, SepayIpnRequest request) {
         try {
-            java.util.Map<String, String> safeQuery = normalizeVnpayQuery(query);
-
-            if (!vnpayService.verifyReturnUrl(safeQuery)) {
-                return new VnpayIpnResponse("97", "Checksum failed");
+            // Step 1: Verify IPN signature (authentication)
+            if (!sepayService.verifyIpnSignature(secretKey)) {
+                log.warn("SePay IPN authentication failed");
+                return SepayIpnResponse.invalidSignature();
             }
 
-            String txnRef = safeQuery.get("vnp_TxnRef");
-            String responseCode = safeQuery.get("vnp_ResponseCode");
-            String transactionStatus = safeQuery.get("vnp_TransactionStatus");
-            String vnpAmount = safeQuery.get("vnp_Amount");
-
-            if (txnRef == null) {
-                return new VnpayIpnResponse("01", "Order not found");
+            // Step 2: Validate notification type
+            if (request.getNotificationType() == null) {
+                log.warn("SePay IPN missing notification_type");
+                return SepayIpnResponse.invalidNotification();
             }
 
-            Optional<Payment> paymentOpt = paymentRepository.findByTxnRef(txnRef);
+            // Step 3: Find payment by invoice number
+            String invoiceNumber = request.getOrder() != null ? request.getOrder().getOrderInvoiceNumber() : null;
+            if (invoiceNumber == null) {
+                log.warn("SePay IPN missing order_invoice_number");
+                return SepayIpnResponse.invalidNotification();
+            }
+
+            Optional<Payment> paymentOpt = paymentRepository.findByTxnRef(invoiceNumber);
             if (paymentOpt.isEmpty()) {
-                return new VnpayIpnResponse("01", "Order not found");
+                log.warn("SePay IPN order not found: {}", invoiceNumber);
+                return SepayIpnResponse.orderNotFound();
             }
 
             Payment payment = paymentOpt.get();
 
-            // Validate amount (VNPay sends amount * 100)
-            if (!isValidVnpayAmount(vnpAmount, payment.getAmount())) {
-                return new VnpayIpnResponse("04", "Amount invalid");
+            // Step 4: Validate payment method and provider
+            if (payment.getPaymentMethod() != PaymentMethod.SEPAY || !"SEPAY".equals(payment.getProvider())) {
+                log.warn("SePay IPN received for non-SePay payment: {}", invoiceNumber);
+                return SepayIpnResponse.invalidNotification();
             }
 
-            boolean isSuccess = "00".equals(responseCode) &&
-                    (transactionStatus == null || "00".equals(transactionStatus));
-
-            if (isSuccess) {
-                String providerPaymentId = safeQuery.get("vnp_TransactionNo");
-                String providerMetadata = safeQuery.toString();
-
-                Payment settled = settlePaidPaymentAndActivateEnrollment(
-                        payment.getId(), providerPaymentId, providerMetadata, LocalDateTime.now());
-
-                if (settled.getStatus() == PaymentStatus.PAID) {
-                    return new VnpayIpnResponse("00", "Success");
-                } else {
-                    return new VnpayIpnResponse("02", "This order has been updated to the payment status");
-                }
+            // Step 5: Process based on notification type
+            if (sepayService.isOrderPaidNotification(request.getNotificationType())) {
+                return processOrderPaidIpn(payment, request);
+            } else if (sepayService.isTransactionVoidNotification(request.getNotificationType())) {
+                return processTransactionVoidIpn(payment, request);
+            } else {
+                log.warn("SePay IPN unknown notification_type: {}", request.getNotificationType());
+                return SepayIpnResponse.invalidNotification();
             }
-
-            if (payment.getStatus() != PaymentStatus.PENDING) {
-                return new VnpayIpnResponse("02", "This order has been updated to the payment status");
+        } catch (IllegalArgumentException e) {
+            log.warn("SePay IPN validation failed: {}", e.getMessage());
+            // Determine specific error from message
+            String msg = e.getMessage().toLowerCase();
+            if (msg.contains("amount")) {
+                return SepayIpnResponse.amountMismatch();
+            } else if (msg.contains("currency")) {
+                return SepayIpnResponse.currencyMismatch();
             }
-
-            String providerPaymentId = safeQuery.get("vnp_TransactionNo");
-            String providerMetadata = safeQuery.toString();
-            markPendingPaymentFailed(payment.getId(), providerPaymentId, providerMetadata);
-
-            return new VnpayIpnResponse("00", "Success");
+            return SepayIpnResponse.invalidNotification();
         } catch (Exception e) {
-            log.error("VNPay IPN error", e);
-            return new VnpayIpnResponse("99", "Unknown error");
+            log.error("SePay IPN processing error", e);
+            return SepayIpnResponse.internalError();
         }
+    }
+
+    private SepayIpnResponse processOrderPaidIpn(Payment payment, SepayIpnRequest request) {
+        // Validate amount and currency
+        sepayService.validateAmountAndCurrency(payment, request);
+
+        // Check if already paid - idempotent
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            log.info("SePay IPN: Payment already PAID, idempotent response: {}", payment.getTxnRef());
+            return SepayIpnResponse.alreadyProcessed();
+        }
+
+        // Don't overwrite terminal states (FAILED, CANCELLED, EXPIRED)
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            log.info("SePay IPN: Payment in terminal state {}, not overwriting: {}", payment.getStatus(), payment.getTxnRef());
+            return SepayIpnResponse.alreadyProcessed();
+        }
+
+        // Step 6: Atomic settlement - only transitions PENDING -> PAID
+        String providerPaymentId = request.getTransaction() != null ? request.getTransaction().getTransactionId() : null;
+        String providerMetadata = request.toString(); // Could serialize to JSON properly
+        LocalDateTime paidAt = LocalDateTime.now();
+
+        int updated = paymentRepository.settlePaymentIfPending(
+                payment.getId(),
+                PaymentStatus.PAID,
+                providerPaymentId,
+                providerMetadata,
+                paidAt,
+                true,
+                PaymentStatus.PENDING
+        );
+
+        if (updated == 0) {
+            // Race condition: another thread already updated it
+            Payment current = paymentRepository.findById(payment.getId()).orElseThrow();
+            if (current.getStatus() == PaymentStatus.PAID) {
+                return SepayIpnResponse.alreadyProcessed();
+            }
+            // Payment in terminal state, don't overwrite
+            return SepayIpnResponse.alreadyProcessed();
+        }
+
+        // Reload payment after update
+        final String paymentId = payment.getId();
+        payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+
+        // Step 7: Activate enrollment (reuse existing logic)
+        try {
+            enrollmentService.activateEnrollmentForPayment(payment, paidAt);
+        } catch (Exception e) {
+            log.error("Failed to activate enrollment for payment {}", payment.getId(), e);
+            // Payment is already marked as PAID, enrollment can be retried
+        }
+
+        log.info("SePay IPN: Payment settled successfully: {}", payment.getTxnRef());
+        return SepayIpnResponse.success();
+    }
+
+    private SepayIpnResponse processTransactionVoidIpn(Payment payment, SepayIpnRequest request) {
+        // Validate amount and currency
+        sepayService.validateAmountAndCurrency(payment, request);
+
+        // If already paid, don't reverse
+        if (payment.getStatus() == PaymentStatus.PAID) {
+            log.info("SePay IPN: TRANSACTION_VOID for already PAID payment, ignoring: {}", payment.getTxnRef());
+            return SepayIpnResponse.alreadyProcessed();
+        }
+
+        // If already in terminal state, don't change
+        if (payment.getStatus() != PaymentStatus.PENDING) {
+            log.info("SePay IPN: TRANSACTION_VOID for payment in state {}, not changing: {}", payment.getStatus(), payment.getTxnRef());
+            return SepayIpnResponse.alreadyProcessed();
+        }
+
+        // Mark pending payment as failed
+        String providerPaymentId = request.getTransaction() != null ? request.getTransaction().getTransactionId() : null;
+        String providerMetadata = request.toString();
+
+        markPendingPaymentFailed(payment.getId(), providerPaymentId, providerMetadata);
+
+        log.info("SePay IPN: Payment marked FAILED due to TRANSACTION_VOID: {}", payment.getTxnRef());
+        return SepayIpnResponse.success();
     }
 
     // Get learner payment history
@@ -350,51 +403,8 @@ public class PaymentService {
         return prefix + "_" + System.currentTimeMillis() + "_" + UUID.randomUUID();
     }
 
-    private java.util.Map<String, String> normalizeVnpayQuery(VnpayReturnQuery query) {
-        java.util.Map<String, String> result = new java.util.LinkedHashMap<>();
-        java.lang.reflect.Field[] fields = VnpayReturnQuery.class.getDeclaredFields();
-        for (java.lang.reflect.Field field : fields) {
-            field.setAccessible(true);
-            try {
-                Object value = field.get(query);
-                if (value != null) {
-                    String jsonName = field.getAnnotation(com.fasterxml.jackson.annotation.JsonProperty.class).value();
-                    result.put(jsonName, value.toString());
-                }
-            } catch (IllegalAccessException e) {
-                // ignore
-            }
-        }
-        return result;
-    }
-
-    private String getRequiredVnpayParam(java.util.Map<String, String> query, String key) {
-        String value = query.get(key);
-        if (value == null || value.isEmpty()) {
-            throw new IllegalArgumentException("Missing VNPay param: " + key);
-        }
-        return value;
-    }
-
-    private boolean isValidVnpayAmount(String vnpAmount, Integer paymentAmount) {
-        if (vnpAmount == null || vnpAmount.isEmpty()) {
-            return false;
-        }
-        try {
-            Integer amount = Integer.valueOf(vnpAmount);
-            // VNPay sends amount * 100
-            return amount.equals(paymentAmount * 100);
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
     private SimulationPaymentResponse toSimulationPaymentResponse(String status, Payment payment) {
         return new SimulationPaymentResponse(status, toPaymentResponseDto(payment));
-    }
-
-    private VnpayReturnResponse toVnpayReturnResponse(String status, Payment payment) {
-        return new VnpayReturnResponse(status, toPaymentResponseDto(payment));
     }
 
     private PaymentResponseDto toPaymentResponseDto(Payment payment) {

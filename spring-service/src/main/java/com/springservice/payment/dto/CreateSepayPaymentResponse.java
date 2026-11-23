@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateVnpayPaymentResponse {
+public class CreateSepayPaymentResponse {
 
     @JsonProperty("paymentId")
     private String paymentId;
@@ -24,6 +24,6 @@ public class CreateVnpayPaymentResponse {
     @JsonProperty("amount")
     private BigDecimal amount;
 
-    @JsonProperty("paymentUrl")
-    private String paymentUrl;
+    @JsonProperty("checkoutForm")
+    private SepayCheckoutForm checkoutForm;
 }

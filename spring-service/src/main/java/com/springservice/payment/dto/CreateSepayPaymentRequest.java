@@ -12,16 +12,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateVnpayPaymentRequest {
+public class CreateSepayPaymentRequest {
 
     @NotNull
     @Size(min = 36, max = 36, message = "courseId must be a valid UUID")
     @JsonProperty("courseId")
     private String courseId;
-
-    @JsonProperty("bankCode")
-    private String bankCode;
-
-    @JsonProperty("locale")
-    private String locale;
 }

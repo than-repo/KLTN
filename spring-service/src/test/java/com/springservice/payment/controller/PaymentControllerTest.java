@@ -2,7 +2,6 @@ package com.springservice.payment.controller;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +25,16 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.springservice.payment.dto.CreateSepayPaymentRequest;
+import com.springservice.payment.dto.CreateSepayPaymentResponse;
 import com.springservice.payment.dto.CreateSimulationPaymentRequest;
-import com.springservice.payment.dto.CreateVnpayPaymentRequest;
-import com.springservice.payment.dto.CreateVnpayPaymentResponse;
 import com.springservice.payment.dto.GetPaymentsResponse;
+import com.springservice.payment.dto.SepayCheckoutForm;
+import com.springservice.payment.dto.SepayIpnRequest;
+import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.dto.SepayReturnQuery;
+import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
-import com.springservice.payment.dto.VnpayIpnResponse;
-import com.springservice.payment.dto.VnpayReturnQuery;
-import com.springservice.payment.dto.VnpayReturnResponse;
 import com.springservice.payment.entity.Payment;
 import com.springservice.payment.entity.PaymentMethod;
 import com.springservice.payment.entity.PaymentStatus;
@@ -42,7 +43,8 @@ import com.springservice.payment.repository.PaymentRepository;
 import com.springservice.payment.repository.EnrollmentRepository;
 import com.springservice.wishlist.repository.WishlistRepository;
 import com.springservice.payment.service.PaymentService;
-import com.springservice.payment.service.VnpayService;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.*;
@@ -117,8 +119,8 @@ class PaymentControllerTest {
             http
                     .csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/payments/vnpay/return").permitAll()
-                            .requestMatchers("/api/payments/vnpay/ipn").permitAll()
+                            .requestMatchers("/api/payments/sepay/return").permitAll()
+                            .requestMatchers("/api/payments/sepay/ipn").permitAll()
                             .anyRequest().authenticated())
                     .oauth2ResourceServer(oauth2 -> oauth2
                             .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtToken -> {
@@ -143,33 +145,39 @@ class PaymentControllerTest {
     private PaymentService paymentService;
 
     @MockitoBean
-    private VnpayService vnpayService;
-
-    @MockitoBean
     private CourseClient courseClient;
 
     private Jwt testJwt = TestConfig.TEST_JWT;
 
+    // SePay Payment Creation Tests
     @Test
-    void createVnpayPayment_Success() throws Exception {
+    void createSepayPayment_Success() throws Exception {
         // Given
-                CreateVnpayPaymentRequest request = new CreateVnpayPaymentRequest();
+        CreateSepayPaymentRequest request = new CreateSepayPaymentRequest();
         request.setCourseId("course-456");
-        request.setBankCode("NCB");
-        request.setLocale("vn");
 
-        CreateVnpayPaymentResponse response = new CreateVnpayPaymentResponse(
+        SepayCheckoutForm checkoutForm = SepayCheckoutForm.builder()
+                .actionUrl("https://pay-sandbox.sepay.vn/v1/checkout/init")
+                .method("POST")
+                .fields(java.util.Map.of(
+                        "merchant", "TEST_MERCHANT",
+                        "order_amount", "100000",
+                        "signature", "test_signature"
+                ))
+                .build();
+
+        CreateSepayPaymentResponse response = new CreateSepayPaymentResponse(
                 "payment-789",
                 "PAY1234567890ABCD",
                 BigDecimal.valueOf(100000),
-                "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_TxnRef=PAY1234567890ABCD..."
+                checkoutForm
         );
 
-        when(paymentService.createVnpayPayment(eq("user-123"), any(CreateVnpayPaymentRequest.class), anyString()))
+        when(paymentService.createSepayPayment(eq("user-123"), any(CreateSepayPaymentRequest.class)))
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/create-payment-url")
+        mockMvc.perform(post("/api/payments/sepay/create-payment")
                         .with(jwt().jwt(testJwt))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -177,26 +185,27 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.paymentId").value("payment-789"))
                 .andExpect(jsonPath("$.txnRef").value("PAY1234567890ABCD"))
                 .andExpect(jsonPath("$.amount").value(100000))
-                .andExpect(jsonPath("$.paymentUrl").value(containsString("vnpayment.vn")));
+                .andExpect(jsonPath("$.checkoutForm.actionUrl").value(containsString("pay-sandbox.sepay.vn")));
     }
 
     @Test
-    void createVnpayPayment_Unauthorized() throws Exception {
+    void createSepayPayment_Unauthorized() throws Exception {
         // Given
-        CreateVnpayPaymentRequest request = new CreateVnpayPaymentRequest();
+        CreateSepayPaymentRequest request = new CreateSepayPaymentRequest();
         request.setCourseId("course-456");
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/create-payment-url")
+        mockMvc.perform(post("/api/payments/sepay/create-payment")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
     }
 
+    // Simulation Payment Tests (PRESERVED - Regression)
     @Test
     void createSimulationPayment_Success() throws Exception {
         // Given
-                CreateSimulationPaymentRequest request = new CreateSimulationPaymentRequest();
+        CreateSimulationPaymentRequest request = new CreateSimulationPaymentRequest();
         request.setCourseId("course-456");
 
         SimulationPaymentResponse response = new SimulationPaymentResponse("pending", null);
@@ -216,7 +225,7 @@ class PaymentControllerTest {
     @Test
     void confirmSimulationPayment_Success() throws Exception {
         // Given
-                String paymentId = "payment-789";
+        String paymentId = "payment-789";
 
         SimulationPaymentResponse response = new SimulationPaymentResponse("success", null);
 
@@ -233,7 +242,7 @@ class PaymentControllerTest {
     @Test
     void failSimulationPayment_Success() throws Exception {
         // Given
-                String paymentId = "payment-789";
+        String paymentId = "payment-789";
 
         SimulationPaymentResponse response = new SimulationPaymentResponse("failed", null);
 
@@ -247,120 +256,160 @@ class PaymentControllerTest {
                 .andExpect(jsonPath("$.status").value("failed"));
     }
 
+    // SePay Return URL Tests
     @Test
-    void handleVnpayReturn_Success() throws Exception {
+    void handleSepayReturn_Success() throws Exception {
         // Given
-        VnpayReturnResponse response = new VnpayReturnResponse("success", null);
+        SepayReturnResponse response = new SepayReturnResponse("success", null);
 
-        when(paymentService.handleVnpayReturn(any(VnpayReturnQuery.class)))
+        when(paymentService.handleSepayReturn(any(SepayReturnQuery.class)))
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(get("/api/payments/vnpay/return")
-                        .param("vnp_TxnRef", "PAY1234567890ABCD")
-                        .param("vnp_ResponseCode", "00")
-                        .param("vnp_TransactionStatus", "00")
-                        .param("vnp_SecureHash", "valid_hash"))
+        mockMvc.perform(get("/api/payments/sepay/return")
+                        .param("order_invoice_number", "PAY1234567890ABCD"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("success"));
     }
 
     @Test
-    void handleVnpayReturn_AlreadyPaid() throws Exception {
+    void handleSepayReturn_AlreadyPaid() throws Exception {
         // Given
-        VnpayReturnResponse response = new VnpayReturnResponse("already_paid", null);
+        SepayReturnResponse response = new SepayReturnResponse("already_paid", null);
 
-        when(paymentService.handleVnpayReturn(any(VnpayReturnQuery.class)))
+        when(paymentService.handleSepayReturn(any(SepayReturnQuery.class)))
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(get("/api/payments/vnpay/return")
-                        .param("vnp_TxnRef", "PAY1234567890ABCD")
-                        .param("vnp_ResponseCode", "00")
-                        .param("vnp_TransactionStatus", "00")
-                        .param("vnp_SecureHash", "valid_hash"))
+        mockMvc.perform(get("/api/payments/sepay/return")
+                        .param("order_invoice_number", "PAY1234567890ABCD"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("already_paid"));
     }
 
+    // SePay IPN Tests
     @Test
-    void handleVnpayIpn_Success() throws Exception {
+    void handleSepayIpn_Success() throws Exception {
         // Given
-        VnpayIpnResponse response = new VnpayIpnResponse("00", "Success");
+        SepayIpnResponse response = SepayIpnResponse.success();
 
-        when(paymentService.handleVnpayIpn(any(VnpayReturnQuery.class)))
+        when(paymentService.handleSepayIpn(eq("valid_secret"), any(SepayIpnRequest.class)))
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/ipn")
-                        .param("vnp_TxnRef", "PAY1234567890ABCD")
-                        .param("vnp_ResponseCode", "00")
-                        .param("vnp_TransactionStatus", "00")
-                        .param("vnp_Amount", "10000000")
-                        .param("vnp_TransactionNo", "12345678"))
+        mockMvc.perform(post("/api/payments/sepay/ipn")
+                        .header("X-Secret-Key", "valid_secret")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "notification_type": "ORDER_PAID",
+                                    "order": {
+                                        "order_invoice_number": "PAY1234567890ABCD",
+                                        "order_status": "CAPTURED",
+                                        "order_amount": 100000,
+                                        "order_currency": "VND"
+                                    },
+                                    "transaction": {
+                                        "transaction_id": "TRX789012",
+                                        "transaction_status": "APPROVED",
+                                        "transaction_type": "PAYMENT",
+                                        "transaction_amount": 100000,
+                                        "transaction_currency": "VND",
+                                        "payment_method": "BANK_TRANSFER"
+                                    }
+                                }
+                                """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.RspCode").value("00"))
-                .andExpect(jsonPath("$.Message").value("Success"));
+                .andExpect(jsonPath("$.code").value("SUCCESS"));
     }
 
     @Test
-    void handleVnpayIpn_ChecksumFailed() throws Exception {
+    void handleSepayIpn_InvalidSecret() throws Exception {
         // Given
-        VnpayIpnResponse response = new VnpayIpnResponse("97", "Checksum failed");
+        SepayIpnResponse response = SepayIpnResponse.invalidSignature();
 
-        when(paymentService.handleVnpayIpn(any(VnpayReturnQuery.class)))
+        when(paymentService.handleSepayIpn(eq("invalid_secret"), any(SepayIpnRequest.class)))
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/ipn")
-                        .param("vnp_TxnRef", "PAY1234567890ABCD")
-                        .param("vnp_ResponseCode", "00")
-                        .param("vnp_SecureHash", "invalid_hash"))
+        mockMvc.perform(post("/api/payments/sepay/ipn")
+                        .header("X-Secret-Key", "invalid_secret")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "notification_type": "ORDER_PAID",
+                                    "order": {"order_invoice_number": "PAY1234567890ABCD"}
+                                }
+                                """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.RspCode").value("97"))
-                .andExpect(jsonPath("$.Message").value("Checksum failed"));
+                .andExpect(jsonPath("$.code").value("INVALID_SIGNATURE"));
     }
 
     @Test
-    void handleVnpayIpn_OrderNotFound() throws Exception {
-        // Given
-        VnpayIpnResponse response = new VnpayIpnResponse("01", "Order not found");
-
-        when(paymentService.handleVnpayIpn(any(VnpayReturnQuery.class)))
-                .thenReturn(response);
-
-        // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/ipn")
-                        .param("vnp_TxnRef", "NONEXISTENT")
-                        .param("vnp_ResponseCode", "00")
-                        .param("vnp_Amount", "10000000"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.RspCode").value("01"))
-                .andExpect(jsonPath("$.Message").value("Order not found"));
+    void handleSepayIpn_MissingSecret() throws Exception {
+        // When/Then - Missing X-Secret-Key header
+        mockMvc.perform(post("/api/payments/sepay/ipn")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "notification_type": "ORDER_PAID",
+                                    "order": {"order_invoice_number": "PAY1234567890ABCD"}
+                                }
+                                """))
+                .andExpect(status().isBadRequest()); // Missing required header
     }
 
     @Test
-    void handleVnpayIpn_AmountInvalid() throws Exception {
+    void handleSepayIpn_OrderNotFound() throws Exception {
         // Given
-        VnpayIpnResponse response = new VnpayIpnResponse("04", "Amount invalid");
+        SepayIpnResponse response = SepayIpnResponse.orderNotFound();
 
-        when(paymentService.handleVnpayIpn(any(VnpayReturnQuery.class)))
+        when(paymentService.handleSepayIpn(eq("valid_secret"), any(SepayIpnRequest.class)))
                 .thenReturn(response);
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/ipn")
-                        .param("vnp_TxnRef", "PAY1234567890ABCD")
-                        .param("vnp_ResponseCode", "00")
-                        .param("vnp_Amount", "9999999"))
+        mockMvc.perform(post("/api/payments/sepay/ipn")
+                        .header("X-Secret-Key", "valid_secret")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "notification_type": "ORDER_PAID",
+                                    "order": {"order_invoice_number": "NONEXISTENT"}
+                                }
+                                """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.RspCode").value("04"))
-                .andExpect(jsonPath("$.Message").value("Amount invalid"));
+                .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"));
     }
 
+    @Test
+    void handleSepayIpn_AmountMismatch() throws Exception {
+        // Given
+        SepayIpnResponse response = SepayIpnResponse.amountMismatch();
+
+        when(paymentService.handleSepayIpn(eq("valid_secret"), any(SepayIpnRequest.class)))
+                .thenReturn(response);
+
+        // When/Then
+        mockMvc.perform(post("/api/payments/sepay/ipn")
+                        .header("X-Secret-Key", "valid_secret")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "notification_type": "ORDER_PAID",
+                                    "order": {
+                                        "order_invoice_number": "PAY1234567890ABCD",
+                                        "order_amount": 99999
+                                    }
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("AMOUNT_MISMATCH"));
+    }
+
+    // Payment History Tests (PRESERVED - Regression)
     @Test
     void getLearnerPayments_Success() throws Exception {
         // Given
-
         GetPaymentsResponse mockResponse = new GetPaymentsResponse(
                 Collections.emptyList(),
                 new GetPaymentsResponse.PaginationMeta(1, 10, 0, 0, false, false)
@@ -382,7 +431,6 @@ class PaymentControllerTest {
     @Test
     void getLearnerPayments_WithCustomPagination() throws Exception {
         // Given
-
         GetPaymentsResponse mockResponse = new GetPaymentsResponse(
                 Collections.emptyList(),
                 new GetPaymentsResponse.PaginationMeta(2, 20, 50, 3, true, true)
@@ -409,16 +457,16 @@ class PaymentControllerTest {
     }
 
     @Test
-    void createVnpayPayment_InvalidCourseId_Returns400() throws Exception {
+    void createSepayPayment_InvalidCourseId_Returns400() throws Exception {
         // Given
-                CreateVnpayPaymentRequest request = new CreateVnpayPaymentRequest();
+        CreateSepayPaymentRequest request = new CreateSepayPaymentRequest();
         request.setCourseId("invalid-course-id"); // Not a valid UUID format
 
-        when(paymentService.createVnpayPayment(eq("user-123"), any(CreateVnpayPaymentRequest.class), anyString()))
+        when(paymentService.createSepayPayment(eq("user-123"), any(CreateSepayPaymentRequest.class)))
                 .thenThrow(new IllegalArgumentException("Invalid course ID"));
 
         // When/Then
-        mockMvc.perform(post("/api/payments/vnpay/create-payment-url")
+        mockMvc.perform(post("/api/payments/sepay/create-payment")
                         .with(jwt().jwt(testJwt))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -428,7 +476,7 @@ class PaymentControllerTest {
     @Test
     void confirmSimulationPayment_InvalidState_Returns400() throws Exception {
         // Given
-                String paymentId = "payment-789";
+        String paymentId = "payment-789";
 
         when(paymentService.confirmSimulationPayment(eq("user-123"), eq(paymentId)))
                 .thenThrow(new com.springservice.payment.exception.InvalidPaymentStateException("Payment cannot be confirmed"));

@@ -55,6 +55,22 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             @Param("providerMetadata") String providerMetadata,
             @Param("pendingStatus") PaymentStatus pendingStatus);
 
+    // Atomic conditional update: ONLY transitions PENDING -> PAID
+    // Used for idempotent IPN processing to prevent duplicate settlements
+    @Modifying
+    @Transactional
+    @Query("UPDATE Payment p SET p.status = :status, p.providerPaymentId = :providerPaymentId, " +
+           "p.providerMetadata = :providerMetadata, p.paidAt = :paidAt, p.isActive = :isActive " +
+           "WHERE p.id = :paymentId AND p.status = :expectedStatus")
+    int settlePaymentIfPending(
+            @Param("paymentId") String paymentId,
+            @Param("status") PaymentStatus status,
+            @Param("providerPaymentId") String providerPaymentId,
+            @Param("providerMetadata") String providerMetadata,
+            @Param("paidAt") java.time.LocalDateTime paidAt,
+            @Param("isActive") Boolean isActive,
+            @Param("expectedStatus") PaymentStatus expectedStatus);
+
     @Query("SELECT p FROM Payment p WHERE p.userId = :userId AND p.courseId = :courseId " +
            "AND p.isActive = true AND p.deletedAt IS NULL " +
            "ORDER BY p.createdAt DESC")
