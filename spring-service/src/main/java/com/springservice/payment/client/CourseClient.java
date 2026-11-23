@@ -7,58 +7,84 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @FeignClient(name = "course-service", url = "${course-service.url:http://localhost:3000/api/v1}")
 public interface CourseClient {
 
     /**
      * Get course price by ID using the public courses by-ids endpoint.
-     * Returns a list with one course (or empty if not found).
+     * Returns a wrapper with data array containing the course.
      */
     @GetMapping("/courses/public/by-ids")
-    List<CoursePriceResponse> getCoursesByIds(@RequestParam("ids") String courseIds);
+    CoursePriceResponseWrapper getCoursesByIds(@RequestParam("ids") String courseIds);
 
     /**
      * Get course detail by ID using the public courses by-ids endpoint.
-     * Returns a list with one course (or empty if not found).
+     * Returns a wrapper with data array containing the course.
      */
     @GetMapping("/courses/public/by-ids")
-    List<CourseDetailResponse> getCourseDetailsByIds(@RequestParam("ids") String courseIds);
+    CourseDetailResponseWrapper getCourseDetailsByIds(@RequestParam("ids") String courseIds);
+
+    record CoursePriceResponseWrapper(
+            @JsonProperty("success") Boolean success,
+            @JsonProperty("statusCode") Integer statusCode,
+            @JsonProperty("timestamp") String timestamp,
+            @JsonProperty("path") String path,
+            @JsonProperty("data") List<CoursePriceResponse> data
+    ) {}
+
+    record CourseDetailResponseWrapper(
+            @JsonProperty("success") Boolean success,
+            @JsonProperty("statusCode") Integer statusCode,
+            @JsonProperty("timestamp") String timestamp,
+            @JsonProperty("path") String path,
+            @JsonProperty("data") List<CourseDetailResponse> data
+    ) {}
 
     record CoursePriceResponse(
-            String id,
-            BigDecimal price,
-            String currency,
-            String level,
-            String status,
-            Boolean isActive,
-            String publishedAt
+            @JsonProperty("id") String id,
+            @JsonProperty("price") BigDecimal price,
+            @JsonProperty("currency") String currency,
+            @JsonProperty("level") String level,
+            @JsonProperty("status") @JsonAlias({"status"}) String status,
+            @JsonProperty("isActive") @JsonAlias({"isActive", "is_active"}) Boolean isActive,
+            @JsonProperty("publishedAt") @JsonAlias({"publishedAt", "published_at"}) String publishedAt
     ) {}
 
     record CourseDetailResponse(
-            String id,
-            String title,
-            String slug,
-            String shortDescription,
-            String description,
-            List<String> whatYouWillLearn,
-            List<String> requirements,
-            String thumbnailUrl,
-            String level,
-            BigDecimal price,
-            String currency,
-            Integer durationInMinutes,
-            Boolean certificateEnabled,
-            List<CategoryResponse> categories,
-            List<InstructorResponse> instructors,
-            String status,
-            Boolean isActive,
-            String publishedAt,
-            String createdAt,
-            String updatedAt,
-            String deletedAt
+            @JsonProperty("id") String id,
+            @JsonProperty("title") String title,
+            @JsonProperty("slug") String slug,
+            @JsonProperty("shortDescription") @JsonAlias({"shortDescription", "short_description"}) String shortDescription,
+            @JsonProperty("description") String description,
+            @JsonProperty("whatYouWillLearn") @JsonAlias({"whatYouWillLearn", "what_you_will_learn"}) List<String> whatYouWillLearn,
+            @JsonProperty("requirements") List<String> requirements,
+            @JsonProperty("thumbnailUrl") @JsonAlias({"thumbnailUrl", "thumbnail_url"}) String thumbnailUrl,
+            @JsonProperty("level") String level,
+            @JsonProperty("price") BigDecimal price,
+            @JsonProperty("currency") String currency,
+            @JsonProperty("durationInMinutes") @JsonAlias({"durationInMinutes", "duration_in_minutes"}) Integer durationInMinutes,
+            @JsonProperty("certificateEnabled") @JsonAlias({"certificateEnabled", "certificate_enabled"}) Boolean certificateEnabled,
+            @JsonProperty("categories") List<CategoryResponse> categories,
+            @JsonProperty("instructors") List<InstructorResponse> instructors,
+            @JsonProperty("status") String status,
+            @JsonProperty("isActive") @JsonAlias({"isActive", "is_active"}) Boolean isActive,
+            @JsonProperty("publishedAt") @JsonAlias({"publishedAt", "published_at"}) String publishedAt,
+            @JsonProperty("createdAt") @JsonAlias({"createdAt", "created_at"}) String createdAt,
+            @JsonProperty("updatedAt") @JsonAlias({"updatedAt", "updated_at"}) String updatedAt,
+            @JsonProperty("deletedAt") @JsonAlias({"deletedAt", "deleted_at"}) String deletedAt
     ) {}
 
-    record CategoryResponse(String id, String name, String slug) {}
+    record CategoryResponse(
+            @JsonProperty("id") String id,
+            @JsonProperty("name") String name,
+            @JsonProperty("slug") String slug
+    ) {}
 
-    record InstructorResponse(String id, String fullName) {}
+    record InstructorResponse(
+            @JsonProperty("id") String id,
+            @JsonProperty("fullName") @JsonAlias({"fullName", "full_name"}) String fullName
+    ) {}
 }

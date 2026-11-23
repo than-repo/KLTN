@@ -25,8 +25,8 @@ import jakarta.persistence.UniqueConstraint;
                 columnNames = { "txn_ref" }),
         indexes = {
                 @Index(name = "idx_payments_user_id", columnList = "user_id"),
-                @Index(name = "idx_payments_course_id", columnList = "course_id"),
-                @Index(name = "idx_payments_user_course", columnList = "user_id, course_id"),
+                @Index(name = "idx_payments_course_id", columnList = "courseId"),
+                @Index(name = "idx_payments_user_course", columnList = "user_id, courseId"),
                 @Index(name = "idx_payments_status", columnList = "status")
         })
 public class Payment {
@@ -38,7 +38,7 @@ public class Payment {
     @Column(name = "user_id", nullable = false, length = 191)
     private String userId;
 
-    @Column(name = "course_id", nullable = false, length = 191)
+    @Column(name = "courseId", nullable = false, length = 191)
     private String courseId;
 
     @Column(name = "amount", nullable = false)

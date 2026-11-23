@@ -1,25 +1,29 @@
 import type { PaginationMeta } from "@/features/courses/types/course";
 
-export type VnpayLocale = "vn" | "en";
+export type SepayLocale = "vn" | "en";
 
-export type CreateVnpayPaymentUrlInput = {
-  bankCode?: string;
+export type CreateSepayPaymentInput = {
   courseId: string;
-  locale?: VnpayLocale;
 };
 
-export type CreateVnpayPaymentUrlResult = {
+export type SepayCheckoutForm = {
+  actionUrl: string;
+  method: string;
+  fields: Record<string, string>;
+};
+
+export type CreateSepayPaymentResult = {
   amount: number;
   paymentId: string;
-  paymentUrl: string;
-  txnRef: string | null;
+  txnRef: string;
+  checkoutForm: SepayCheckoutForm;
 };
 
 export type CreateSimulationPaymentInput = {
   courseId: string;
 };
 
-export type PaymentMethod = "VNPAY" | "SIMULATION";
+export type PaymentMethod = "SEPAY" | "SIMULATION";
 
 export type PaymentStatus =
   | "PENDING"
@@ -44,11 +48,11 @@ export type PaymentResponse = {
   userId: string;
 };
 
-export type VnpayReturnStatus = "success" | "failed" | "already_paid";
+export type SepayReturnStatus = "success" | "failed" | "pending" | "already_paid";
 
-export type VnpayReturnResult = {
+export type SepayReturnResult = {
   payment: PaymentResponse;
-  status: VnpayReturnStatus;
+  status: SepayReturnStatus;
 };
 
 export type SimulationPaymentStatus =

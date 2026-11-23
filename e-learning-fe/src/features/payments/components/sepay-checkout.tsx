@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { RoleProtectedRoute } from "@/features/auth/components/role-protected-route";
 import { useAuth } from "@/features/auth/hooks/use-auth";
@@ -19,33 +19,27 @@ import { ApiError } from "@/lib/api/client";
 
 import {
   confirmSimulationPayment,
+  createSepayPayment,
   createSimulationPayment,
-  createVnpayPaymentUrl,
   failSimulationPayment,
 } from "../api/payment-api";
-import type { SimulationPaymentResult } from "../types/payment";
-import {
-  clearPendingVnpayPayment,
-  getPendingVnpayPayment,
-  savePendingVnpayPayment,
-  type PendingVnpayPayment,
-} from "../utils/pending-vnpay-payment";
+import type { CreateSepayPaymentResult, SimulationPaymentResult } from "../types/payment";
 
-type VnpayCheckoutProps = {
+type SepayCheckoutProps = {
   course: PublicCourse;
 };
 
-type CheckoutMethod = "simulation" | "vnpay";
+type CheckoutMethod = "simulation" | "sepay";
 type BusyAction =
   | "checking"
   | "free"
   | "simulation-create"
   | "simulation-confirm"
   | "simulation-fail"
-  | "vnpay"
+  | "sepay"
   | null;
 
-export function VnpayCheckout({ course }: VnpayCheckoutProps) {
+export function SepayCheckout({ course }: SepayCheckoutProps) {
   return (
     <RoleProtectedRoute allowedRoles={["LEARNER"]} fallbackHref="/courses">
       <PaymentCheckoutContent course={course} />
@@ -53,16 +47,16 @@ export function VnpayCheckout({ course }: VnpayCheckoutProps) {
   );
 }
 
-function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
+function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
   const router = useRouter();
   const { accessToken } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const [pendingVnpayPayment, setPendingVnpayPayment] =
-    useState<PendingVnpayPayment | null>(null);
   const [method, setMethod] = useState<CheckoutMethod>("simulation");
   const [busyAction, setBusyAction] = useState<BusyAction>("checking");
   const [simulationPayment, setSimulationPayment] =
     useState<SimulationPaymentResult | null>(null);
+  const [sepayPayment, setSepayPayment] = useState<CreateSepayPaymentResult | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const isFree = !course.price || course.price <= 0;
   const paymentHref = `/courses/${course.slug}/payment`;
   const isBusy = busyAction !== "checking" && busyAction !== null;
@@ -75,25 +69,6 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
       ),
     [course.id, course.slug, simulationPayment?.payment.id, simulationPayment?.payment.txnRef],
   );
-
-  useEffect(() => {
-    const restorePendingVnpayPayment = () => {
-      const pendingPayment = getMatchingPendingVnpayPayment(course.id);
-
-      setPendingVnpayPayment(pendingPayment);
-
-      if (pendingPayment) {
-        setMethod("vnpay");
-      }
-    };
-
-    restorePendingVnpayPayment();
-    window.addEventListener("pageshow", restorePendingVnpayPayment);
-
-    return () => {
-      window.removeEventListener("pageshow", restorePendingVnpayPayment);
-    };
-  }, [course.id]);
 
   useEffect(() => {
     if (!accessToken) {
@@ -158,32 +133,36 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
         return;
       }
 
-      if (method === "vnpay" && pendingVnpayPayment?.paymentUrl) {
-        setBusyAction("vnpay");
-        window.location.assign(pendingVnpayPayment.paymentUrl);
+      if (method === "sepay") {
+        setBusyAction("sepay");
+        const payment = await createSepayPayment(
+          { courseId: course.id },
+          accessToken,
+        );
+
+        setSepayPayment(payment);
+        // Submit the form to SePay
+        if (formRef.current) {
+          formRef.current.action = payment.checkoutForm.actionUrl;
+          formRef.current.method = payment.checkoutForm.method;
+
+          // Populate hidden fields
+          const fieldsContainer = formRef.current.querySelector("#sepay-fields");
+          if (fieldsContainer) {
+            fieldsContainer.innerHTML = "";
+            Object.entries(payment.checkoutForm.fields).forEach(([key, value]) => {
+              const input = document.createElement("input");
+              input.type = "hidden";
+              input.name = key;
+              input.value = value;
+              fieldsContainer.appendChild(input);
+            });
+          }
+
+          formRef.current.submit();
+        }
         return;
       }
-
-      setBusyAction("vnpay");
-      const payment = await createVnpayPaymentUrl(
-        {
-          courseId: course.id,
-          locale: "vn",
-        },
-        accessToken,
-      );
-      const pendingPayment = {
-        courseId: course.id,
-        courseSlug: course.slug,
-        courseTitle: course.title,
-        paymentUrl: payment.paymentUrl,
-        txnRef: payment.txnRef,
-      };
-
-      savePendingVnpayPayment(pendingPayment);
-      setPendingVnpayPayment(pendingPayment);
-
-      window.location.assign(payment.paymentUrl);
     } catch (paymentError) {
       handleCheckoutError(paymentError);
     } finally {
@@ -255,9 +234,8 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
     setError(null);
   }
 
-  function resetPendingVnpayPayment() {
-    clearPendingVnpayPayment();
-    setPendingVnpayPayment(null);
+  function resetSepayPayment() {
+    setSepayPayment(null);
     setError(null);
   }
 
@@ -287,20 +265,20 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
                 onClick={() => setMethod("simulation")}
               />
               <PaymentMethodButton
-                description="Redirect to VNPay sandbox after credentials and callbacks are ready."
+                description="Redirect to SePay sandbox via secure form POST."
                 disabled={isChecking || isBusy || isSimulationPending}
-                isSelected={method === "vnpay"}
-                label="VNPay Test"
-                onClick={() => setMethod("vnpay")}
+                isSelected={method === "sepay"}
+                label="SePay Test"
+                onClick={() => setMethod("sepay")}
               />
             </div>
           </section>
         ) : null}
 
-        {method === "vnpay" && pendingVnpayPayment ? (
-          <PendingVnpayPanel
-            onStartNew={resetPendingVnpayPayment}
-            pendingPayment={pendingVnpayPayment}
+        {method === "sepay" && sepayPayment ? (
+          <PendingSepayPanel
+            onStartNew={resetSepayPayment}
+            sepayPayment={sepayPayment}
           />
         ) : null}
 
@@ -334,11 +312,19 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
               isFree,
               method,
               hasFailedSimulation: simulationPayment?.status === "failed",
-              hasPendingVnpayPayment:
-                method === "vnpay" && Boolean(pendingVnpayPayment?.paymentUrl),
             })}
           </button>
         ) : null}
+
+        {/* Hidden form for SePay checkout */}
+        <form
+          ref={formRef}
+          id="sepay-checkout-form"
+          style={{ display: "none" }}
+          target="_blank"
+        >
+          <div id="sepay-fields" />
+        </form>
       </div>
 
       <aside className="rounded-lg border border-border bg-card p-5 shadow-sm lg:sticky lg:top-20">
@@ -362,12 +348,12 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
                 ? "Free enrollment"
                 : method === "simulation"
                   ? "Simulation"
-                  : "VNPay Sandbox"
+                  : "SePay Sandbox"
             }
           />
           <PaymentRow
             label="Method"
-            value={isFree ? "FREE" : method === "simulation" ? "SIMULATION" : "VNPAY"}
+            value={isFree ? "FREE" : method === "simulation" ? "SIMULATION" : "SEPAY"}
           />
         </div>
         <div className="mt-5 flex items-end justify-between gap-4">
@@ -386,35 +372,32 @@ function PaymentCheckoutContent({ course }: VnpayCheckoutProps) {
   );
 }
 
-function PendingVnpayPanel({
+function PendingSepayPanel({
   onStartNew,
-  pendingPayment,
+  sepayPayment,
 }: {
   onStartNew: () => void;
-  pendingPayment: PendingVnpayPayment;
+  sepayPayment: CreateSepayPaymentResult;
 }) {
   return (
     <section className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
       <p className="text-sm font-semibold text-primary">
-        VNPay session ready
+        SePay session ready
       </p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        You started a VNPay payment for {pendingPayment.courseTitle}. If you
-        came back from the VNPay sandbox, you can continue that payment session.
+        You started a SePay payment. Click the button below to proceed to the SePay
+        payment page.
       </p>
       <dl className="mt-4 grid gap-2 text-sm">
-        <PaymentRow label="Course" value={pendingPayment.courseTitle} />
-        <PaymentRow
-          label="Transaction"
-          value={pendingPayment.txnRef ?? "Pending"}
-        />
+        <PaymentRow label="Transaction" value={sepayPayment.txnRef} />
+        <PaymentRow label="Amount" value={`${sepayPayment.amount.toLocaleString("vi-VN")} VND`} />
       </dl>
       <button
         className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md border border-primary bg-transparent px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
         onClick={onStartNew}
         type="button"
       >
-        Start new VNPay session
+        Start new SePay session
       </button>
     </section>
   );
@@ -562,7 +545,6 @@ function PaymentRow({ label, value }: { label: string; value: string }) {
 function getPrimaryLabel(input: {
   busyAction: BusyAction;
   hasFailedSimulation: boolean;
-  hasPendingVnpayPayment: boolean;
   isFree: boolean;
   method: CheckoutMethod;
 }) {
@@ -574,8 +556,8 @@ function getPrimaryLabel(input: {
     return "Creating payment...";
   }
 
-  if (input.busyAction === "vnpay") {
-    return "Opening VNPay...";
+  if (input.busyAction === "sepay") {
+    return "Opening SePay...";
   }
 
   if (input.isFree) {
@@ -588,23 +570,7 @@ function getPrimaryLabel(input: {
       : "Start simulation payment";
   }
 
-  if (input.hasPendingVnpayPayment) {
-    return "Resume VNPay payment";
-  }
-
-  return "Pay with VNPay Test";
-}
-
-function getMatchingPendingVnpayPayment(
-  courseId: string,
-): PendingVnpayPayment | null {
-  const pendingPayment = getPendingVnpayPayment();
-
-  if (pendingPayment?.courseId !== courseId) {
-    return null;
-  }
-
-  return pendingPayment;
+  return "Pay with SePay Test";
 }
 
 function buildQrCells(seed: string) {

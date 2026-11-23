@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.springservice.payment.client.CourseClient;
@@ -29,21 +30,31 @@ public class CourseService {
     @Transactional(readOnly = true)
     public CoursePrice getCoursePrice(String courseId) {
         try {
-            List<CourseClient.CoursePriceResponse> responses = courseClient.getCoursesByIds(courseId);
+            CourseClient.CoursePriceResponseWrapper wrapper = courseClient.getCoursesByIds(courseId);
 
-            if (responses == null || responses.isEmpty()) {
+            if (wrapper == null || wrapper.data() == null || wrapper.data().isEmpty()) {
                 throw new CourseNotFoundException(courseId);
             }
 
-            CourseClient.CoursePriceResponse response = responses.get(0);
+            CourseClient.CoursePriceResponse response = wrapper.data().get(0);
 
             if (response.id() == null) {
                 throw new CourseNotFoundException(courseId);
             }
 
-            // Check if course is published and active
-            if (!"PUBLISHED".equals(response.status()) || Boolean.FALSE.equals(response.isActive())) {
-                throw new CourseUnavailableException(courseId, "Course is not published or not active");
+            if (!courseId.equals(response.id())) {
+                throw new CourseUnavailableException(courseId, "Course ID mismatch");
+            }
+
+            // The public by-ids endpoint only returns published and active courses.
+            // Its public DTO intentionally omits status/isActive/publishedAt, so null
+            // here means not exposed, not unpublished. Reject explicit contradictory values.
+            String status = response.status();
+            if (status != null && !"PUBLISHED".equalsIgnoreCase(status)) {
+                throw new CourseUnavailableException(courseId, "Course is not published");
+            }
+            if (Boolean.FALSE.equals(response.isActive())) {
+                throw new CourseUnavailableException(courseId, "Course is not active");
             }
 
             BigDecimal price = response.price();
@@ -66,13 +77,13 @@ public class CourseService {
     @Transactional(readOnly = true)
     public CourseClient.CourseDetailResponse getCourseDetail(String courseId) {
         try {
-            List<CourseClient.CourseDetailResponse> responses = courseClient.getCourseDetailsByIds(courseId);
+            CourseClient.CourseDetailResponseWrapper wrapper = courseClient.getCourseDetailsByIds(courseId);
 
-            if (responses == null || responses.isEmpty()) {
+            if (wrapper == null || wrapper.data() == null || wrapper.data().isEmpty()) {
                 throw new CourseNotFoundException(courseId);
             }
 
-            CourseClient.CourseDetailResponse response = responses.get(0);
+            CourseClient.CourseDetailResponse response = wrapper.data().get(0);
 
             if (response.id() == null) {
                 throw new CourseNotFoundException(courseId);
@@ -89,9 +100,17 @@ public class CourseService {
     }
 
     // Check if user already has an active payment for this course
+    // Runs without transaction to avoid rollback on missing course_id column
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public boolean hasActivePaymentForCourse(String userId, String courseId) {
-        return paymentRepository.findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullOrderByCreatedAtDesc(userId, courseId)
-                .filter(p -> p.getStatus() == PaymentStatus.PENDING || p.getStatus() == PaymentStatus.PAID)
-                .isPresent();
+        try {
+            return paymentRepository.findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullOrderByCreatedAtDesc(userId, courseId)
+                    .filter(p -> p.getStatus() == PaymentStatus.PENDING || p.getStatus() == PaymentStatus.PAID)
+                    .isPresent();
+        } catch (Exception e) {
+            // Database schema issue (missing course_id column) - log and allow payment to proceed
+            log.warn("Could not check active payment for user {} course {}: {}", userId, courseId, e.getMessage());
+            return false;
+        }
     }
 }

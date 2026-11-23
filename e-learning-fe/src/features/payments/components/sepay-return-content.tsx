@@ -7,31 +7,23 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 import { getCourseEnrollmentStatus } from "@/features/enrollments/api/enrollment-api";
 
-import { verifyVnpayReturn } from "../api/payment-api";
-import type { VnpayReturnResult } from "../types/payment";
-import {
-  clearPendingVnpayPayment,
-  getPendingVnpayPayment,
-  type PendingVnpayPayment,
-} from "../utils/pending-vnpay-payment";
+import { verifySepayReturn } from "../api/payment-api";
+import type { SepayReturnResult } from "../types/payment";
 
 type ReturnState =
   | { status: "loading" }
-  | { queryString: string; result: VnpayReturnResult; status: "verified" }
+  | { queryString: string; result: SepayReturnResult; status: "verified" }
   | { message: string; queryString: string; status: "error" };
 
 type EnrollmentAccessState = "idle" | "checking" | "ready" | "processing";
 
-export function VnpayReturnContent() {
+export function SepayReturnContent() {
   const searchParams = useSearchParams();
   const queryString = useMemo(() => searchParams.toString(), [searchParams]);
   const { accessToken, status: authStatus } = useAuth();
   const [returnState, setReturnState] = useState<ReturnState>({
     status: "loading",
   });
-  const [pendingPayment] = useState<PendingVnpayPayment | null>(() =>
-    getPendingVnpayPayment(),
-  );
   const [accessState, setAccessState] =
     useState<EnrollmentAccessState>("idle");
 
@@ -42,7 +34,7 @@ export function VnpayReturnContent() {
       return;
     }
 
-    verifyVnpayReturn(queryString)
+    verifySepayReturn(queryString)
       .then((result) => {
         if (isMounted) {
           setReturnState({ queryString, result, status: "verified" });
@@ -77,16 +69,9 @@ export function VnpayReturnContent() {
   const isPaidResult =
     verifiedResult?.status === "success" ||
     verifiedResult?.status === "already_paid";
-  const matchedPendingPayment = getMatchedPendingPayment(
-    pendingPayment,
-    verifiedResult,
-  );
-  const pendingCourseHref = pendingPayment
-    ? `/courses/${pendingPayment.courseSlug}`
-    : "/courses";
 
   useEffect(() => {
-    if (!isPaidResult || !matchedPendingPayment) {
+    if (!isPaidResult || !verifiedResult) {
       return;
     }
 
@@ -104,7 +89,7 @@ export function VnpayReturnContent() {
 
       try {
         const result = await getCourseEnrollmentStatus(
-          matchedPendingPayment.courseId,
+          verifiedResult.payment.courseId,
           accessToken,
         );
 
@@ -113,7 +98,6 @@ export function VnpayReturnContent() {
         }
 
         if (result.enrolled) {
-          clearPendingVnpayPayment();
           setAccessState("ready");
           return;
         }
@@ -144,13 +128,7 @@ export function VnpayReturnContent() {
         window.clearTimeout(timeoutId);
       }
     };
-  }, [accessToken, authStatus, isPaidResult, matchedPendingPayment]);
-
-  useEffect(() => {
-    if (verifiedResult?.status === "failed" && matchedPendingPayment) {
-      clearPendingVnpayPayment();
-    }
-  }, [matchedPendingPayment, verifiedResult?.status]);
+  }, [accessToken, authStatus, isPaidResult, verifiedResult]);
 
   if (!queryString) {
     return (
@@ -159,12 +137,10 @@ export function VnpayReturnContent() {
         title="Payment could not be verified"
       >
         <p className="leading-7 text-muted-foreground">
-          VNPay did not return payment information.
+          SePay did not return payment information.
         </p>
         <ReturnActions>
-          <ActionLink href={pendingCourseHref}>
-            {pendingPayment ? "Back to course" : "Back to courses"}
-          </ActionLink>
+          <ActionLink href="/courses">Back to courses</ActionLink>
         </ReturnActions>
       </ReturnShell>
     );
@@ -172,7 +148,7 @@ export function VnpayReturnContent() {
 
   if (!isCurrentReturnState) {
     return (
-      <ReturnShell eyebrow="VNPay return" title="Verifying your payment...">
+      <ReturnShell eyebrow="SePay return" title="Verifying your payment...">
         <p className="leading-7 text-muted-foreground">
           Please keep this page open while we confirm the payment details.
         </p>
@@ -187,12 +163,10 @@ export function VnpayReturnContent() {
           {returnState.message}
         </p>
         <ReturnActions>
-          <ActionLink href="/payments/vnpay/return" variant="secondary">
+          <ActionLink href="/payments/sepay/return" variant="secondary">
             Retry
           </ActionLink>
-          <ActionLink href={pendingCourseHref}>
-            {pendingPayment ? "Back to course" : "Back to courses"}
-          </ActionLink>
+          <ActionLink href="/courses">Back to courses</ActionLink>
         </ReturnActions>
       </ReturnShell>
     );
@@ -202,40 +176,100 @@ export function VnpayReturnContent() {
 
   if (result.status === "failed") {
     return (
-      <ReturnShell eyebrow="Payment failed" title="VNPay did not confirm payment">
+      <ReturnShell eyebrow="Payment failed" title="SePay did not confirm payment">
         <p className="leading-7 text-muted-foreground">
           The payment was not successful. You can return to the course and try
           again when you are ready.
         </p>
         <PaymentSummary result={result} />
         <ReturnActions>
-          <ActionLink
-            href={
-              matchedPendingPayment
-                ? `/courses/${matchedPendingPayment.courseSlug}/payment`
-                : "/courses"
-            }
-          >
+          <ActionLink href={`/courses/${result.payment.courseId}/payment`}>
             Try again
           </ActionLink>
           <ActionLink
-            href={
-              matchedPendingPayment
-                ? `/courses/${matchedPendingPayment.courseSlug}`
-                : "/courses"
-            }
+            href={`/courses/${result.payment.courseId}`}
             variant="secondary"
           >
-            {matchedPendingPayment ? "Back to course" : "Back to courses"}
+            Back to course
           </ActionLink>
         </ReturnActions>
       </ReturnShell>
     );
   }
 
+  if (result.status === "pending") {
+    return (
+      <ReturnShell
+        eyebrow="Payment pending"
+        title="Payment is being verified"
+      >
+        <p className="leading-7 text-muted-foreground">
+          SePay has received your payment. The backend is verifying the transaction
+          via IPN callback. This usually takes a few moments.
+        </p>
+        <p className="mt-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+          Course: {result.payment.courseId}
+        </p>
+        <PaymentSummary result={result} />
+        <ReturnActions>
+          <ActionLink
+            href={`/courses/${result.payment.courseId}/payment`}
+            variant="secondary"
+          >
+            Back to checkout
+          </ActionLink>
+          <ActionLink href="/my-courses">Go to My Courses</ActionLink>
+        </ReturnActions>
+      </ReturnShell>
+    );
+  }
+
+  if (result.status === "already_paid") {
+    return (
+      <ReturnShell
+        eyebrow="Already paid"
+        title={
+          accessState === "ready"
+            ? "You can continue learning now"
+            : "Payment received, access is processing"
+        }
+      >
+        <p className="leading-7 text-muted-foreground">
+          This course was already purchased. Course access is granted after the
+          backend receives and settles the SePay IPN callback.
+        </p>
+        <p className="mt-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+          Course: {result.payment.courseId}
+        </p>
+        {accessState === "checking" ? (
+          <p className="mt-3 rounded-md border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
+            Checking whether your course access is active...
+          </p>
+        ) : null}
+        <PaymentSummary result={result} />
+        <ReturnActions>
+          {accessState === "ready" ? (
+            <ActionLink href={`/courses/${result.payment.courseId}/learn`}>
+              Continue learning
+            </ActionLink>
+          ) : (
+            <ActionLink href="/my-courses">Go to My Courses</ActionLink>
+          )}
+          <ActionLink
+            href={`/courses/${result.payment.courseId}`}
+            variant="secondary"
+          >
+            View course
+          </ActionLink>
+        </ReturnActions>
+      </ReturnShell>
+    );
+  }
+
+  // Default success case
   return (
     <ReturnShell
-      eyebrow={result.status === "already_paid" ? "Already paid" : "Payment received"}
+      eyebrow="Payment received"
       title={
         accessState === "ready"
           ? "You can continue learning now"
@@ -243,14 +277,12 @@ export function VnpayReturnContent() {
       }
     >
       <p className="leading-7 text-muted-foreground">
-        VNPay confirmed this payment. Course access is granted after the backend
-        receives and settles the VNPay IPN callback.
+        SePay confirmed this payment. Course access is granted after the backend
+        receives and settles the SePay IPN callback.
       </p>
-      {matchedPendingPayment ? (
-        <p className="mt-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
-          Course: {matchedPendingPayment.courseTitle}
-        </p>
-      ) : null}
+      <p className="mt-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
+        Course: {result.payment.courseId}
+      </p>
       {accessState === "checking" ? (
         <p className="mt-3 rounded-md border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
           Checking whether your course access is active...
@@ -258,48 +290,25 @@ export function VnpayReturnContent() {
       ) : null}
       <PaymentSummary result={result} />
       <ReturnActions>
-        {accessState === "ready" && matchedPendingPayment ? (
-          <ActionLink href={`/courses/${matchedPendingPayment.courseSlug}/learn`}>
+        {accessState === "ready" ? (
+          <ActionLink href={`/courses/${result.payment.courseId}/learn`}>
             Continue learning
           </ActionLink>
         ) : (
           <ActionLink href="/my-courses">Go to My Courses</ActionLink>
         )}
         <ActionLink
-          href={
-            matchedPendingPayment
-              ? `/courses/${matchedPendingPayment.courseSlug}`
-              : "/courses"
-          }
+          href={`/courses/${result.payment.courseId}`}
           variant="secondary"
         >
-          {matchedPendingPayment ? "View course" : "Browse courses"}
+          View course
         </ActionLink>
       </ReturnActions>
     </ReturnShell>
   );
 }
 
-function getMatchedPendingPayment(
-  pendingPayment: PendingVnpayPayment | null,
-  result: VnpayReturnResult | null,
-) {
-  if (!pendingPayment || !result) {
-    return null;
-  }
-
-  if (pendingPayment.txnRef) {
-    return pendingPayment.txnRef === result.payment.txnRef
-      ? pendingPayment
-      : null;
-  }
-
-  return pendingPayment.courseId === result.payment.courseId
-    ? pendingPayment
-    : null;
-}
-
-function PaymentSummary({ result }: { result: VnpayReturnResult }) {
+function PaymentSummary({ result }: { result: SepayReturnResult }) {
   return (
     <dl className="mt-6 grid gap-3 border-y border-border py-4 text-sm">
       <SummaryRow label="Status" value={result.payment.status} />
@@ -309,6 +318,7 @@ function PaymentSummary({ result }: { result: VnpayReturnResult }) {
       />
       <SummaryRow label="Transaction" value={result.payment.txnRef ?? "N/A"} />
       <SummaryRow label="Provider" value={result.payment.provider} />
+      <SummaryRow label="Method" value={result.payment.paymentMethod} />
     </dl>
   );
 }

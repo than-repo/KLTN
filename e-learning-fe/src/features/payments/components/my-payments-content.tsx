@@ -38,7 +38,7 @@ const paymentMethodOptions: Array<{
   value: PaymentMethodFilter;
 }> = [
   { label: "All methods", value: "ALL" },
-  { label: "VNPAY", value: "VNPAY" },
+  { label: "SePay", value: "SEPAY" },
   { label: "Simulation", value: "SIMULATION" },
 ];
 
@@ -121,8 +121,8 @@ function getPaymentStatusLabel(status: PaymentHistoryItem["status"]) {
 
 function getPaymentMethodLabel(method: PaymentHistoryItem["paymentMethod"]) {
   switch (method) {
-    case "VNPAY":
-      return "VNPAY";
+    case "SEPAY":
+      return "SePay";
     case "SIMULATION":
       return "Simulation";
     default:

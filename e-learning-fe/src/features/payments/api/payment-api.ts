@@ -1,23 +1,29 @@
 import { apiRequest } from "@/lib/api/client";
+import { getSpringApiBaseUrl } from "@/lib/config/env";
 
 import type {
-  CreateVnpayPaymentUrlInput,
-  CreateVnpayPaymentUrlResult,
+  CreateSepayPaymentInput,
+  CreateSepayPaymentResult,
   CreateSimulationPaymentInput,
   SimulationPaymentResult,
-  VnpayReturnResult,
+  SepayReturnResult,
   GetPaymentsResponse,
   MyPaymentsQuery,
 } from "../types/payment";
 
 const paymentDevHeaders: HeadersInit = { "ngrok-skip-browser-warning": "true" };
 
-export function createVnpayPaymentUrl(
-  input: CreateVnpayPaymentUrlInput,
+function springPaymentUrl(path: string) {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${getSpringApiBaseUrl()}/api/payments${normalizedPath}`;
+}
+
+export function createSepayPayment(
+  input: CreateSepayPaymentInput,
   accessToken: string,
 ) {
-  return apiRequest<CreateVnpayPaymentUrlResult>(
-    "/payments/vnpay/create-payment-url",
+  return apiRequest<CreateSepayPaymentResult>(
+    springPaymentUrl("/sepay/create-payment"),
     {
       accessToken,
       body: input,
@@ -27,11 +33,11 @@ export function createVnpayPaymentUrl(
   );
 }
 
-export function verifyVnpayReturn(queryString: string) {
+export function verifySepayReturn(queryString: string) {
   const suffix = queryString ? `?${queryString}` : "";
 
-  return apiRequest<VnpayReturnResult>(
-    `/payments/vnpay/verify-return${suffix}`,
+  return apiRequest<SepayReturnResult>(
+    springPaymentUrl(`/sepay/return${suffix}`),
     {
       method: "GET",
       headers: paymentDevHeaders,
@@ -44,7 +50,7 @@ export function createSimulationPayment(
   accessToken: string,
 ) {
   return apiRequest<SimulationPaymentResult>(
-    "/payments/simulation/create-payment",
+    springPaymentUrl("/simulation/create-payment"),
     {
       accessToken,
       body: input,
@@ -59,7 +65,7 @@ export function confirmSimulationPayment(
   accessToken: string,
 ) {
   return apiRequest<SimulationPaymentResult>(
-    `/payments/simulation/${encodeURIComponent(paymentId)}/confirm`,
+    springPaymentUrl(`/simulation/${encodeURIComponent(paymentId)}/confirm`),
     {
       accessToken,
       method: "POST",
@@ -70,7 +76,7 @@ export function confirmSimulationPayment(
 
 export function failSimulationPayment(paymentId: string, accessToken: string) {
   return apiRequest<SimulationPaymentResult>(
-    `/payments/simulation/${encodeURIComponent(paymentId)}/fail`,
+    springPaymentUrl(`/simulation/${encodeURIComponent(paymentId)}/fail`),
     {
       accessToken,
       method: "POST",
@@ -81,7 +87,7 @@ export function failSimulationPayment(paymentId: string, accessToken: string) {
 
 export function getMyPayments(query: MyPaymentsQuery, accessToken: string) {
   return apiRequest<GetPaymentsResponse>(
-    `/payments/me${buildMyPaymentsQueryString(query)}`,
+    springPaymentUrl(`/me${buildMyPaymentsQueryString(query)}`),
     {
       method: "GET",
       accessToken,

@@ -14,7 +14,7 @@ export type MyEnrollmentsSortField =
 
 export type MyEnrollmentsSortDirection = "asc" | "desc";
 
-export type PaymentMethod = "VNPAY" | "SIMULATION";
+export type PaymentMethod = "SEPAY" | "SIMULATION";
 
 export type PaymentStatus =
   | "PENDING"

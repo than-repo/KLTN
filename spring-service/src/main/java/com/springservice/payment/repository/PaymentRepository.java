@@ -71,6 +71,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             @Param("isActive") Boolean isActive,
             @Param("expectedStatus") PaymentStatus expectedStatus);
 
+    // Uses entity field name courseId (mapped to courseId column in DB)
     @Query("SELECT p FROM Payment p WHERE p.userId = :userId AND p.courseId = :courseId " +
            "AND p.isActive = true AND p.deletedAt IS NULL " +
            "ORDER BY p.createdAt DESC")
