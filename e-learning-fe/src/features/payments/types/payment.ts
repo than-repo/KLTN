@@ -19,6 +19,12 @@ export type CreateSepayPaymentResult = {
   checkoutForm: SepayCheckoutForm;
 };
 
+export type SepayPendingPayment = {
+  amount: number;
+  paymentId: string;
+  txnRef: string;
+};
+
 export type CreateSimulationPaymentInput = {
   courseId: string;
 };
@@ -48,7 +54,14 @@ export type PaymentResponse = {
   userId: string;
 };
 
-export type SepayReturnStatus = "success" | "failed" | "pending" | "already_paid";
+export type SepayReturnStatus =
+  | "success"
+  | "failed"
+  | "pending"
+  | "already_paid"
+  | "cancelled"
+  | "expired"
+  | "unknown";
 
 export type SepayReturnResult = {
   payment: PaymentResponse;

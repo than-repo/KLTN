@@ -22,8 +22,14 @@ import {
   createSepayPayment,
   createSimulationPayment,
   failSimulationPayment,
+  getPendingSepayPayment,
+  replaceSepayPayment,
 } from "../api/payment-api";
-import type { CreateSepayPaymentResult, SimulationPaymentResult } from "../types/payment";
+import type {
+  CreateSepayPaymentResult,
+  SepayPendingPayment,
+  SimulationPaymentResult,
+} from "../types/payment";
 
 type SepayCheckoutProps = {
   course: PublicCourse;
@@ -37,6 +43,7 @@ type BusyAction =
   | "simulation-confirm"
   | "simulation-fail"
   | "sepay"
+  | "sepay-replace"
   | null;
 
 export function SepayCheckout({ course }: SepayCheckoutProps) {
@@ -55,7 +62,11 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
   const [busyAction, setBusyAction] = useState<BusyAction>("checking");
   const [simulationPayment, setSimulationPayment] =
     useState<SimulationPaymentResult | null>(null);
-  const [sepayPayment, setSepayPayment] = useState<CreateSepayPaymentResult | null>(null);
+  const [sepayPayment, setSepayPayment] =
+    useState<CreateSepayPaymentResult | null>(null);
+  const [pendingSepayPayment, setPendingSepayPayment] =
+    useState<SepayPendingPayment | null>(null);
+  const [pendingSepayDialogOpen, setPendingSepayDialogOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const isFree = !course.price || course.price <= 0;
   const paymentHref = `/courses/${course.slug}/payment`;
@@ -67,7 +78,12 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
       buildQrCells(
         `${simulationPayment?.payment.id ?? course.id}:${simulationPayment?.payment.txnRef ?? course.slug}`,
       ),
-    [course.id, course.slug, simulationPayment?.payment.id, simulationPayment?.payment.txnRef],
+    [
+      course.id,
+      course.slug,
+      simulationPayment?.payment.id,
+      simulationPayment?.payment.txnRef,
+    ],
   );
 
   useEffect(() => {
@@ -135,32 +151,37 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
 
       if (method === "sepay") {
         setBusyAction("sepay");
-        const payment = await createSepayPayment(
-          { courseId: course.id },
-          accessToken,
-        );
-
-        setSepayPayment(payment);
-        // Submit the form to SePay
-        if (formRef.current) {
-          formRef.current.action = payment.checkoutForm.actionUrl;
-          formRef.current.method = payment.checkoutForm.method;
-
-          // Populate hidden fields
-          const fieldsContainer = formRef.current.querySelector("#sepay-fields");
-          if (fieldsContainer) {
-            fieldsContainer.innerHTML = "";
-            Object.entries(payment.checkoutForm.fields).forEach(([key, value]) => {
-              const input = document.createElement("input");
-              input.type = "hidden";
-              input.name = key;
-              input.value = value;
-              fieldsContainer.appendChild(input);
-            });
-          }
-
-          formRef.current.submit();
+        const pending = await getPendingSepayPayment(course.id, accessToken);
+        if (pending) {
+          setPendingSepayPayment(pending);
+          setPendingSepayDialogOpen(true);
+          return;
         }
+
+        let payment: CreateSepayPaymentResult;
+        try {
+          payment = await createSepayPayment(
+            { courseId: course.id },
+            accessToken,
+          );
+        } catch (paymentError) {
+          if (
+            paymentError instanceof ApiError &&
+            paymentError.statusCode === 409
+          ) {
+            const latestPending = await getPendingSepayPayment(
+              course.id,
+              accessToken,
+            );
+            if (latestPending) {
+              setPendingSepayPayment(latestPending);
+              setPendingSepayDialogOpen(true);
+              return;
+            }
+          }
+          throw paymentError;
+        }
+        openSepayCheckout(payment);
         return;
       }
     } catch (paymentError) {
@@ -214,6 +235,58 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
     } finally {
       setBusyAction(null);
     }
+  }
+
+  async function handleReplacePendingSepayPayment() {
+    if (!accessToken || !pendingSepayPayment) {
+      return;
+    }
+
+    setBusyAction("sepay-replace");
+    setError(null);
+
+    try {
+      const replacement = await replaceSepayPayment(
+        pendingSepayPayment.paymentId,
+        accessToken,
+      );
+      setPendingSepayPayment(null);
+      setPendingSepayDialogOpen(false);
+      openSepayCheckout(replacement);
+    } catch (paymentError) {
+      handleCheckoutError(paymentError);
+    } finally {
+      setBusyAction(null);
+    }
+  }
+
+  function openSepayCheckout(payment: CreateSepayPaymentResult) {
+    setSepayPayment(payment);
+
+    if (!formRef.current) {
+      setError("The SePay checkout form could not be prepared.");
+      return;
+    }
+
+    formRef.current.action = payment.checkoutForm.actionUrl;
+    formRef.current.method = payment.checkoutForm.method;
+
+    const fieldsContainer = formRef.current.querySelector("#sepay-fields");
+    if (!fieldsContainer) {
+      setError("The SePay checkout form could not be prepared.");
+      return;
+    }
+
+    fieldsContainer.innerHTML = "";
+    Object.entries(payment.checkoutForm.fields).forEach(([key, value]) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = value;
+      fieldsContainer.appendChild(input);
+    });
+
+    formRef.current.submit();
   }
 
   function handleCheckoutError(paymentError: unknown) {
@@ -282,6 +355,23 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
           />
         ) : null}
 
+        {pendingSepayPayment ? (
+          pendingSepayDialogOpen ? (
+            <PendingSepayDialog
+              busy={busyAction === "sepay-replace"}
+              onContinue={() => setPendingSepayDialogOpen(false)}
+              onReplace={handleReplacePendingSepayPayment}
+              payment={pendingSepayPayment}
+            />
+          ) : (
+            <PendingSepayNotice
+              busy={busyAction === "sepay-replace"}
+              onReplace={handleReplacePendingSepayPayment}
+              payment={pendingSepayPayment}
+            />
+          )
+        ) : null}
+
         {simulationPayment ? (
           <SimulationGateway
             busyAction={busyAction}
@@ -300,7 +390,8 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
           </p>
         ) : null}
 
-        {!simulationPayment || simulationPayment.status === "failed" ? (
+        {(!simulationPayment || simulationPayment.status === "failed") &&
+        !pendingSepayPayment ? (
           <button
             className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-md border border-primary bg-primary px-6 text-base font-semibold text-primary-foreground transition-colors hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             disabled={isChecking || isBusy}
@@ -353,7 +444,9 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
           />
           <PaymentRow
             label="Method"
-            value={isFree ? "FREE" : method === "simulation" ? "SIMULATION" : "SEPAY"}
+            value={
+              isFree ? "FREE" : method === "simulation" ? "SIMULATION" : "SEPAY"
+            }
           />
         </div>
         <div className="mt-5 flex items-end justify-between gap-4">
@@ -372,6 +465,101 @@ function PaymentCheckoutContent({ course }: SepayCheckoutProps) {
   );
 }
 
+function PendingSepayDialog({
+  busy,
+  onContinue,
+  onReplace,
+  payment,
+}: {
+  busy: boolean;
+  onContinue: () => void;
+  onReplace: () => void;
+  payment: SepayPendingPayment;
+}) {
+  return (
+    <div
+      aria-describedby="pending-sepay-description"
+      aria-labelledby="pending-sepay-title"
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
+      role="dialog"
+    >
+      <section className="w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-xl">
+        <p className="text-sm font-semibold text-primary">
+          Pending SePay order
+        </p>
+        <h2 className="mt-2 text-xl font-semibold" id="pending-sepay-title">
+          You already have a pending payment
+        </h2>
+        <p
+          className="mt-3 text-sm leading-6 text-muted-foreground"
+          id="pending-sepay-description"
+        >
+          Continue the payment in the SePay page you previously opened, or
+          cancel that order before creating a replacement. A new order will not
+          be created unless SePay confirms the old one is cancelled.
+        </p>
+        <dl className="mt-4 grid gap-2 text-sm">
+          <PaymentRow label="Transaction" value={payment.txnRef} />
+          <PaymentRow
+            label="Amount"
+            value={`${payment.amount.toLocaleString("vi-VN")} VND`}
+          />
+        </dl>
+        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-danger bg-transparent px-5 text-sm font-semibold text-danger transition-colors hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={busy}
+            onClick={onReplace}
+            type="button"
+          >
+            {busy ? "Cancelling old order..." : "Cancel and create new payment"}
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={busy}
+            onClick={onContinue}
+            type="button"
+          >
+            Continue existing payment
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function PendingSepayNotice({
+  busy,
+  onReplace,
+  payment,
+}: {
+  busy: boolean;
+  onReplace: () => void;
+  payment: SepayPendingPayment;
+}) {
+  return (
+    <section className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+      <p className="text-sm font-semibold text-primary">
+        Existing payment kept
+      </p>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        Finish transaction {payment.txnRef} in the SePay page you already
+        opened. If that page is no longer available, cancel the pending order
+        before creating another one.
+      </p>
+      <button
+        className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md border border-danger bg-transparent px-5 text-sm font-semibold text-danger transition-colors hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={busy}
+        onClick={onReplace}
+        type="button"
+      >
+        {busy ? "Cancelling old order..." : "Cancel and create new payment"}
+      </button>
+    </section>
+  );
+}
+
 function PendingSepayPanel({
   onStartNew,
   sepayPayment,
@@ -381,16 +569,17 @@ function PendingSepayPanel({
 }) {
   return (
     <section className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
-      <p className="text-sm font-semibold text-primary">
-        SePay session ready
-      </p>
+      <p className="text-sm font-semibold text-primary">SePay session ready</p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        You started a SePay payment. Click the button below to proceed to the SePay
-        payment page.
+        You started a SePay payment. Click the button below to proceed to the
+        SePay payment page.
       </p>
       <dl className="mt-4 grid gap-2 text-sm">
         <PaymentRow label="Transaction" value={sepayPayment.txnRef} />
-        <PaymentRow label="Amount" value={`${sepayPayment.amount.toLocaleString("vi-VN")} VND`} />
+        <PaymentRow
+          label="Amount"
+          value={`${sepayPayment.amount.toLocaleString("vi-VN")} VND`}
+        />
       </dl>
       <button
         className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md border border-primary bg-transparent px-5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5"
@@ -503,7 +692,9 @@ function SimulationGateway({
             onClick={onConfirm}
             type="button"
           >
-            {busyAction === "simulation-confirm" ? "Confirming..." : "I have paid"}
+            {busyAction === "simulation-confirm"
+              ? "Confirming..."
+              : "I have paid"}
           </button>
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-danger bg-transparent px-6 text-base font-semibold text-danger transition-colors hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-60"

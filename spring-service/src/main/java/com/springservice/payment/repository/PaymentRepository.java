@@ -55,6 +55,15 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             @Param("providerMetadata") String providerMetadata,
             @Param("pendingStatus") PaymentStatus pendingStatus);
 
+    @Modifying
+    @Transactional
+    @Query("UPDATE Payment p SET p.status = :cancelledStatus, p.isActive = false " +
+           "WHERE p.id = :paymentId AND p.status = :pendingStatus")
+    int cancelPendingPayment(
+            @Param("paymentId") String paymentId,
+            @Param("cancelledStatus") PaymentStatus cancelledStatus,
+            @Param("pendingStatus") PaymentStatus pendingStatus);
+
     // Atomic conditional update: ONLY transitions PENDING -> PAID
     // Used for idempotent IPN processing to prevent duplicate settlements
     @Modifying
@@ -75,4 +84,11 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             String userId,
             String courseId,
             List<PaymentStatus> statuses);
+
+    Optional<Payment> findFirstByUserIdAndCourseIdAndPaymentMethodAndProviderAndIsActiveTrueAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(
+            String userId,
+            String courseId,
+            PaymentMethod paymentMethod,
+            String provider,
+            PaymentStatus status);
 }

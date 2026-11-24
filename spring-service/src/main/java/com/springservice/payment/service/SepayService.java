@@ -254,12 +254,14 @@ public class SepayService {
         SepayIpnRequest.Transaction transaction = request.getTransaction();
 
         // Validate order amount matches payment amount
-        if (order.getOrderAmount() == null || !order.getOrderAmount().equals(payment.getAmount().longValue())) {
+        if (order.getOrderAmount() == null ||
+                order.getOrderAmount().compareTo(BigDecimal.valueOf(payment.getAmount())) != 0) {
             throw new IllegalArgumentException("Order amount mismatch: expected " + payment.getAmount() + ", got " + order.getOrderAmount());
         }
 
         // Validate transaction amount matches payment amount
-        if (transaction.getTransactionAmount() == null || !transaction.getTransactionAmount().equals(payment.getAmount().longValue())) {
+        if (transaction.getTransactionAmount() == null ||
+                transaction.getTransactionAmount().compareTo(BigDecimal.valueOf(payment.getAmount())) != 0) {
             throw new IllegalArgumentException("Transaction amount mismatch: expected " + payment.getAmount() + ", got " + transaction.getTransactionAmount());
         }
 

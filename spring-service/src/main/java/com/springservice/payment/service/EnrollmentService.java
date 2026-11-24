@@ -73,6 +73,14 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
+    @Transactional
+    public void ensureEnrollmentForPayment(Payment payment, LocalDateTime enrolledAt) {
+        if (enrollmentRepository.findByPaymentId(payment.getId()).isPresent()) {
+            return;
+        }
+        activateEnrollmentForPayment(payment, enrolledAt);
+    }
+
     @Transactional(readOnly = true)
     public Optional<Enrollment> getActiveEnrollment(String userId, String courseId) {
         return enrollmentRepository.findActiveEnrollmentByUserAndCourse(

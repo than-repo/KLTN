@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.service.SepayGatewayException;
 
 @ControllerAdvice
 public class PaymentExceptionHandler {
@@ -44,5 +45,10 @@ public class PaymentExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<String> handleIllegalState(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(SepayGatewayException.class)
+    public ResponseEntity<String> handleSepayGateway(SepayGatewayException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ex.getMessage());
     }
 }

@@ -6,6 +6,7 @@ import type {
   CreateSepayPaymentResult,
   CreateSimulationPaymentInput,
   SimulationPaymentResult,
+  SepayPendingPayment,
   SepayReturnResult,
   GetPaymentsResponse,
   MyPaymentsQuery,
@@ -27,6 +28,30 @@ export function createSepayPayment(
     {
       accessToken,
       body: input,
+      method: "POST",
+      headers: paymentDevHeaders,
+    },
+  );
+}
+
+export function getPendingSepayPayment(courseId: string, accessToken: string) {
+  const params = new URLSearchParams({ courseId });
+
+  return apiRequest<SepayPendingPayment | null>(
+    springPaymentUrl(`/sepay/pending?${params.toString()}`),
+    {
+      accessToken,
+      method: "GET",
+      headers: paymentDevHeaders,
+    },
+  );
+}
+
+export function replaceSepayPayment(paymentId: string, accessToken: string) {
+  return apiRequest<CreateSepayPaymentResult>(
+    springPaymentUrl(`/sepay/${encodeURIComponent(paymentId)}/replace`),
+    {
+      accessToken,
       method: "POST",
       headers: paymentDevHeaders,
     },

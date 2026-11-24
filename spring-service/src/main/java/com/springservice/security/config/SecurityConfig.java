@@ -35,7 +35,9 @@ public class SecurityConfig {
                 throws ServletException, java.io.IOException {
             // Check if this is a public path
             String path = request.getRequestURI();
-            if (path.startsWith("/api/payments/sepay/") || path.startsWith("/actuator/")) {
+            if ("/api/payments/sepay/return".equals(path) ||
+                    "/api/payments/sepay/ipn".equals(path) ||
+                    path.startsWith("/actuator/")) {
                 // For public paths, don't add WWW-Authenticate header
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 return;
@@ -53,7 +55,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         // Public endpoints - no authentication required
-                        .requestMatchers("/api/payments/sepay/**").permitAll()
+                        .requestMatchers("/api/payments/sepay/return", "/api/payments/sepay/ipn").permitAll()
+                        .requestMatchers("/api/payments/sepay/**").hasRole("LEARNER")
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Protected endpoints - require LEARNER role

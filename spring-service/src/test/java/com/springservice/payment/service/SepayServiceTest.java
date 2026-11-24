@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springservice.payment.config.SepayConfig;
 import com.springservice.payment.dto.SepayCheckoutForm;
 import com.springservice.payment.dto.SepayIpnRequest;
@@ -252,14 +253,14 @@ class SepayServiceTest {
                 .order(SepayIpnRequest.Order.builder()
                         .orderInvoiceNumber("PAY1234567890ABCD")
                         .orderStatus("CAPTURED")
-                        .orderAmount(100000L)
+                        .orderAmount(BigDecimal.valueOf(100000))
                         .orderCurrency("VND")
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
                         .transactionId("TRX789012")
                         .transactionStatus("APPROVED")
                         .transactionType("PAYMENT")
-                        .transactionAmount(100000L)
+                        .transactionAmount(BigDecimal.valueOf(100000))
                         .transactionCurrency("VND")
                         .paymentMethod("BANK_TRANSFER")
                         .build())
@@ -282,14 +283,14 @@ class SepayServiceTest {
                 .order(SepayIpnRequest.Order.builder()
                         .orderInvoiceNumber("PAY1234567890ABCD")
                         .orderStatus("PENDING") // Not CAPTURED
-                        .orderAmount(100000L)
+                        .orderAmount(BigDecimal.valueOf(100000))
                         .orderCurrency("VND")
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
                         .transactionId("TRX789012")
                         .transactionStatus("APPROVED")
                         .transactionType("PAYMENT")
-                        .transactionAmount(100000L)
+                        .transactionAmount(BigDecimal.valueOf(100000))
                         .transactionCurrency("VND")
                         .paymentMethod("BANK_TRANSFER")
                         .build())
@@ -311,14 +312,14 @@ class SepayServiceTest {
                 .order(SepayIpnRequest.Order.builder()
                         .orderInvoiceNumber("PAY1234567890ABCD")
                         .orderStatus("CAPTURED")
-                        .orderAmount(100000L)
+                        .orderAmount(BigDecimal.valueOf(100000))
                         .orderCurrency("VND")
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
                         .transactionId("TRX789012")
                         .transactionStatus("PENDING") // Not APPROVED
                         .transactionType("PAYMENT")
-                        .transactionAmount(100000L)
+                        .transactionAmount(BigDecimal.valueOf(100000))
                         .transactionCurrency("VND")
                         .paymentMethod("BANK_TRANSFER")
                         .build())
@@ -340,14 +341,14 @@ class SepayServiceTest {
                 .order(SepayIpnRequest.Order.builder()
                         .orderInvoiceNumber("PAY1234567890ABCD")
                         .orderStatus("CAPTURED")
-                        .orderAmount(100000L)
+                        .orderAmount(BigDecimal.valueOf(100000))
                         .orderCurrency("VND")
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
                         .transactionId("TRX789012")
                         .transactionStatus("APPROVED")
                         .transactionType("PAYMENT")
-                        .transactionAmount(100000L)
+                        .transactionAmount(BigDecimal.valueOf(100000))
                         .transactionCurrency("VND")
                         .paymentMethod("UNKNOWN_METHOD")
                         .build())
@@ -438,11 +439,11 @@ class SepayServiceTest {
         // Given
         SepayIpnRequest request = SepayIpnRequest.builder()
                 .order(SepayIpnRequest.Order.builder()
-                        .orderAmount(100000L)
+                        .orderAmount(new BigDecimal("100000.00"))
                         .orderCurrency("VND")
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
-                        .transactionAmount(100000L)
+                        .transactionAmount(new BigDecimal("100000.00"))
                         .transactionCurrency("VND")
                         .build())
                 .build();
@@ -456,11 +457,11 @@ class SepayServiceTest {
         // Given
         SepayIpnRequest request = SepayIpnRequest.builder()
                 .order(SepayIpnRequest.Order.builder()
-                        .orderAmount(99999L) // Different from payment amount (100000)
+                        .orderAmount(BigDecimal.valueOf(99999)) // Different from payment amount (100000)
                         .orderCurrency("VND")
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
-                        .transactionAmount(100000L)
+                        .transactionAmount(BigDecimal.valueOf(100000))
                         .transactionCurrency("VND")
                         .build())
                 .build();
@@ -475,11 +476,11 @@ class SepayServiceTest {
         // Given
         SepayIpnRequest request = SepayIpnRequest.builder()
                 .order(SepayIpnRequest.Order.builder()
-                        .orderAmount(100000L)
+                        .orderAmount(BigDecimal.valueOf(100000))
                         .orderCurrency("USD") // Not VND
                         .build())
                 .transaction(SepayIpnRequest.Transaction.builder()
-                        .transactionAmount(100000L)
+                        .transactionAmount(BigDecimal.valueOf(100000))
                         .transactionCurrency("VND")
                         .build())
                 .build();
@@ -487,5 +488,34 @@ class SepayServiceTest {
         // When/Then
         assertThrows(IllegalArgumentException.class,
                 () -> sepayService.validateAmountAndCurrency(testPayment, request));
+    }
+
+    @Test
+    void parsesDocumentedIpnDecimalAmountsAndCustomDataArray() throws Exception {
+        String payload = """
+                {
+                  "notification_type": "ORDER_PAID",
+                  "order": {
+                    "order_amount": "100000.00",
+                    "custom_data": []
+                  },
+                  "transaction": {
+                    "transaction_amount": "100000"
+                  }
+                }
+                """;
+
+        SepayIpnRequest request = new ObjectMapper().readValue(payload, SepayIpnRequest.class);
+
+        assertEquals(new BigDecimal("100000.00"), request.getOrder().getOrderAmount());
+        assertTrue(request.getOrder().getCustomData() instanceof java.util.List<?>);
+        assertEquals(new BigDecimal("100000"), request.getTransaction().getTransactionAmount());
+        assertDoesNotThrow(() -> sepayService.validateAmountAndCurrency(testPayment, requestWithCurrencies(request)));
+    }
+
+    private SepayIpnRequest requestWithCurrencies(SepayIpnRequest request) {
+        request.getOrder().setOrderCurrency("VND");
+        request.getTransaction().setTransactionCurrency("VND");
+        return request;
     }
 }

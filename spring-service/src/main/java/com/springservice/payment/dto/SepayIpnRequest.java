@@ -1,5 +1,7 @@
 package com.springservice.payment.dto;
 
+import java.math.BigDecimal;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -47,13 +49,13 @@ public class SepayIpnRequest {
         private String orderCurrency;
 
         @JsonProperty("order_amount")
-        private Long orderAmount;
+        private BigDecimal orderAmount;
 
         @JsonProperty("order_invoice_number")
         private String orderInvoiceNumber;
 
         @JsonProperty("custom_data")
-        private String customData;
+        private Object customData;
 
         @JsonProperty("user_agent")
         private String userAgent;
@@ -90,7 +92,7 @@ public class SepayIpnRequest {
         private String transactionStatus;
 
         @JsonProperty("transaction_amount")
-        private Long transactionAmount;
+        private BigDecimal transactionAmount;
 
         @JsonProperty("transaction_currency")
         private String transactionCurrency;

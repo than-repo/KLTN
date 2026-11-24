@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.springservice.payment.config.SepayConfig;
 import com.springservice.payment.dto.CreateSimulationPaymentRequest;
 import com.springservice.payment.entity.Payment;
 import com.springservice.payment.exception.CourseUnavailableException;
@@ -35,7 +34,7 @@ class PaymentServiceSimulationTest {
         paymentService = new PaymentService(
                 paymentRepository,
                 mock(SepayService.class),
-                mock(SepayConfig.class),
+                mock(SepayGatewayClient.class),
                 courseService,
                 mock(EnrollmentService.class));
     }

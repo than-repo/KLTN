@@ -10,7 +10,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.springservice.payment.config.SepayConfig;
 import com.springservice.payment.dto.CreateSepayPaymentRequest;
 import com.springservice.payment.dto.CreateSepayPaymentResponse;
 import com.springservice.payment.dto.CreateSimulationPaymentRequest;
@@ -21,6 +20,7 @@ import com.springservice.payment.dto.PaymentResponseDto;
 import com.springservice.payment.dto.SepayCheckoutForm;
 import com.springservice.payment.dto.SepayIpnRequest;
 import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.dto.SepayPendingPaymentResponse;
 import com.springservice.payment.dto.SepayReturnQuery;
 import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
@@ -28,6 +28,7 @@ import com.springservice.payment.entity.Enrollment;
 import com.springservice.payment.entity.Payment;
 import com.springservice.payment.entity.PaymentMethod;
 import com.springservice.payment.entity.PaymentStatus;
+import com.springservice.payment.exception.InvalidPaymentStateException;
 import com.springservice.payment.exception.CourseNotFoundException;
 import com.springservice.payment.exception.CourseUnavailableException;
 import com.springservice.payment.exception.InvalidPaymentStateException;
@@ -45,7 +46,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final SepayService sepayService;
-    private final SepayConfig sepayConfig;
+    private final SepayGatewayClient sepayGatewayClient;
     private final CourseService courseService;
     private final EnrollmentService enrollmentService;
 
@@ -61,11 +62,7 @@ public class PaymentService {
         }
 
         BigDecimal amount = course.price();
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0 || amount.scale() > 0) {
-            throw new IllegalArgumentException("Invalid course price");
-        }
-
-        Integer amountInt = amount.intValue();
+        Integer amountInt = validateSepayAmount(amount);
 
         // Check if user already has an active payment for this course
         if (courseService.hasActivePaymentForCourse(userId, request.getCourseId())) {
@@ -80,6 +77,63 @@ public class PaymentService {
         SepayCheckoutForm checkoutForm = sepayService.createCheckoutForm(payment);
 
         return new CreateSepayPaymentResponse(payment.getId(), payment.getTxnRef(), amount, checkoutForm);
+    }
+
+    public Optional<SepayPendingPaymentResponse> getPendingSepayPayment(String userId, String courseId) {
+        return paymentRepository
+                .findFirstByUserIdAndCourseIdAndPaymentMethodAndProviderAndIsActiveTrueAndDeletedAtIsNullAndStatusOrderByCreatedAtDesc(
+                        userId, courseId, PaymentMethod.SEPAY, "SEPAY", PaymentStatus.PENDING)
+                .map(payment -> new SepayPendingPaymentResponse(
+                        payment.getId(), payment.getTxnRef(), BigDecimal.valueOf(payment.getAmount())));
+    }
+
+    public CreateSepayPaymentResponse replacePendingSepayPayment(String userId, String paymentId) {
+        Payment payment = paymentRepository
+                .findByIdAndUserIdAndPaymentMethodAndProvider(
+                        paymentId, userId, PaymentMethod.SEPAY, "SEPAY")
+                .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+
+        if (payment.getStatus() != PaymentStatus.PENDING ||
+                !Boolean.TRUE.equals(payment.getIsActive()) ||
+                payment.getDeletedAt() != null) {
+            throw new InvalidPaymentStateException("Only an active pending SePay payment can be replaced.");
+        }
+
+        CourseService.CoursePrice course = courseService.getCoursePrice(payment.getCourseId());
+        if (course == null) {
+            throw new CourseNotFoundException(payment.getCourseId());
+        }
+        BigDecimal amount = course.price();
+        Integer amountInt = validateSepayAmount(amount);
+
+        sepayGatewayClient.cancelOrder(payment.getTxnRef());
+
+        int cancelled = paymentRepository.cancelPendingPayment(
+                payment.getId(), PaymentStatus.CANCELLED, PaymentStatus.PENDING);
+        if (cancelled == 0) {
+            Payment current = paymentRepository.findById(payment.getId())
+                    .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+            if (current.getStatus() == PaymentStatus.PAID) {
+                throw new InvalidPaymentStateException(
+                        "The payment completed while cancellation was in progress; no replacement was created.");
+            }
+            throw new InvalidPaymentStateException(
+                    "The payment changed while cancellation was in progress; refresh and try again.");
+        }
+
+        if (courseService.hasActivePaymentForCourse(userId, payment.getCourseId())) {
+            throw new IllegalStateException(
+                    "Another active payment exists for this course; no replacement was created.");
+        }
+
+        String txnRef = generateTxnRef("PAY");
+        Payment replacement = new Payment(
+                userId, payment.getCourseId(), amountInt, PaymentMethod.SEPAY, "SEPAY", txnRef);
+        replacement = paymentRepository.save(replacement);
+        SepayCheckoutForm checkoutForm = sepayService.createCheckoutForm(replacement);
+
+        return new CreateSepayPaymentResponse(
+                replacement.getId(), replacement.getTxnRef(), amount, checkoutForm);
     }
 
     // Simulation Payment (PRESERVED - unchanged)
@@ -245,6 +299,9 @@ public class PaymentService {
 
         // Check if already paid - idempotent
         if (payment.getStatus() == PaymentStatus.PAID) {
+            if (!ensureEnrollmentSafely(payment, payment.getPaidAt())) {
+                return SepayIpnResponse.internalError();
+            }
             log.info("SePay IPN: Payment already PAID, idempotent response: {}", payment.getTxnRef());
             return SepayIpnResponse.alreadyProcessed();
         }
@@ -257,7 +314,7 @@ public class PaymentService {
 
         // Step 6: Atomic settlement - only transitions PENDING -> PAID
         String providerPaymentId = request.getTransaction() != null ? request.getTransaction().getTransactionId() : null;
-        String providerMetadata = request.toString(); // Could serialize to JSON properly
+        String providerMetadata = "{\"provider\":\"SEPAY\",\"notificationType\":\"ORDER_PAID\"}";
         LocalDateTime paidAt = LocalDateTime.now();
 
         int updated = paymentRepository.settlePaymentIfPending(
@@ -274,6 +331,9 @@ public class PaymentService {
             // Race condition: another thread already updated it
             Payment current = paymentRepository.findById(payment.getId()).orElseThrow();
             if (current.getStatus() == PaymentStatus.PAID) {
+                if (!ensureEnrollmentSafely(current, current.getPaidAt())) {
+                    return SepayIpnResponse.internalError();
+                }
                 return SepayIpnResponse.alreadyProcessed();
             }
             // Payment in terminal state, don't overwrite
@@ -286,11 +346,8 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
         // Step 7: Activate enrollment (reuse existing logic)
-        try {
-            enrollmentService.activateEnrollmentForPayment(payment, paidAt);
-        } catch (Exception e) {
-            log.error("Failed to activate enrollment for payment {}", payment.getId(), e);
-            // Payment is already marked as PAID, enrollment can be retried
+        if (!activateEnrollmentSafely(payment, paidAt)) {
+            return SepayIpnResponse.internalError();
         }
 
         log.info("SePay IPN: Payment settled successfully: {}", payment.getTxnRef());
@@ -315,9 +372,14 @@ public class PaymentService {
 
         // Mark pending payment as failed
         String providerPaymentId = request.getTransaction() != null ? request.getTransaction().getTransactionId() : null;
-        String providerMetadata = request.toString();
+        String providerMetadata = "{\"provider\":\"SEPAY\",\"notificationType\":\"TRANSACTION_VOID\"}";
 
-        markPendingPaymentFailed(payment.getId(), providerPaymentId, providerMetadata);
+        int updated = paymentRepository.markPendingPaymentFailed(
+                payment.getId(), PaymentStatus.FAILED, providerPaymentId, providerMetadata, PaymentStatus.PENDING);
+        if (updated == 0) {
+            log.info("SePay IPN: Payment changed while processing TRANSACTION_VOID: {}", payment.getTxnRef());
+            return SepayIpnResponse.alreadyProcessed();
+        }
 
         log.info("SePay IPN: Payment marked FAILED due to TRANSACTION_VOID: {}", payment.getTxnRef());
         return SepayIpnResponse.success();
@@ -395,12 +457,46 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentNotFoundException(paymentId));
     }
 
+    private boolean activateEnrollmentSafely(Payment payment, LocalDateTime enrolledAt) {
+        try {
+            enrollmentService.activateEnrollmentForPayment(
+                    payment, enrolledAt != null ? enrolledAt : LocalDateTime.now());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to activate enrollment for payment {}", payment.getId(), e);
+            return false;
+        }
+    }
+
+    private boolean ensureEnrollmentSafely(Payment payment, LocalDateTime enrolledAt) {
+        try {
+            enrollmentService.ensureEnrollmentForPayment(
+                    payment, enrolledAt != null ? enrolledAt : LocalDateTime.now());
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to retry enrollment activation for payment {}", payment.getId(), e);
+            return false;
+        }
+    }
+
     private String generateTxnRef(String prefix) {
         if ("PAY".equals(prefix)) {
             return prefix + System.currentTimeMillis() +
                     UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
         }
         return prefix + "_" + System.currentTimeMillis() + "_" + UUID.randomUUID();
+    }
+
+    private Integer validateSepayAmount(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0 ||
+                amount.stripTrailingZeros().scale() > 0) {
+            throw new IllegalArgumentException("Invalid course price");
+        }
+        try {
+            return amount.intValueExact();
+        } catch (ArithmeticException exception) {
+            throw new IllegalArgumentException("Invalid course price", exception);
+        }
     }
 
     private SimulationPaymentResponse toSimulationPaymentResponse(String status, Payment payment) {

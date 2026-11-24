@@ -21,6 +21,7 @@ import com.springservice.payment.dto.GetPaymentsQuery;
 import com.springservice.payment.dto.GetPaymentsResponse;
 import com.springservice.payment.dto.SepayIpnRequest;
 import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.dto.SepayPendingPaymentResponse;
 import com.springservice.payment.dto.SepayReturnQuery;
 import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
@@ -51,6 +52,24 @@ public class PaymentController {
 
         return ResponseEntity.created(URI.create("/api/payments/" + response.getPaymentId()))
                 .body(response);
+    }
+
+    @GetMapping("/sepay/pending")
+    public ResponseEntity<SepayPendingPaymentResponse> getPendingSepayPayment(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam String courseId) {
+        return paymentService.getPendingSepayPayment(jwt.getSubject(), courseId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    @PostMapping("/sepay/{paymentId}/replace")
+    public ResponseEntity<CreateSepayPaymentResponse> replacePendingSepayPayment(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String paymentId) {
+        CreateSepayPaymentResponse response =
+                paymentService.replacePendingSepayPayment(jwt.getSubject(), paymentId);
+        return ResponseEntity.ok(response);
     }
 
     // Create Simulation payment (for testing) - PRESERVED
@@ -104,8 +123,11 @@ public class PaymentController {
 
         SepayIpnResponse response = paymentService.handleSepayIpn(secretKey, request);
 
-        // SePay expects HTTP 200 for all acknowledged responses
-        // Only return 500 for internal errors that should trigger retry
+        if ("INVALID_SIGNATURE".equals(response.getCode())) {
+            return ResponseEntity.status(401).body(response);
+        }
+
+        // SePay retries internal failures; all other responses acknowledge the callback.
         if (!response.isSuccess() && "INTERNAL_ERROR".equals(response.getCode())) {
             return ResponseEntity.internalServerError().body(response);
         }

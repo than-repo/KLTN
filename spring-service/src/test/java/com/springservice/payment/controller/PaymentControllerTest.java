@@ -2,6 +2,7 @@ package com.springservice.payment.controller;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ import com.springservice.payment.dto.GetPaymentsResponse;
 import com.springservice.payment.dto.SepayCheckoutForm;
 import com.springservice.payment.dto.SepayIpnRequest;
 import com.springservice.payment.dto.SepayIpnResponse;
+import com.springservice.payment.dto.SepayPendingPaymentResponse;
 import com.springservice.payment.dto.SepayReturnQuery;
 import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
@@ -198,6 +200,26 @@ class PaymentControllerTest {
         mockMvc.perform(post("/api/payments/sepay/create-payment")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void getPendingSepayPayment_ReturnsOwnedLearnerPayment() throws Exception {
+        when(paymentService.getPendingSepayPayment("user-123", "course-456"))
+                .thenReturn(Optional.of(new SepayPendingPaymentResponse(
+                        "payment-789", "PAY1234567890ABCD", BigDecimal.valueOf(100000))));
+
+        mockMvc.perform(get("/api/payments/sepay/pending")
+                        .with(jwt().jwt(testJwt))
+                        .param("courseId", "course-456"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paymentId").value("payment-789"))
+                .andExpect(jsonPath("$.txnRef").value("PAY1234567890ABCD"));
+    }
+
+    @Test
+    void replacePendingSepayPaymentRequiresAuthentication() throws Exception {
+        mockMvc.perform(post("/api/payments/sepay/payment-789/replace"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -429,7 +451,7 @@ class PaymentControllerTest {
                                     "order": {"order_invoice_number": "PAY1234567890ABCD"}
                                 }
                                 """))
-                .andExpect(status().isOk())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("INVALID_SIGNATURE"));
     }
 

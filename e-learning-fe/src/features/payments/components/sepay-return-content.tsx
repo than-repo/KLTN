@@ -24,8 +24,7 @@ export function SepayReturnContent() {
   const [returnState, setReturnState] = useState<ReturnState>({
     status: "loading",
   });
-  const [accessState, setAccessState] =
-    useState<EnrollmentAccessState>("idle");
+  const [accessState, setAccessState] = useState<EnrollmentAccessState>("idle");
 
   useEffect(() => {
     let isMounted = true;
@@ -158,10 +157,11 @@ export function SepayReturnContent() {
 
   if (returnState.status === "error") {
     return (
-      <ReturnShell eyebrow="Verification error" title="Payment could not be verified">
-        <p className="leading-7 text-muted-foreground">
-          {returnState.message}
-        </p>
+      <ReturnShell
+        eyebrow="Verification error"
+        title="Payment could not be verified"
+      >
+        <p className="leading-7 text-muted-foreground">{returnState.message}</p>
         <ReturnActions>
           <ActionLink href="/payments/sepay/return" variant="secondary">
             Retry
@@ -174,12 +174,21 @@ export function SepayReturnContent() {
 
   const result = returnState.result;
 
-  if (result.status === "failed") {
+  if (
+    result.status === "failed" ||
+    result.status === "cancelled" ||
+    result.status === "expired" ||
+    result.status === "unknown"
+  ) {
     return (
-      <ReturnShell eyebrow="Payment failed" title="SePay did not confirm payment">
+      <ReturnShell
+        eyebrow="Payment not completed"
+        title="SePay did not confirm payment"
+      >
         <p className="leading-7 text-muted-foreground">
-          The payment was not successful. You can return to the course and try
-          again when you are ready.
+          No course access was granted. Return to checkout to try again. If a
+          SePay order is still pending, cancel it there before creating a
+          replacement.
         </p>
         <PaymentSummary result={result} />
         <ReturnActions>
@@ -199,13 +208,12 @@ export function SepayReturnContent() {
 
   if (result.status === "pending") {
     return (
-      <ReturnShell
-        eyebrow="Payment pending"
-        title="Payment is being verified"
-      >
+      <ReturnShell eyebrow="Payment pending" title="Payment is being verified">
         <p className="leading-7 text-muted-foreground">
-          SePay has received your payment. The backend is verifying the transaction
-          via IPN callback. This usually takes a few moments.
+          Your payment is not confirmed yet. Course access is granted only after
+          the backend verifies the transaction through SePay&apos;s IPN
+          callback. If you did not complete payment, return to checkout and
+          cancel the pending order before creating a replacement.
         </p>
         <p className="mt-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary">
           Course: {result.payment.courseId}
