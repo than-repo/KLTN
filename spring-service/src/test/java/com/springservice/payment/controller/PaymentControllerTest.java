@@ -3,9 +3,11 @@ package com.springservice.payment.controller;
 import java.math.BigDecimal;
 import java.util.Collections;
 
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,6 +26,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springservice.payment.dto.CreateSepayPaymentRequest;
@@ -35,12 +39,12 @@ import com.springservice.payment.dto.SepayIpnResponse;
 import com.springservice.payment.dto.SepayReturnQuery;
 import com.springservice.payment.dto.SepayReturnResponse;
 import com.springservice.payment.dto.SimulationPaymentResponse;
+import com.springservice.payment.entity.Enrollment;
 import com.springservice.payment.entity.Payment;
 import com.springservice.payment.entity.PaymentMethod;
 import com.springservice.payment.entity.PaymentStatus;
 import com.springservice.payment.client.CourseClient;
 import com.springservice.payment.repository.PaymentRepository;
-import com.springservice.payment.repository.EnrollmentRepository;
 import com.springservice.wishlist.repository.WishlistRepository;
 import com.springservice.payment.service.PaymentService;
 
@@ -66,6 +70,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 @Import({PaymentControllerTest.TestConfig.class, PaymentControllerTest.TestSecurityConfig.class})
 @ComponentScan(basePackages = "com.springservice.payment")
+@EntityScan(basePackages = "com.springservice.payment.entity")
+@EnableJpaRepositories(basePackages = "com.springservice.payment.repository")
 class PaymentControllerTest {
 
     @Configuration
@@ -90,18 +96,6 @@ class PaymentControllerTest {
         @Primary
         CourseClient courseClient() {
             return org.mockito.Mockito.mock(CourseClient.class);
-        }
-
-        @Bean
-        @Primary
-        PaymentRepository paymentRepository() {
-            return org.mockito.Mockito.mock(PaymentRepository.class);
-        }
-
-        @Bean
-        @Primary
-        EnrollmentRepository enrollmentRepository() {
-            return org.mockito.Mockito.mock(EnrollmentRepository.class);
         }
 
         @Bean
@@ -138,6 +132,12 @@ class PaymentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -220,6 +220,94 @@ class PaymentControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("pending"));
+    }
+
+    @Test
+    @Transactional
+    void paymentEntityPersistsWithCamelCaseDatabaseColumns() {
+        Payment payment = new Payment(
+                "user-123",
+                "course-456",
+                100000,
+                PaymentMethod.SIMULATION,
+                "SIMULATION",
+                "SIM_TEST_CAMEL_CASE_COLUMNS");
+
+        entityManager.persist(payment);
+        entityManager.flush();
+        entityManager.clear();
+
+        Payment persistedPayment = entityManager.find(Payment.class, payment.getId());
+
+        org.junit.jupiter.api.Assertions.assertNotNull(persistedPayment);
+        org.junit.jupiter.api.Assertions.assertEquals("course-456", persistedPayment.getCourseId());
+        org.junit.jupiter.api.Assertions.assertNotNull(persistedPayment.getCreatedAt());
+        org.junit.jupiter.api.Assertions.assertNotNull(persistedPayment.getUpdatedAt());
+    }
+
+    @Test
+    @Transactional
+    void duplicateActivePaymentLookupReturnsOneMatchingPayment() {
+        Payment first = new Payment(
+                "duplicate-user",
+                "duplicate-course",
+                100000,
+                PaymentMethod.SIMULATION,
+                "SIMULATION",
+                "SIM_DUPLICATE_1");
+        Payment second = new Payment(
+                "duplicate-user",
+                "duplicate-course",
+                100000,
+                PaymentMethod.SIMULATION,
+                "SIMULATION",
+                "SIM_DUPLICATE_2");
+        Payment failed = new Payment(
+                "duplicate-user",
+                "duplicate-course",
+                100000,
+                PaymentMethod.SIMULATION,
+                "SIMULATION",
+                "SIM_DUPLICATE_3");
+        failed.setStatus(PaymentStatus.FAILED);
+
+        entityManager.persist(first);
+        entityManager.persist(second);
+        entityManager.persist(failed);
+        entityManager.flush();
+
+        java.util.Optional<Payment> activePayment = paymentRepository
+                .findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullAndStatusInOrderByCreatedAtDesc(
+                        "duplicate-user",
+                        "duplicate-course",
+                        List.of(PaymentStatus.PENDING, PaymentStatus.PAID));
+
+        org.junit.jupiter.api.Assertions.assertTrue(activePayment.isPresent());
+        org.junit.jupiter.api.Assertions.assertEquals(PaymentStatus.PENDING, activePayment.get().getStatus());
+    }
+
+    @Test
+    @Transactional
+    void enrollmentEntityPersistsWithCamelCaseDatabaseColumns() {
+        Enrollment enrollment = new Enrollment(
+                "user-123",
+                "course-456",
+                "payment-789",
+                java.time.LocalDateTime.now());
+        enrollment.setId("enrollment-123");
+
+        entityManager.persist(enrollment);
+        entityManager.flush();
+        entityManager.clear();
+
+        Enrollment persistedEnrollment = entityManager.find(Enrollment.class, enrollment.getId());
+
+        org.junit.jupiter.api.Assertions.assertNotNull(persistedEnrollment);
+        org.junit.jupiter.api.Assertions.assertEquals("user-123", persistedEnrollment.getUserId());
+        org.junit.jupiter.api.Assertions.assertEquals("course-456", persistedEnrollment.getCourseId());
+        org.junit.jupiter.api.Assertions.assertEquals("payment-789", persistedEnrollment.getPaymentId());
+        org.junit.jupiter.api.Assertions.assertNotNull(persistedEnrollment.getCreatedAt());
+        org.junit.jupiter.api.Assertions.assertNotNull(persistedEnrollment.getUpdatedAt());
     }
 
     @Test

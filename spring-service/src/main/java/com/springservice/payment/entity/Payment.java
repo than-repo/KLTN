@@ -22,11 +22,11 @@ import jakarta.persistence.UniqueConstraint;
         name = "payments",
         uniqueConstraints = @UniqueConstraint(
                 name = "uk_payments_txn_ref",
-                columnNames = { "txn_ref" }),
+                columnNames = { "txnRef" }),
         indexes = {
-                @Index(name = "idx_payments_user_id", columnList = "user_id"),
+                @Index(name = "idx_payments_user_id", columnList = "userId"),
                 @Index(name = "idx_payments_course_id", columnList = "courseId"),
-                @Index(name = "idx_payments_user_course", columnList = "user_id, courseId"),
+                @Index(name = "idx_payments_user_course", columnList = "userId, courseId"),
                 @Index(name = "idx_payments_status", columnList = "status")
         })
 public class Payment {
@@ -35,7 +35,7 @@ public class Payment {
     @Column(name = "id", nullable = false, updatable = false, length = 36)
     private String id;
 
-    @Column(name = "user_id", nullable = false, length = 191)
+    @Column(name = "userId", nullable = false, length = 191)
     private String userId;
 
     @Column(name = "courseId", nullable = false, length = 191)
@@ -48,7 +48,7 @@ public class Payment {
     private String currency = "VND";
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false, length = 20)
+    @Column(name = "paymentMethod", nullable = false, length = 20)
     private PaymentMethod paymentMethod = PaymentMethod.VNPAY;
 
     @Enumerated(EnumType.STRING)
@@ -58,31 +58,31 @@ public class Payment {
     @Column(name = "provider", nullable = false, length = 50)
     private String provider = "VNPAY";
 
-    @Column(name = "txn_ref", length = 100, unique = true)
+    @Column(name = "txnRef", length = 100, unique = true)
     private String txnRef;
 
-    @Column(name = "provider_payment_id", length = 100)
+    @Column(name = "providerPaymentId", length = 100)
     private String providerPaymentId;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "provider_metadata", columnDefinition = "JSON")
+    @Column(name = "providerMetadata", columnDefinition = "JSON")
     private String providerMetadata;
 
-    @Column(name = "paid_at")
+    @Column(name = "paidAt")
     private LocalDateTime paidAt;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "isActive", nullable = false)
     private Boolean isActive = true;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updatedAt", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
+    @Column(name = "deletedAt")
     private LocalDateTime deletedAt;
 
     protected Payment() {

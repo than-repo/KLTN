@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.springservice.payment.client.CourseClient;
@@ -100,17 +99,11 @@ public class CourseService {
     }
 
     // Check if user already has an active payment for this course
-    // Runs without transaction to avoid rollback on missing course_id column
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional(readOnly = true)
     public boolean hasActivePaymentForCourse(String userId, String courseId) {
-        try {
-            return paymentRepository.findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullOrderByCreatedAtDesc(userId, courseId)
-                    .filter(p -> p.getStatus() == PaymentStatus.PENDING || p.getStatus() == PaymentStatus.PAID)
-                    .isPresent();
-        } catch (Exception e) {
-            // Database schema issue (missing course_id column) - log and allow payment to proceed
-            log.warn("Could not check active payment for user {} course {}: {}", userId, courseId, e.getMessage());
-            return false;
-        }
+        return paymentRepository
+                .findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullAndStatusInOrderByCreatedAtDesc(
+                        userId, courseId, List.of(PaymentStatus.PENDING, PaymentStatus.PAID))
+                .isPresent();
     }
 }

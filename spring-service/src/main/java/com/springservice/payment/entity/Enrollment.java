@@ -18,14 +18,14 @@ import jakarta.persistence.UniqueConstraint;
 @Table(
         name = "enrollments",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_enrollments_user_course", columnNames = { "user_id", "course_id" }),
-                @UniqueConstraint(name = "uk_enrollments_payment_id", columnNames = { "payment_id" })
+                @UniqueConstraint(name = "uk_enrollments_user_course", columnNames = { "userId", "courseId" }),
+                @UniqueConstraint(name = "uk_enrollments_payment_id", columnNames = { "paymentId" })
         },
         indexes = {
-                @Index(name = "idx_enrollments_user_id", columnList = "user_id"),
-                @Index(name = "idx_enrollments_course_id", columnList = "course_id"),
+                @Index(name = "idx_enrollments_user_id", columnList = "userId"),
+                @Index(name = "idx_enrollments_course_id", columnList = "courseId"),
                 @Index(name = "idx_enrollments_status", columnList = "status"),
-                @Index(name = "idx_enrollments_payment_id", columnList = "payment_id")
+                @Index(name = "idx_enrollments_payment_id", columnList = "paymentId")
         })
 public class Enrollment {
 
@@ -33,40 +33,40 @@ public class Enrollment {
     @Column(name = "id", nullable = false, updatable = false, length = 36)
     private String id;
 
-    @Column(name = "user_id", nullable = false, length = 191)
+    @Column(name = "userId", nullable = false, length = 191)
     private String userId;
 
-    @Column(name = "course_id", nullable = false, length = 191)
+    @Column(name = "courseId", nullable = false, length = 191)
     private String courseId;
 
-    @Column(name = "payment_id", length = 36, unique = true)
+    @Column(name = "paymentId", length = 36, unique = true)
     private String paymentId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private EnrollmentStatus status = EnrollmentStatus.ACTIVE;
 
-    @Column(name = "progress_percentage", nullable = false)
+    @Column(name = "progressPercentage", nullable = false)
     private Double progressPercentage = 0.0;
 
-    @Column(name = "enrolled_at")
+    @Column(name = "enrolledAt")
     private LocalDateTime enrolledAt;
 
-    @Column(name = "completed_at")
+    @Column(name = "completedAt")
     private LocalDateTime completedAt;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "isActive", nullable = false)
     private Boolean isActive = true;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updatedAt", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "deleted_at")
+    @Column(name = "deletedAt")
     private LocalDateTime deletedAt;
 
     protected Enrollment() {

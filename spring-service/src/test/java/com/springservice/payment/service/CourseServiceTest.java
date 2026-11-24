@@ -7,13 +7,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.springservice.payment.client.CourseClient;
+import com.springservice.payment.entity.Payment;
+import com.springservice.payment.entity.PaymentMethod;
+import com.springservice.payment.entity.PaymentStatus;
 import com.springservice.payment.exception.CourseNotFoundException;
 import com.springservice.payment.exception.CourseUnavailableException;
 import com.springservice.payment.repository.PaymentRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CourseServiceTest {
@@ -91,5 +96,20 @@ class CourseServiceTest {
         when(courseClient.getCoursesByIds(COURSE_ID)).thenReturn(wrapper);
 
         assertThrows(CourseUnavailableException.class, () -> courseService.getCoursePrice(COURSE_ID));
+    }
+
+    @Test
+    void activePaymentCheckSearchesOnlyPendingOrPaidRecords() {
+        Payment payment = new Payment("user-123", COURSE_ID, 100000, PaymentMethod.SIMULATION,
+                "SIMULATION", "SIM_TEST");
+        when(paymentRepository
+                .findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullAndStatusInOrderByCreatedAtDesc(
+                        "user-123", COURSE_ID, List.of(PaymentStatus.PENDING, PaymentStatus.PAID)))
+                .thenReturn(java.util.Optional.of(payment));
+
+        assertTrue(courseService.hasActivePaymentForCourse("user-123", COURSE_ID));
+        verify(paymentRepository)
+                .findFirstByUserIdAndCourseIdAndIsActiveTrueAndDeletedAtIsNullAndStatusInOrderByCreatedAtDesc(
+                        "user-123", COURSE_ID, List.of(PaymentStatus.PENDING, PaymentStatus.PAID));
     }
 }
