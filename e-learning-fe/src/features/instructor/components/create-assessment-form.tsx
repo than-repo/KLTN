@@ -3,14 +3,19 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/features/auth/hooks/use-auth";
 
-import { createInstructorAssessmentDraft } from "../api/instructor-assessment-api";
+import {
+  createInstructorAssessmentDraft,
+  updateInstructorAssessmentBlueprint,
+} from "../api/instructor-assessment-api";
 import { getInstructorCourseSections } from "../api/instructor-course-api";
 import { getInstructorCourseLessons } from "../api/instructor-lesson-api";
 import type {
   AssessmentType,
   CreateAssessmentPayload,
+  UpdateAssessmentBlueprintPayload,
 } from "../types/instructor-assessment";
 import type { Section } from "../types/instructor-course";
 import {
@@ -36,6 +41,10 @@ type FormState = {
   timeLimitMinutes: number | "";
   title: string;
   type: AssessmentType;
+  // Blueprint fields (only for QUIZ type)
+  easyQuestionCount: number;
+  mediumQuestionCount: number;
+  hardQuestionCount: number;
 };
 
 const initialForm: FormState = {
@@ -48,6 +57,9 @@ const initialForm: FormState = {
   timeLimitMinutes: 30,
   title: "",
   type: "QUIZ",
+  easyQuestionCount: 0,
+  mediumQuestionCount: 0,
+  hardQuestionCount: 0,
 };
 
 type CreateAssessmentFormProps = {
@@ -72,6 +84,20 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
   // Lesson selection state
   const [sections, setSections] = useState<Section[]>([]);
   const [loadingLessons, setLoadingLessons] = useState(false);
+
+  // Blueprint state (only for quiz assessments)
+  const [blueprintForm, setBlueprintForm] = useState<{
+    easyQuestionCount: number;
+    mediumQuestionCount: number;
+    hardQuestionCount: number;
+  }>({
+    easyQuestionCount: 0,
+    mediumQuestionCount: 0,
+    hardQuestionCount: 0,
+  });
+
+  const isQuiz = form.type === "QUIZ";
+  const blueprintTotal = blueprintForm.easyQuestionCount + blueprintForm.mediumQuestionCount + blueprintForm.hardQuestionCount;
 
   const isDirty = useMemo(
     () => JSON.stringify(form) !== JSON.stringify(initialForm),
@@ -186,6 +212,13 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
     }
 
     return null;
+  }
+
+  function updateBlueprint<K extends keyof typeof blueprintForm>(
+    key: K,
+    value: (typeof blueprintForm)[K],
+  ) {
+    setBlueprintForm((prev) => ({ ...prev, [key]: value }));
   }
 
   function handleCancel() {
@@ -309,6 +342,21 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
         payload,
         accessToken,
       );
+
+      // If it's a quiz and blueprint has values, save the blueprint
+      if (isQuiz && blueprintTotal > 0) {
+        const blueprintPayload: UpdateAssessmentBlueprintPayload = {
+          easyQuestionCount: blueprintForm.easyQuestionCount,
+          mediumQuestionCount: blueprintForm.mediumQuestionCount,
+          hardQuestionCount: blueprintForm.hardQuestionCount,
+        };
+        await updateInstructorAssessmentBlueprint(
+          courseId,
+          created.id,
+          blueprintPayload,
+          accessToken,
+        );
+      }
 
       showSuccess(
         "Assessment created successfully. You can now add questions.",
@@ -467,6 +515,78 @@ export function CreateAssessmentForm({ courseId }: CreateAssessmentFormProps) {
             />
           </div>
         </div>
+
+        {/* Quiz Blueprint Settings - Only for QUIZ type */}
+        {isQuiz && (
+          <div className="rounded-lg border border-border bg-surface-pearl p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Quiz Blueprint Settings</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Define the target number of questions per difficulty level for quiz generation.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="action">Easy: {blueprintForm.easyQuestionCount}</Badge>
+                <Badge variant="neutral">Medium: {blueprintForm.mediumQuestionCount}</Badge>
+                <Badge variant="danger">Hard: {blueprintForm.hardQuestionCount}</Badge>
+                <Badge variant="action">Total: {blueprintTotal}</Badge>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-3" id="blueprint-fields">
+              <div>
+                <label className="text-sm font-medium" htmlFor="blueprint-easy">
+                  Easy questions
+                </label>
+                <input
+                  className={fieldClasses}
+                  id="blueprint-easy"
+                  min={0}
+                  max={100}
+                  onChange={(event) =>
+                    updateBlueprint("easyQuestionCount", Number(event.target.value) || 0)
+                  }
+                  type="number"
+                  value={blueprintForm.easyQuestionCount}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium" htmlFor="blueprint-medium">
+                  Medium questions
+                </label>
+                <input
+                  className={fieldClasses}
+                  id="blueprint-medium"
+                  min={0}
+                  max={100}
+                  onChange={(event) =>
+                    updateBlueprint("mediumQuestionCount", Number(event.target.value) || 0)
+                  }
+                  type="number"
+                  value={blueprintForm.mediumQuestionCount}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium" htmlFor="blueprint-hard">
+                  Hard questions
+                </label>
+                <input
+                  className={fieldClasses}
+                  id="blueprint-hard"
+                  min={0}
+                  max={100}
+                  onChange={(event) =>
+                    updateBlueprint("hardQuestionCount", Number(event.target.value) || 0)
+                  }
+                  type="number"
+                  value={blueprintForm.hardQuestionCount}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="rounded-md border border-border bg-surface-pearl p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold">Availability window</p>

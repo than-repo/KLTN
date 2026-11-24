@@ -286,6 +286,37 @@ export function InstructorAssessmentsContent({
                           : "None"}
                       </span>
                     </div>
+
+                    {/* Difficulty breakdown for quiz assessments with blueprint */}
+                    {isQuiz &&
+                    ((assessment.easyQuestionCount ?? 0) > 0 ||
+                      (assessment.mediumQuestionCount ?? 0) > 0 ||
+                      (assessment.hardQuestionCount ?? 0) > 0) && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <span className="text-xs font-medium text-muted-foreground">Blueprint:</span>
+                        {assessment.easyQuestionCount && (
+                          <Badge variant="action" className="text-xs">
+                            Easy: {assessment.easyQuestionCount}
+                          </Badge>
+                        )}
+                        {assessment.mediumQuestionCount && (
+                          <Badge variant="neutral" className="text-xs">
+                            Medium: {assessment.mediumQuestionCount}
+                          </Badge>
+                        )}
+                        {assessment.hardQuestionCount && (
+                          <Badge variant="danger" className="text-xs">
+                            Hard: {assessment.hardQuestionCount}
+                          </Badge>
+                        )}
+                        <Badge variant="action" className="text-xs">
+                          Total:{" "}
+                          {(assessment.easyQuestionCount ?? 0) +
+                            (assessment.mediumQuestionCount ?? 0) +
+                            (assessment.hardQuestionCount ?? 0)}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap gap-2">

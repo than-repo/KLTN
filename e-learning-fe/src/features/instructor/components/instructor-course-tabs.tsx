@@ -92,12 +92,12 @@ export function InstructorCourseTabs({
               <Icon className="size-4 flex-shrink-0" aria-hidden="true" />
               {config.label}
               {config.showBadge && tabKey === "skills" && skillsCount > 0 && (
-                <Badge className="flex-shrink-0 min-w-[20px] h-5 text-xs" variant={isActive ? "action" : "action"}>
+                <Badge className="flex-shrink-0 min-w-[20px] h-5 text-xs" variant={isActive ? "neutral" : "action"}>
                   {skillsCount}
                 </Badge>
               )}
               {config.showBadge && tabKey === "assessments" && assessmentsCount > 0 && (
-                <Badge className="flex-shrink-0 min-w-[20px] h-5 text-xs" variant={isActive ? "action" : "action"}>
+                <Badge className="flex-shrink-0 min-w-[20px] h-5 text-xs" variant={isActive ? "neutral" : "action"}>
                   {assessmentsCount}
                 </Badge>
               )}

@@ -2,9 +2,11 @@ import { apiRequest } from "@/lib/api/client";
 
 import type {
   Assessment,
+  AssessmentBlueprintResponse,
   CreateAssessmentPayload,
   DetailedAssessment,
   PaginatedAssessmentResponse,
+  UpdateAssessmentBlueprintPayload,
   UpdateAssessmentPayload,
   UpdatePublishedAssessmentPayload,
 } from "../types/instructor-assessment";
@@ -101,5 +103,18 @@ export function publishInstructorAssessment(
   return apiRequest<Assessment>(
     `${assessmentPath(courseId)}/${assessmentId}/publish`,
     { accessToken, method: "PATCH" },
+  );
+}
+
+export function updateInstructorAssessmentBlueprint(
+  courseId: string,
+  assessmentId: string,
+  payload: UpdateAssessmentBlueprintPayload,
+  accessToken: string,
+) {
+  // Backend endpoint is at /instuctor/course/:courseId/assessment/:assessmentId/blueprint
+  return apiRequest<AssessmentBlueprintResponse>(
+    `/instuctor/course/${courseId}/assessment/${assessmentId}/blueprint`,
+    { accessToken, body: payload, method: "PATCH" },
   );
 }

@@ -55,6 +55,11 @@ export type Assessment = {
   totalPoints: number;
   type: AssessmentType;
   updatedAt?: string;
+  // Blueprint settings
+  easyQuestionCount?: number | null;
+  mediumQuestionCount?: number | null;
+  hardQuestionCount?: number | null;
+  questionNumber?: number | null;
 };
 
 export type CreateAssessmentPayload = {
@@ -84,6 +89,20 @@ export type UpdateAssessmentPayload = {
   type?: AssessmentType;
 };
 
+export type UpdateAssessmentBlueprintPayload = {
+  easyQuestionCount: number;
+  mediumQuestionCount: number;
+  hardQuestionCount: number;
+};
+
+export type AssessmentBlueprintResponse = {
+  assessmentId: string;
+  easyQuestionCount: number;
+  mediumQuestionCount: number;
+  hardQuestionCount: number;
+  questionNumber: number;
+};
+
 export type UpdatePublishedAssessmentPayload = {
   active?: boolean;
   assessmentReviewContent?: AssessmentReviewContent | null;
@@ -111,6 +130,9 @@ export type UpsertAssessmentAnswerPayload = {
   wrongAnswers?: string[];
 };
 
+import type { Skill } from "./instructor-skill";
+export type { Skill } from "./instructor-skill";
+
 export type AssessmentQuestion = {
   activation?: boolean;
   answer?: AssessmentAnswer | null;
@@ -124,6 +146,8 @@ export type AssessmentQuestion = {
   questionText: string;
   type: AssessmentQuestionType;
   skillIds?: string[];
+  // API returns populated skill objects on detail endpoint
+  skills?: Skill[];
   updatedAt?: string;
 };
 

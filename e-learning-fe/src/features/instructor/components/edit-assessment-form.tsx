@@ -12,6 +12,7 @@ import {
   publishInstructorAssessment,
   updateInstructorAssessment,
   updatePublishedInstructorAssessment,
+  updateInstructorAssessmentBlueprint,
 } from "../api/instructor-assessment-api";
 import { getInstructorCourseSections } from "../api/instructor-course-api";
 import { getInstructorCourseLessons } from "../api/instructor-lesson-api";
@@ -98,11 +99,28 @@ export function EditAssessmentForm({
   const [loadingLessons, setLoadingLessons] = useState(false);
 
   const isPublished = assessment?.status === "PUBLISHED";
+  const isQuiz = assessment?.type === "QUIZ";
+
+  // Blueprint state (only for quiz assessments)
+  const [blueprintForm, setBlueprintForm] = useState<{
+    easyQuestionCount: number;
+    mediumQuestionCount: number;
+    hardQuestionCount: number;
+  }>({
+    easyQuestionCount: assessment?.easyQuestionCount ?? 0,
+    mediumQuestionCount: assessment?.mediumQuestionCount ?? 0,
+    hardQuestionCount: assessment?.hardQuestionCount ?? 0,
+  });
+  const [savingBlueprint, setSavingBlueprint] = useState(false);
+  const [blueprintError, setBlueprintError] = useState<string | null>(null);
+  const [blueprintSuccess, setBlueprintSuccess] = useState<string | null>(null);
 
   const isDirty = useMemo(
     () => JSON.stringify(form) !== JSON.stringify(initialForm),
     [form, initialForm],
   );
+
+  const blueprintTotal = blueprintForm.easyQuestionCount + blueprintForm.mediumQuestionCount + blueprintForm.hardQuestionCount;
 
   function showError(message: string) {
     setSuccessModal(null);
@@ -157,6 +175,13 @@ export function EditAssessmentForm({
         title: data.title,
         type: data.type,
       };
+
+      // Initialize blueprint form with assessment data
+      setBlueprintForm({
+        easyQuestionCount: data.easyQuestionCount ?? 0,
+        mediumQuestionCount: data.mediumQuestionCount ?? 0,
+        hardQuestionCount: data.hardQuestionCount ?? 0,
+      });
 
       setAssessment(data);
       setForm(nextForm);
@@ -252,6 +277,53 @@ export function EditAssessmentForm({
       showError(getErrorMessage(publishError, "Could not publish assessment."));
     } finally {
       setPublishing(false);
+    }
+  }
+
+  function updateBlueprint<K extends keyof typeof blueprintForm>(
+    key: K,
+    value: (typeof blueprintForm)[K],
+  ) {
+    setBlueprintForm((prev) => ({ ...prev, [key]: value }));
+    setBlueprintError(null);
+    setBlueprintSuccess(null);
+  }
+
+  async function handleBlueprintSubmit(event: React.MouseEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!accessToken) {
+      setBlueprintError("Your session is not ready. Please sign in again.");
+      return;
+    }
+
+    if (blueprintTotal === 0) {
+      setBlueprintError("A quiz blueprint must include at least one question.");
+      return;
+    }
+
+    try {
+      setSavingBlueprint(true);
+      setBlueprintError(null);
+
+      await updateInstructorAssessmentBlueprint(
+        courseId,
+        assessmentId,
+        blueprintForm,
+        accessToken,
+      );
+
+      // Update the assessment data with new blueprint values
+      await loadAssessment(accessToken);
+
+      setBlueprintSuccess(
+        `Blueprint updated: ${blueprintForm.easyQuestionCount} Easy, ${blueprintForm.mediumQuestionCount} Medium, ${blueprintForm.hardQuestionCount} Hard`,
+      );
+    } catch (saveError) {
+      setBlueprintError(getErrorMessage(saveError, "Could not save blueprint."));
+    } finally {
+      setSavingBlueprint(false);
     }
   }
 
@@ -591,6 +663,101 @@ export function EditAssessmentForm({
               />
             </div>
           </div>
+
+          {/* Blueprint Settings - Only for Quiz assessments in DRAFT status */}
+          {!isPublished && isQuiz && (
+            <div className="rounded-lg border border-border bg-surface-pearl p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Quiz Blueprint Settings</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Define the target number of questions per difficulty level for quiz generation.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="action">Easy: {blueprintForm.easyQuestionCount}</Badge>
+                  <Badge variant="neutral">Medium: {blueprintForm.mediumQuestionCount}</Badge>
+                  <Badge variant="danger">Hard: {blueprintForm.hardQuestionCount}</Badge>
+                  <Badge variant="action">Total: {blueprintTotal}</Badge>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-4 md:grid-cols-3" id="blueprint-fields">
+                <div>
+                  <label className="text-sm font-medium" htmlFor="blueprint-easy">
+                    Easy questions
+                  </label>
+                  <input
+                    className={fieldClasses}
+                    id="blueprint-easy"
+                    min={0}
+                    max={100}
+                    onChange={(event) =>
+                      updateBlueprint("easyQuestionCount", Number(event.target.value) || 0)
+                    }
+                    type="number"
+                    value={blueprintForm.easyQuestionCount}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium" htmlFor="blueprint-medium">
+                    Medium questions
+                  </label>
+                  <input
+                    className={fieldClasses}
+                    id="blueprint-medium"
+                    min={0}
+                    max={100}
+                    onChange={(event) =>
+                      updateBlueprint("mediumQuestionCount", Number(event.target.value) || 0)
+                    }
+                    type="number"
+                    value={blueprintForm.mediumQuestionCount}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium" htmlFor="blueprint-hard">
+                    Hard questions
+                  </label>
+                  <input
+                    className={fieldClasses}
+                    id="blueprint-hard"
+                    min={0}
+                    max={100}
+                    onChange={(event) =>
+                      updateBlueprint("hardQuestionCount", Number(event.target.value) || 0)
+                    }
+                    type="number"
+                    value={blueprintForm.hardQuestionCount}
+                  />
+                </div>
+              </div>
+
+              {(blueprintError || blueprintSuccess) && (
+                <p
+                  className={`mt-3 text-sm ${
+                    blueprintError
+                      ? "text-danger"
+                      : "text-success"
+                  }`}
+                  role={blueprintError ? "alert" : "status"}
+                >
+                  {blueprintError || blueprintSuccess}
+                </p>
+              )}
+
+              <div className="mt-4 flex justify-end">
+                <button
+                  className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={savingBlueprint || blueprintTotal === 0}
+                  type="button"
+                  onClick={handleBlueprintSubmit}
+                >
+                  {savingBlueprint ? "Saving..." : "Save Blueprint"}
+                </button>
+              </div>
+            </div>
+          )}
 
           {isPublished ? (
             <div className="grid gap-4 md:grid-cols-2">
