@@ -16,6 +16,16 @@ import {
 } from "../../utils/lesson-media";
 import { getUploadSignature } from "../../api/instructor-lesson-file-api";
 
+interface LessonDraftForm {
+  description: string;
+  file: File | null;
+  fileMediaType: LessonMediaType | null;
+  filePreviewUrl: string | null;
+  mediaFilename: string;
+  mediaUrl: string;
+  title: string;
+}
+
 interface SectionListProps {
   sections: Section[];
   collapsedSections: Record<string, boolean>;
@@ -39,6 +49,14 @@ interface SectionListProps {
   sectionLessonsError: Record<string, string>;
   onLoadSectionLessons: (sectionId: string) => void;
   onRetryLoadSectionLessons: (sectionId: string) => void;
+  // Lesson form props
+  lessonFormSectionId: string | null;
+  lessonDraftForm: LessonDraftForm;
+  setLessonDraftForm: React.Dispatch<React.SetStateAction<LessonDraftForm>>;
+  creatingLessonSectionId: string | null;
+  onCreateLesson: (event: React.FormEvent<HTMLFormElement>, sectionId: string) => void;
+  onCloseLessonForm: () => void;
+  onSelectNewLessonFile: (file: File) => void;
   // Lesson management props
   uploadedFiles: Record<string, LessonFileMedia[]>;
   editingLessonId: string | null;
@@ -104,6 +122,15 @@ export function SectionList({
   sectionLessonsError,
   onLoadSectionLessons,
   onRetryLoadSectionLessons,
+  // Lesson form
+  lessonFormSectionId,
+  lessonDraftForm,
+  setLessonDraftForm,
+  creatingLessonSectionId,
+  onCreateLesson,
+  onCloseLessonForm,
+  onSelectNewLessonFile,
+  // Lesson management
   uploadedFiles,
   editingLessonId,
   setEditingLessonId,
@@ -178,6 +205,14 @@ export function SectionList({
           hasLessonsLoaded={!!section.lessons}
           onLoadLessons={onLoadSectionLessons}
           onRetryLoadLessons={onRetryLoadSectionLessons}
+          // Lesson form
+          lessonFormSectionId={lessonFormSectionId}
+          lessonDraftForm={lessonDraftForm}
+          setLessonDraftForm={setLessonDraftForm}
+          creatingLessonSectionId={creatingLessonSectionId}
+          onCreateLesson={onCreateLesson}
+          onCloseLessonForm={onCloseLessonForm}
+          onSelectNewLessonFile={onSelectNewLessonFile}
           // Lesson management
           uploadedFiles={uploadedFiles}
           editingLessonId={editingLessonId}
@@ -243,6 +278,15 @@ function SectionItem({
   hasLessonsLoaded,
   onLoadLessons,
   onRetryLoadLessons,
+  // Lesson form
+  lessonFormSectionId,
+  lessonDraftForm,
+  setLessonDraftForm,
+  creatingLessonSectionId,
+  onCreateLesson,
+  onCloseLessonForm,
+  onSelectNewLessonFile,
+  // Lesson management
   uploadedFiles,
   editingLessonId,
   setEditingLessonId,
@@ -300,6 +344,15 @@ function SectionItem({
   hasLessonsLoaded: boolean;
   onLoadLessons: (sectionId: string) => void;
   onRetryLoadLessons: (sectionId: string) => void;
+  // Lesson form
+  lessonFormSectionId: string | null;
+  lessonDraftForm: LessonDraftForm;
+  setLessonDraftForm: React.Dispatch<React.SetStateAction<LessonDraftForm>>;
+  creatingLessonSectionId: string | null;
+  onCreateLesson: (event: React.FormEvent<HTMLFormElement>, sectionId: string) => void;
+  onCloseLessonForm: () => void;
+  onSelectNewLessonFile: (file: File) => void;
+  // Lesson management
   uploadedFiles: Record<string, LessonFileMedia[]>;
   editingLessonId: string | null;
   setEditingLessonId: (id: string | null) => void;
@@ -453,6 +506,15 @@ function SectionItem({
             hasLessonsLoaded={hasLessonsLoaded}
             onLoadLessons={onLoadLessons}
             onRetryLoadLessons={onRetryLoadLessons}
+            // Lesson form
+            lessonFormSectionId={lessonFormSectionId}
+            lessonDraftForm={lessonDraftForm}
+            setLessonDraftForm={setLessonDraftForm}
+            creatingLessonSectionId={creatingLessonSectionId}
+            onCreateLesson={onCreateLesson}
+            onCloseLessonForm={onCloseLessonForm}
+            onSelectNewLessonFile={onSelectNewLessonFile}
+            // Lesson management
             uploadedFiles={uploadedFiles}
             editingLessonId={editingLessonId}
             setEditingLessonId={setEditingLessonId}
@@ -467,6 +529,7 @@ function SectionItem({
             onAssignSkill={onAssignSkill}
             skillDialogLesson={skillDialogLesson}
             setSkillDialogLesson={setSkillDialogLesson}
+            // Media management
             mediaLinkForms={mediaLinkForms}
             setMediaLinkForms={setMediaLinkForms}
             savingMediaLinkLessonId={savingMediaLinkLessonId}
@@ -503,6 +566,15 @@ function SectionLessons({
   hasLessonsLoaded,
   onLoadLessons,
   onRetryLoadLessons,
+  // Lesson form
+  lessonFormSectionId,
+  lessonDraftForm,
+  setLessonDraftForm,
+  creatingLessonSectionId,
+  onCreateLesson,
+  onCloseLessonForm,
+  onSelectNewLessonFile,
+  // Lesson management
   uploadedFiles,
   editingLessonId,
   setEditingLessonId,
@@ -546,6 +618,15 @@ function SectionLessons({
   hasLessonsLoaded: boolean;
   onLoadLessons: (sectionId: string) => void;
   onRetryLoadLessons: (sectionId: string) => void;
+  // Lesson form
+  lessonFormSectionId: string | null;
+  lessonDraftForm: LessonDraftForm;
+  setLessonDraftForm: React.Dispatch<React.SetStateAction<LessonDraftForm>>;
+  creatingLessonSectionId: string | null;
+  onCreateLesson: (event: React.FormEvent<HTMLFormElement>, sectionId: string) => void;
+  onCloseLessonForm: () => void;
+  onSelectNewLessonFile: (file: File) => void;
+  // Lesson management
   uploadedFiles: Record<string, LessonFileMedia[]>;
   editingLessonId: string | null;
   setEditingLessonId: (id: string | null) => void;
@@ -629,7 +710,24 @@ function SectionLessons({
   }
 
   // Lessons loaded - render them
+  const isLessonFormOpen = lessonFormSectionId === section.id;
+
   if (!section.lessons || section.lessons.length === 0) {
+    if (isLessonFormOpen) {
+      return (
+        <LessonForm
+          sectionId={section.id}
+          canEditCourse={canEditCourse}
+          lockedMessage={lockedMessage}
+          lessonDraftForm={lessonDraftForm}
+          setLessonDraftForm={setLessonDraftForm}
+          creatingLessonSectionId={creatingLessonSectionId}
+          onCreateLesson={onCreateLesson}
+          onCloseLessonForm={onCloseLessonForm}
+          onSelectNewLessonFile={onSelectNewLessonFile}
+        />
+      );
+    }
     return (
       <>
         <p className="text-sm text-muted-foreground">No lessons in this section yet.</p>
@@ -694,15 +792,29 @@ function SectionLessons({
           />
         ))}
       </ol>
-      <button
-        className="mt-4 inline-flex items-center justify-center min-h-11 rounded-md border border-dashed border-border bg-card px-5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
-        disabled={!canEditCourse}
-        onClick={() => onAddLesson(section.id)}
-        type="button"
-      >
-        <FileText className="size-4 mr-2" />
-        Add Lesson
-      </button>
+      {isLessonFormOpen ? (
+        <LessonForm
+          sectionId={section.id}
+          canEditCourse={canEditCourse}
+          lockedMessage={lockedMessage}
+          lessonDraftForm={lessonDraftForm}
+          setLessonDraftForm={setLessonDraftForm}
+          creatingLessonSectionId={creatingLessonSectionId}
+          onCreateLesson={onCreateLesson}
+          onCloseLessonForm={onCloseLessonForm}
+          onSelectNewLessonFile={onSelectNewLessonFile}
+        />
+      ) : (
+        <button
+          className="mt-4 inline-flex items-center justify-center min-h-11 rounded-md border border-dashed border-border bg-card px-5 text-sm font-semibold transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={!canEditCourse}
+          onClick={() => onAddLesson(section.id)}
+          type="button"
+        >
+          <FileText className="size-4 mr-2" />
+          Add Lesson
+        </button>
+      )}
     </>
   );
 }
@@ -999,6 +1111,119 @@ function LessonItem({
         </>
       )}
     </li>
+  );
+}
+
+function LessonForm({
+  sectionId,
+  canEditCourse,
+  lockedMessage,
+  lessonDraftForm,
+  setLessonDraftForm,
+  creatingLessonSectionId,
+  onCreateLesson,
+  onCloseLessonForm,
+  onSelectNewLessonFile,
+}: {
+  sectionId: string;
+  canEditCourse: boolean;
+  lockedMessage: string;
+  lessonDraftForm: LessonDraftForm;
+  setLessonDraftForm: React.Dispatch<React.SetStateAction<LessonDraftForm>>;
+  creatingLessonSectionId: string | null;
+  onCreateLesson: (event: React.FormEvent<HTMLFormElement>, sectionId: string) => void;
+  onCloseLessonForm: () => void;
+  onSelectNewLessonFile: (file: File) => void;
+}) {
+  function updateLessonDraftForm(patch: Partial<LessonDraftForm>) {
+    setLessonDraftForm((prev) => ({ ...prev, ...patch }));
+  }
+
+  return (
+    <form
+      className="mt-4 rounded-md border border-primary/40 bg-primary/5 p-4"
+      onSubmit={(event) => onCreateLesson(event, sectionId)}
+    >
+      <p className="text-sm font-semibold">New lesson</p>
+      <div className="mt-3 grid gap-3">
+        <input
+          className={fieldClasses}
+          onChange={(event) => updateLessonDraftForm({ title: event.target.value })}
+          placeholder="Lesson title"
+          required
+          value={lessonDraftForm.title}
+        />
+        <textarea
+          className={fieldClasses}
+          onChange={(event) => updateLessonDraftForm({ description: event.target.value })}
+          placeholder="Lesson description (optional)"
+          rows={2}
+          value={lessonDraftForm.description}
+        />
+        <input
+          className={fieldClasses}
+          onChange={(event) => updateLessonDraftForm({ mediaUrl: event.target.value })}
+          placeholder="Media URL (optional): https://..."
+          value={lessonDraftForm.mediaUrl}
+        />
+        <input
+          className={fieldClasses}
+          onChange={(event) => updateLessonDraftForm({ mediaFilename: event.target.value })}
+          placeholder="Media filename (optional)"
+          value={lessonDraftForm.mediaFilename}
+        />
+        <div className="flex flex-wrap items-center gap-3">
+          <label
+            className="inline-flex min-h-9 cursor-pointer items-center justify-center rounded-md border border-border bg-surface-pearl px-4 text-sm font-semibold"
+            htmlFor={`lesson-file-${sectionId}`}
+          >
+            {lessonDraftForm.file ? lessonDraftForm.file.name : "Attach a file"}
+          </label>
+          <input
+            accept="*/*"
+            className="hidden"
+            id={`lesson-file-${sectionId}`}
+            onChange={(
+              event: React.ChangeEvent<HTMLInputElement>,
+            ) => {
+              const file = event.target.files?.[0];
+
+              if (file) {
+                onSelectNewLessonFile(file);
+              }
+
+              event.target.value = "";
+            }}
+            type="file"
+          />
+          {lessonDraftForm.filePreviewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt=""
+              className="h-14 w-24 rounded-md border border-border object-cover"
+              src={lessonDraftForm.filePreviewUrl}
+            />
+          ) : null}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-primary bg-primary px-5 text-sm font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={creatingLessonSectionId === sectionId}
+            type="submit"
+          >
+            {creatingLessonSectionId === sectionId ? "Creating..." : "Create Lesson"}
+          </button>
+          <button
+            className="inline-flex min-h-11 items-center justify-center rounded-md border border-border bg-card px-5 text-sm font-semibold"
+            onClick={onCloseLessonForm}
+            type="button"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
   );
 }
 

@@ -1100,6 +1100,14 @@ export function LazyCurriculumBuilder() {
         sectionLessonsError={sectionLessonsError}
         onLoadSectionLessons={loadSectionLessons}
         onRetryLoadSectionLessons={loadSectionLessons}
+        // Lesson form props
+        lessonFormSectionId={lessonFormSectionId}
+        lessonDraftForm={lessonDraftForm}
+        setLessonDraftForm={setLessonDraftForm}
+        creatingLessonSectionId={creatingLessonSectionId}
+        onCreateLesson={handleCreateLesson}
+        onCloseLessonForm={closeLessonForm}
+        onSelectNewLessonFile={handleSelectNewLessonFile}
         // Lesson management props
         uploadedFiles={uploadedFiles}
         editingLessonId={editingLessonId}

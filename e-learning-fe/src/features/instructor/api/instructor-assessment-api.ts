@@ -112,7 +112,7 @@ export function updateInstructorAssessmentBlueprint(
   payload: UpdateAssessmentBlueprintPayload,
   accessToken: string,
 ) {
-  // Backend endpoint is at /instuctor/course/:courseId/assessment/:assessmentId/blueprint
+  // Backend endpoint is at /instructor/course/:courseId/assessment/:assessmentId/blueprint
   return apiRequest<AssessmentBlueprintResponse>(
     `/instuctor/course/${courseId}/assessment/${assessmentId}/blueprint`,
     { accessToken, body: payload, method: "PATCH" },
